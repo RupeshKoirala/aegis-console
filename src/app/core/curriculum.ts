@@ -5,6 +5,9 @@ import { M00 } from '../modules/m00-setup/module';
 import { M01 } from '../modules/m01-components/module';
 import { M02 } from '../modules/m02-modules/module';
 import { M03 } from '../modules/m03-practice/module';
+import { M04 } from '../modules/m04-debugging/module';
+import { M05 } from '../modules/m05-components-deep/module';
+import { M06 } from '../modules/m06-directives/module';
 
 export interface Exercise {
   id: string;
@@ -25,13 +28,13 @@ export const CURRICULUM: CourseModule[] = [
   M01,
   M02,
   M03,
+  M04,
+  M05,
+  M06,
   // @@modules
 ];
 
 export const COMING_SOON: string[] = [
-  'M04 Debugging',
-  'M05 Components deep dive',
-  'M06 Directives',
   'M07 Pipes',
   'M08 Dependency injection',
   'M09 Change detection',

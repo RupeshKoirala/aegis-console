@@ -1,0 +1,16 @@
+<table>
+  @if (caption()) { <caption class="muted">{{ caption() }}</caption> }
+  <tbody>
+    @for (row of rows(); track $index; let i = $index) {
+      <!-- TODO 1: if a rowTemplate() was given, stamp it out with the context { $implicit: row, index: i }:
+                   @if (rowTemplate(); as tpl) { <ng-container *ngTemplateOutlet="tpl; context: { $implicit: row, index: i }" /> }
+                   otherwise keep this default row in an @else -->
+      <tr class="default-row"><td class="mono">{{ row | json }}</td></tr>
+    } @empty {
+      <!-- TODO 2: render emptyTemplate() if given, otherwise the #defaultEmpty template below:
+                   <ng-container [ngTemplateOutlet]="emptyTemplate() ?? defaultEmpty" /> -->
+    }
+  </tbody>
+</table>
+
+<!-- TODO 3: declare the fallback:  <ng-template #defaultEmpty><tr class="default-empty"><td class="empty">No rows</td></tr></ng-template> -->
