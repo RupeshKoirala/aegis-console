@@ -47,12 +47,29 @@ Tick the boxes as you go. 📖 = read in Study Hub first.
 - [ ] 03 Structural directive *aegisHasRole
 - [ ] 04 hostDirectives composition
 
+## M07 · Pipes
+📖 angular-manual/m10 · angular/l9
+- [ ] 01 The built-in catalog
+- [ ] 02 Custom pipes: defang, cidr, relative time
+- [ ] 03 Pure vs impure
+
+## M08 · Dependency injection
+📖 angular-manual/m11 · foundations/l12 · spring/l2
+- [ ] 01 The injector tree
+- [ ] 02 Providers & InjectionTokens
+- [ ] 03 optional / self / skipSelf / host
+- [ ] 04 Multi providers & injection context
+
+## M09 · Change detection
+📖 angular-manual/m8 · foundations/l17 · foundations/l7
+- [ ] 01 OnPush: why the card is stale
+- [ ] 02 Measure the render cost
+- [ ] 03 ChangeDetectorRef: markForCheck, detach
+- [ ] 04 Zoneless audit
+
 ## Coming next
 | Module | Topic | Aegis feature |
 |---|---|---|
-| M07 | Pipes: full catalog, custom, pure/impure | defang, CIDR, relative time |
-| M08 | Dependency injection in depth | tenant context, feature flags |
-| M09 | Change detection, OnPush, zoneless | live event ticker |
 | M10 | Signals in depth, linkedSignal, resource | list filtering & selection |
 | M11 | RxJS + signal interop | live attack stream (SSE) |
 | M12 | HTTP & interceptors, problem+json | indicator CRUD against the API |

@@ -1,0 +1,27 @@
+<h1>Alert detail</h1>
+<dl class="card">
+  <!--
+    TODO 2: date      → 'medium' in UTC (class d-medium) and the custom 'yyyy-MM-dd HH:mm' in UTC (class d-custom)
+    TODO 3: case      → tenant | titlecase,  severity | uppercase
+    TODO 4: numbers   → blockedConnections | number: '1.0-0'   capacityUsed | percent: '1.1-1'
+                        monthlyCost | currency: 'USD' : 'symbol' : '1.0-0'
+    TODO 5: slice     → the first 12 characters of sha256, then "…"
+    TODO 6: i18n      → hits | i18nPlural: hitMap      status | i18nSelect: statusMap
+    TODO 7: async     → liveCount$ | async
+    TODO 8: keyvalue  → one <span class="tag">key=value</span> per entry of alert.tags, plus  alert.tags | json  in the <pre>
+    Keep the same <dt>/<dd> structure and classes as below.
+  -->
+  <dt>Seen (medium, UTC)</dt><dd class="d-medium">{{ alert.at }}</dd>
+  <dt>Seen (ISO-ish)</dt><dd class="d-custom">{{ alert.at }}</dd>
+  <dt>Tenant</dt><dd class="tenant">{{ alert.tenant }}</dd>
+  <dt>Severity</dt><dd class="severity">{{ alert.severity }}</dd>
+  <dt>Blocked connections</dt><dd class="num">{{ alert.blockedConnections }}</dd>
+  <dt>Capacity used</dt><dd class="pct">{{ alert.capacityUsed }}</dd>
+  <dt>Monthly cost</dt><dd class="cur">{{ alert.monthlyCost }}</dd>
+  <dt>SHA-256</dt><dd class="hash mono">{{ alert.sha256 }}</dd>
+  <dt>Hits</dt><dd class="plural">{{ alert.hits }}</dd>
+  <dt>Status</dt><dd class="select">{{ alert.status }}</dd>
+  <dt>Live count</dt><dd class="async">?</dd>
+  <dt>Tags</dt><dd class="tags"></dd>
+  <dt>Raw</dt><dd><pre class="raw mono"></pre></dd>
+</dl>
