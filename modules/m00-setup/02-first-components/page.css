@@ -1,0 +1,4 @@
+.tenant { margin: 14px 0 20px; }
+.tiles h3 { margin: 0; font-size: 28px; }
+.tiles p { margin: 4px 0 0; }
+.foot { margin-top: 28px; padding-top: 16px; border-top: 1px solid var(--border); }

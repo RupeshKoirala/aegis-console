@@ -1,0 +1,71 @@
+<h1>Alert queue <small class="muted">(Gen 1 style)</small></h1>
+
+<div class="row toolbar">
+  @for (s of filters; track s) {
+    <button class="filter" [class.on]="filter === s" (click)="filter = s; selected = null">{{ s }}</button>
+  }
+</div>
+
+<!--@@sol-->
+<ng-container *ngIf="visibleAlerts.length; else noAlerts">
+  <table class="card">
+    <thead><tr><th>#</th><th>Severity</th><th>Alert</th><th>Status</th></tr></thead>
+    <tbody>
+      <tr *ngFor="let a of visibleAlerts; let i = index; let odd = odd; trackBy: trackById"
+          class="alert-row" [ngClass]="{ odd: odd, resolved: a.status === 'RESOLVED' }" (click)="selected = a">
+        <td class="n">{{ i + 1 }}</td>
+        <td><span [ngClass]="['sev', a.severity]">{{ a.severity }}</span></td>
+        <td>{{ a.title }}</td>
+        <td [ngSwitch]="a.status">
+          <span *ngSwitchCase="'NEW'" class="icon">🆕</span>
+          <span *ngSwitchCase="'TRIAGED'" class="icon">🔎</span>
+          <span *ngSwitchDefault class="icon">✅</span>
+          <span class="status" [ngStyle]="{ 'background-color': statusColors[a.status] }">{{ a.status }}</span>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</ng-container>
+<ng-template #noAlerts><p class="none muted">No alerts with status {{ filter }}</p></ng-template>
+
+<p class="selected" *ngIf="selected as s">Selected: <strong>{{ s.title }}</strong> (assignee: {{ s.assignee || 'nobody' }})</p>
+<!--@@stub-->
+<!--
+  Build the queue with Gen 1 directives only (no @if/@for here!):
+
+  TODO 2: wrap the table in  <ng-container *ngIf="visibleAlerts.length; else noAlerts">
+          and add  <ng-template #noAlerts><p class="none muted">No alerts with status {{ filter }}</p></ng-template>
+  TODO 3: repeat the <tr class="alert-row"> with
+          *ngFor="let a of visibleAlerts; let i = index; let odd = odd; trackBy: trackById"
+          number cell → {{ i + 1 }}, plus (click)="selected = a", and bind the real alert fields
+  TODO 4: on the <tr>:  [ngClass]="{ odd: odd, resolved: a.status === 'RESOLVED' }"
+          on the severity <span>:  [ngClass]="['sev', a.severity]"
+  TODO 5: in the status cell: [ngSwitch]="a.status" with *ngSwitchCase="'NEW'" 🆕, *ngSwitchCase="'TRIAGED'" 🔎,
+          *ngSwitchDefault ✅  (each a <span class="icon">)
+  TODO 6: the status pill:  [ngStyle]="{ 'background-color': statusColors[a.status] }"
+  TODO 7: below the table:  <p class="selected" *ngIf="selected as s">Selected: <strong>{{ s.title }}</strong>
+          (assignee: {{ s.assignee || 'nobody' }})</p>
+-->
+<table class="card">
+  <thead><tr><th>#</th><th>Severity</th><th>Alert</th><th>Status</th></tr></thead>
+  <tbody>
+    <tr class="alert-row">
+      <td class="n">1</td>
+      <td><span class="sev CRITICAL">CRITICAL</span></td>
+      <td>Blocked traffic to 203.0.113.66 (Botnets)</td>
+      <td><span class="icon">🆕</span><span class="status">NEW</span></td>
+    </tr>
+  </tbody>
+</table>
+<!--@@end-->
+
+<!-- ── The same template in Gen 3 (what you'd write today) ───────────────────────
+  @if (visibleAlerts().length) {
+    @for (a of visibleAlerts(); track a.id; let i = $index, odd = $odd) {
+      <tr [class.odd]="odd" [class.resolved]="a.status === 'RESOLVED'"> …
+        @switch (a.status) { @case ('NEW') { 🆕 } @case ('TRIAGED') { 🔎 } @default { ✅ } }
+        <span class="status" [style.background-color]="statusColors[a.status]">…</span>
+    }
+  } @else { <p>No alerts…</p> }
+  @if (selected(); as s) { … }
+-->

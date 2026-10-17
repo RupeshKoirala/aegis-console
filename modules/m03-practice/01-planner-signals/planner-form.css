@@ -1,0 +1,4 @@
+.planner-form { display: grid; grid-template-columns: repeat(5, 1fr) auto; gap: 12px; align-items: end; }
+input { width: 100%; }
+.actions { display: flex; gap: 8px; }
+@media (max-width: 900px) { .planner-form { grid-template-columns: 1fr 1fr; } }

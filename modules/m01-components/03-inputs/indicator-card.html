@@ -1,0 +1,15 @@
+<article class="ind-card" [class.compact]="compact()" [attr.data-kind]="listKind()">
+  <header>
+    <span [class]="'pill ' + listKind()">{{ listKind() }}</span>
+    <span class="type">{{ indicator().type }}</span>
+  </header>
+  <h3 class="mono value">{{ indicator().value }}</h3>
+  @if (!compact()) {
+    @if (shortDescription(); as d) {
+      <p class="desc">{{ d }}</p>
+    }
+    @if (indicator().score !== null) {
+      <p class="score">{{ indicator().category }} · <strong>{{ indicator().score }}</strong></p>
+    }
+  }
+</article>

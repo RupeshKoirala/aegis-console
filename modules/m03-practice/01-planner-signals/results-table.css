@@ -1,0 +1,6 @@
+.results { padding: 0; overflow: hidden; margin-top: 16px; }
+td { font-variant-numeric: tabular-nums; }
+.result-row.warn .util { color: var(--threat); font-weight: 700; }
+.result-row.full { background: rgba(239, 68, 68, .1); }
+.result-row.full .util { color: var(--block); }
+.empty { margin-top: 16px; }

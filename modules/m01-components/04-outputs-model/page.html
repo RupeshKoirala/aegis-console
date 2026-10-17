@@ -1,0 +1,45 @@
+<h1>Threat triage</h1>
+
+<div class="row toolbar">
+<!--@@sol-->
+  <aegis-severity-filter [(selected)]="severities" />
+<!--@@stub-->
+  <!-- TODO 7: <aegis-severity-filter /> two-way bound to the `severities` signal:  [(selected)]="severities" -->
+<!--@@end-->
+  <span class="muted shown">{{ visible().length }} shown · filter: {{ severities().join(', ') || 'none' }}</span>
+  <button class="reset" (click)="severities.set([])">Reset filter</button>
+</div>
+
+<div class="split">
+  <section class="card list">
+<!--@@sol-->
+    @for (i of visible(); track i.id) {
+      <aegis-indicator-row [indicator]="i" [active]="picked()?.id === i.id" (picked)="onPicked($event)" (removeRequested)="onRemove($event)" />
+    }
+<!--@@stub-->
+    <!-- TODO 8: one <aegis-indicator-row> per indicator in visible():
+                 [indicator]="i"  [active]="picked()?.id === i.id"
+                 (picked)="onPicked($event)"  (removeRequested)="onRemove($event)" -->
+<!--@@end-->
+  </section>
+  <aside class="card picked">
+    @if (picked(); as p) {
+      <h3 class="mono">{{ p.value }}</h3>
+      <p>{{ p.category }} · score {{ p.score }}</p>
+    } @else {
+      <p class="muted">Pick a row</p>
+    }
+  </aside>
+</div>
+
+<h3 class="gen1">Gen 1 rows (&#64;Output + EventEmitter)</h3>
+<section class="card legacy">
+<!--@@sol-->
+  @for (i of visible().slice(0, 3); track i.id) {
+    <aegis-legacy-row [indicator]="i" (removeRequested)="onRemove($event)" />
+  }
+<!--@@stub-->
+  <!-- TODO 9: <aegis-legacy-row> for the first 3 visible indicators (visible().slice(0, 3)):
+               [indicator]="i"  (removeRequested)="onRemove($event)". Same syntax as Gen 3. -->
+<!--@@end-->
+</section>

@@ -1,0 +1,2 @@
+table.card { padding: 0; overflow: hidden; }
+.avatar { display: inline-grid; place-items: center; width: 30px; height: 30px; border-radius: 50%; background: var(--surface-2); font-size: 12px; font-weight: 700; }

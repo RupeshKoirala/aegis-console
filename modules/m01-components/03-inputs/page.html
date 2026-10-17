@@ -1,0 +1,34 @@
+<h1>Indicator cards</h1>
+
+<h3>Gen 3 · signal inputs</h3>
+<section class="grid signal-cards">
+<!--@@sol-->
+  @for (i of withDescription; track i.id) {
+    <aegis-indicator-card [indicator]="i" [kind]="kindOf(i)" maxDescription="24" />
+  }
+  @for (i of threats; track i.id) {
+    <aegis-indicator-card [indicator]="i" [kind]="kindOf(i)" />
+  }
+  <aegis-indicator-card class="compact-one" [indicator]="threats[0]" kind="THREAT" compact />
+<!--@@stub-->
+  <!--
+    TODO 8: render <aegis-indicator-card> for
+      - every indicator in withDescription:  [indicator]="i" [kind]="kindOf(i)" maxDescription="24"
+        (a plain attribute: the numberAttribute transform turns "24" into 24)
+      - every indicator in threats:          [indicator]="i" [kind]="kindOf(i)"
+      - one extra card:  class="compact-one" [indicator]="threats[0]" kind="THREAT" compact
+        (no brackets on kind or compact: static string / boolean attribute)
+  -->
+<!--@@end-->
+</section>
+
+<h3>Gen 1 · &#64;Input decorators</h3>
+<section class="grid legacy-cards">
+<!--@@sol-->
+  @for (i of withDescription; track i.id) {
+    <aegis-legacy-indicator-card [indicator]="i" [kind]="kindOf(i)" maxDescription="24" />
+  }
+<!--@@stub-->
+  <!-- TODO 9: the same as the first loop of TODO 8, but with <aegis-legacy-indicator-card>. The binding syntax is identical. -->
+<!--@@end-->
+</section>

@@ -1,0 +1,5 @@
+.toolbar { margin-bottom: 14px; } .shown { margin-left: auto; }
+.split { display: grid; grid-template-columns: 1fr 260px; gap: 16px; align-items: start; }
+.list { padding: 0; overflow: hidden; }
+.gen1 { margin-top: 28px; color: var(--muted); font-weight: 500; }
+.legacy { padding: 0; }

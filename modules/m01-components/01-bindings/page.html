@@ -1,0 +1,89 @@
+<h1>Indicator inspector</h1>
+<p class="muted">Click the card, then use ← and → (or the buttons).</p>
+
+<!--@@sol-->
+<article class="inspector card" tabindex="0"
+         [attr.data-kind]="list().kind"
+         [class.expired]="isExpired()"
+         (keydown.arrowRight)="next()"
+         (keydown.arrowLeft)="previous()">
+  <header class="row">
+    <span [class]="'pill ' + list().kind">{{ list().kind }}</span>
+    <span class="muted">{{ list().name }}</span>
+    <span class="counter muted">{{ index() + 1 }} / {{ indicators.length }}</span>
+  </header>
+
+  <h2 class="value mono" [title]="indicator().description ?? 'No description'">{{ indicator().value }}</h2>
+  <p class="meta">{{ indicator().type }} · source {{ indicator().source }}</p>
+
+  <div class="score">
+    <span>Score {{ indicator().score ?? '—' }}</span>
+    <div class="bar"><div class="fill" [style.width.%]="indicator().score ?? 0"></div></div>
+  </div>
+
+  <footer class="row">
+    <button class="prev" (click)="previous()">← Prev</button>
+    <button class="next" (click)="next()">Next →</button>
+    <button class="copy" [attr.aria-label]="'Copy ' + indicator().value" (click)="copy()">
+      {{ copied() ? '✓ Copied' : 'Copy' }}
+    </button>
+    <button class="delete danger" [disabled]="role !== 'ADMIN'">Delete</button>
+  </footer>
+</article>
+<!--@@stub-->
+<!--
+  Replace the hardcoded parts below with bindings. One TODO = one kind of binding.
+
+  TODO 4 (attribute + class binding on <article>):
+          [attr.data-kind]="list().kind"   [class.expired]="isExpired()"
+  TODO 5 (key events on <article>):
+          (keydown.arrowRight)="next()"    (keydown.arrowLeft)="previous()"
+  TODO 6 (interpolation): kind, list name, "{{ index() + 1 }} / {{ indicators.length }}", value, type, source,
+          and the score: "Score {{ indicator().score ?? '—' }}"
+  TODO 7 (property bindings):
+          the kind pill   →  [class]="'pill ' + list().kind"
+          the <h2>        →  [title]="indicator().description ?? 'No description'"
+          the delete btn  →  [disabled]="role !== 'ADMIN'"
+  TODO 8 (style binding on .fill):  [style.width.%]="indicator().score ?? 0"
+  TODO 9 (events + attribute on the buttons):
+          prev/next  →  (click)="previous()" / (click)="next()"
+          copy       →  (click)="copy()"   [attr.aria-label]="'Copy ' + indicator().value"
+                        text: {{ copied() ? '✓ Copied' : 'Copy' }}
+-->
+<article class="inspector card" tabindex="0">
+  <header class="row">
+    <span class="pill BLOCK">BLOCK</span>
+    <span class="muted">Manual blocks</span>
+    <span class="counter muted">1 / 19</span>
+  </header>
+
+  <h2 class="value mono">203.0.113.7</h2>
+  <p class="meta">IP · source manual</p>
+
+  <div class="score">
+    <span>Score —</span>
+    <div class="bar"><div class="fill"></div></div>
+  </div>
+
+  <footer class="row">
+    <button class="prev">← Prev</button>
+    <button class="next">Next →</button>
+    <button class="copy">Copy</button>
+    <button class="delete danger">Delete</button>
+  </footer>
+</article>
+<!--@@end-->
+
+<!-- ── Older syntax you will meet in existing code ───────────────────────────────
+  Gen 1 · v2–v15 (state in plain fields, zone.js re-renders after every event):
+      index = 0;                                     ← a plain class field, not a signal
+      get indicator() { return this.indicators[this.index]; }   ← a getter instead of computed()
+      {{ indicator.value }}                          ← no () because it's not a signal
+      [ngClass]="'pill ' + list.kind"   [ngStyle]="{ 'width.%': score }"   (still valid, see M01.05)
+      (keydown.arrowright)="next()"                  ← key-event filters are unchanged since v2
+
+  Gen 2 · v16–v20: signals arrive (v16), so the same code as Gen 3, but every component
+      also needed `standalone: true` and usually zone.js was still in polyfills.
+
+  Gen 3 · v22: signals + computed, zoneless, OnPush by default. What you just wrote.
+-->

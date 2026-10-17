@@ -1,0 +1,24 @@
+<table class="card">
+  <thead><tr><th></th><th>User</th><th>Email</th><th>Role</th></tr></thead>
+  <tbody>
+    <!-- A non-standalone template can only use what its module (AdminModule) sees:
+         its own declarations + the EXPORTS of the modules it imports. @for needs no import. -->
+    @for (u of users; track u.id) {
+      <tr class="user-row">
+<!--@@sol-->
+        <td><span class="avatar">{{ u.displayName | initials }}</span></td>
+        <td>{{ u.displayName }}</td>
+        <td class="mono">{{ u.email }}</td>
+        <td><aegis-role-badge [role]="u.role" /></td>
+<!--@@stub-->
+        <!-- TODO 3 (after TODO 1 + 2): avatar text → {{ u.displayName | initials }}
+                                       role cell   → <aegis-role-badge [role]="u.role" /> -->
+        <td><span class="avatar">?</span></td>
+        <td>{{ u.displayName }}</td>
+        <td class="mono">{{ u.email }}</td>
+        <td>{{ u.role }}</td>
+<!--@@end-->
+      </tr>
+    }
+  </tbody>
+</table>
