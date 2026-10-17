@@ -1,0 +1,14 @@
+.toolbar { margin-bottom: 14px; }
+.kind.on { background: var(--accent); border-color: var(--accent); color: #fff; }
+.check { display: flex; gap: 6px; align-items: center; margin: 0 0 0 8px; }
+.total { margin-left: auto; }
+.split { display: grid; grid-template-columns: 1fr 300px; gap: 16px; align-items: start; }
+table.card { padding: 0; overflow: hidden; }
+.ind-row { cursor: pointer; }
+.ind-row.odd { background: rgba(255,255,255,.02); }
+.ind-row:hover, .ind-row.active { background: var(--surface-2); }
+.n { color: var(--muted); width: 40px; }
+.kind-icon { margin-right: 4px; }
+.empty { text-align: center; color: var(--muted); padding: 28px; }
+.details h3 { margin-top: 0; word-break: break-all; }
+.cat { color: var(--threat); }

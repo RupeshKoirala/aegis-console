@@ -1,0 +1,25 @@
+<header class="topbar">
+  <a routerLink="/" class="brand"><span class="shield">◆</span> AEGIS <span class="sub">console · training</span></a>
+</header>
+<div class="layout">
+  <nav class="sidebar">
+    @for (m of modules; track m.id) {
+      <button class="module" [class.expanded]="open() === m.id" (click)="toggle(m.id)">
+        <span class="mid">{{ m.id.toUpperCase() }}</span> {{ m.title }}
+      </button>
+      @if (open() === m.id) {
+        <ul>
+          @for (e of m.exercises; track e.id) {
+            <li><a [routerLink]="['/', m.id, e.id]" routerLinkActive="active">{{ e.id }} · {{ e.title }}</a></li>
+          }
+        </ul>
+      }
+    }
+    @for (title of comingSoon; track title) {
+      <div class="module soon">{{ title }} <small>soon</small></div>
+    }
+  </nav>
+  <main class="content">
+    <router-outlet />
+  </main>
+</div>

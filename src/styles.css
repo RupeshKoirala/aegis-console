@@ -1,0 +1,34 @@
+/* Global styles for the Aegis console. Done for you. */
+:root {
+  --bg: #070a10; --surface: #0d121b; --surface-2: #141b27; --border: #222b3a;
+  --text: #e3e8f0; --muted: #8592a8; --accent: #3b82f6; --accent-2: #22d3ee;
+  --allow: #22c55e; --block: #ef4444; --threat: #f59e0b; --info: #64748b;
+  --critical: #ef4444; --high: #f97316; --medium: #eab308; --low: #22c55e;
+  --mono: ui-monospace, 'JetBrains Mono', 'SFMono-Regular', Menlo, monospace;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body { margin: 0; font-family: Inter, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif; background: var(--bg); color: var(--text); font-size: 15px; }
+h1 { margin-top: 0; font-size: 26px; }
+code, .mono { font-family: var(--mono); font-size: .9em; }
+code { background: var(--surface-2); padding: 1px 6px; border-radius: 4px; }
+button { font: inherit; cursor: pointer; border: 1px solid var(--border); background: var(--surface-2); color: var(--text); padding: 6px 14px; border-radius: 8px; }
+button:hover:not(:disabled) { border-color: var(--accent); }
+button:disabled { opacity: .45; cursor: not-allowed; }
+button.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+button.danger { border-color: var(--block); color: #fca5a5; }
+input, select, textarea { font: inherit; background: var(--surface-2); color: var(--text); border: 1px solid var(--border); border-radius: 8px; padding: 7px 10px; }
+input:focus, select:focus, textarea:focus { outline: 2px solid var(--accent); outline-offset: 0; }
+input.ng-invalid.ng-touched, select.ng-invalid.ng-touched { border-color: var(--block); }
+label { display: block; font-size: 13px; color: var(--muted); margin-bottom: 4px; }
+table { width: 100%; border-collapse: collapse; }
+th, td { text-align: left; padding: 9px 12px; border-bottom: 1px solid var(--border); }
+th { color: var(--muted); font-weight: 500; font-size: 12px; text-transform: uppercase; letter-spacing: .05em; }
+.card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 16px; }
+.muted { color: var(--muted); }
+.row { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 14px; }
+.pill { display: inline-block; font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 999px; letter-spacing: .04em; border: 1px solid currentColor; }
+.pill.ALLOW { color: var(--allow); } .pill.BLOCK { color: var(--block); } .pill.THREAT { color: var(--threat); } .pill.NONE { color: var(--info); }
+.sev { font-weight: 600; } .sev.CRITICAL { color: var(--critical); } .sev.HIGH { color: var(--high); } .sev.MEDIUM { color: var(--medium); } .sev.LOW, .sev.INFO { color: var(--low); }
+.error-text { color: #fca5a5; font-size: 13px; }

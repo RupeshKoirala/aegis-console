@@ -1,0 +1,13 @@
+<!-- Gen 1 template: plain fields, no () because nothing here is a signal. -->
+<article class="ind-card legacy" [class.compact]="compact" [attr.data-kind]="listKind">
+  <header>
+    <span [class]="'pill ' + listKind">{{ listKind }}</span>
+    <span class="type">{{ indicator.type }}</span>
+  </header>
+  <h3 class="mono value">{{ indicator.value }}</h3>
+  @if (!compact) {
+    @if (shortDescription) {
+      <p class="desc">{{ shortDescription }}</p>
+    }
+  }
+</article>

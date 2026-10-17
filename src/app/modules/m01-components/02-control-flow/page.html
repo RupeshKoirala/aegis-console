@@ -1,0 +1,64 @@
+<h1>Indicators</h1>
+
+<div class="toolbar row">
+  <!-- TODO 1: one <button class="kind"> per entry in `kinds` (use @for, track k).
+               [class.on]="kindFilter() === k"   (click)="kindFilter.set(k)"   text: {{ k }} -->
+  <button class="kind on">ALL</button>
+  <label class="check"><input type="checkbox" [checked]="onlyScored()" (change)="onlyScored.set(!onlyScored())" /> only scored</label>
+  <!-- TODO 2: declare  @let total = visible().length;  then show "{{ total }} indicators"
+               (singular "indicator" when total is 1) -->
+  <span class="total muted">? indicators</span>
+</div>
+
+<div class="split">
+  <table class="card">
+    <thead><tr><th>#</th><th>Value</th><th>Type</th><th>List</th><th>Score</th></tr></thead>
+    <tbody>
+      <!--
+        TODO 3: repeat this row for every indicator in visible() with @for, tracking by i.id.
+                - number column: $index + 1   (give it a name: let n = $index)
+                - [class.odd]="$odd"   [class.active]="selected() === i"   (click)="select(i)"
+                - add an @empty block:  <tr><td colspan="5" class="empty">No indicators match these filters</td></tr>
+        TODO 4: in the List cell, use @switch (kindOf(i)) to show ONE icon:
+                'ALLOW' → <span class="kind-icon allow">✔</span>
+                'BLOCK' → <span class="kind-icon block">⛔</span>
+                default → <span class="kind-icon threat">⚠</span>
+                followed by {{ listName(i) }}
+      -->
+      <tr class="ind-row">
+        <td class="n">1</td>
+        <td class="mono">192.0.2.10</td>
+        <td>IP</td>
+        <td><span class="kind-icon allow">✔</span> Partner allow list</td>
+        <td>—</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <aside class="card details">
+    <!--
+      TODO 5: @if (selected(); as s) { …details… } @else { …hint… }
+              details:  <h3 class="mono">{{ s.value }}</h3>  <p>{{ s.description ?? 'No description' }}</p>
+      TODO 6: inside the details, ONLY for threat indicators (s.category is set):
+              <p class="cat">{{ s.category }} · score {{ s.score }}</p>
+    -->
+    <p class="hint muted">Select a row to see details</p>
+  </aside>
+</div>
+
+<!-- ── Older syntax you will meet in existing code ───────────────────────────────
+  Gen 1 · v2–v16 (structural directives, need CommonModule / NgFor / NgIf imports):
+      <tr *ngFor="let i of visible; let n = index; let odd = odd; trackBy: trackById">
+      <tr *ngIf="!visible.length"><td>No indicators…</td></tr>          ← no @empty, you test length yourself
+      <ng-container *ngIf="selected as s; else hint"> … </ng-container>
+      <ng-template #hint><p>Select a row…</p></ng-template>
+      <ng-container [ngSwitch]="kindOf(i)">
+        <span *ngSwitchCase="'ALLOW'">✔</span> <span *ngSwitchDefault>⚠</span>
+      </ng-container>
+      (no @let: people used *ngIf="expr as total" as a hack, or a getter)
+
+  Gen 2 · v17–v20: @if / @for / @switch arrive in v17 (track becomes mandatory), @let in v18.3.
+      Run `ng generate @angular/core:control-flow` to migrate Gen 1 templates automatically.
+
+  Gen 3 · v22: exactly what you wrote. The *ngIf family still works but is deprecated.
+-->

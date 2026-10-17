@@ -1,0 +1,29 @@
+<h1>Indicator playground</h1>
+<section class="card play">
+  <div>
+    <label for="v">Paste an indicator</label>
+    <input id="v" class="mono" [value]="input()" (input)="input.set($any($event.target).value)" />
+    <p>Type: <strong class="type">{{ type() ?? 'invalid' }}</strong></p>
+  </div>
+  <div>
+    <label for="s">Threat score</label>
+    <input id="s" type="number" min="1" max="100" [value]="scoreInput()" (input)="scoreInput.set(+$any($event.target).value)" />
+    <p>Risk: <strong class="sev" [class]="level()">{{ level() }}</strong></p>
+  </div>
+</section>
+
+<h3>Sample indicators grouped by type</h3>
+<div class="groups">
+  @for (g of groups(); track g[0]) {
+    <section class="card">
+      <h4>{{ g[0] }} <span class="muted">({{ g[1].length }})</span></h4>
+      <ul>
+        @for (i of g[1]; track i.id) {
+          <li class="mono" [class.expired]="isExpired(i, now)">{{ label(i) }}</li>
+        }
+      </ul>
+    </section>
+  } @empty {
+    <p class="muted">groupBy() returned nothing yet. Finish TODO 4.</p>
+  }
+</div>

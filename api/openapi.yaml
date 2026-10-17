@@ -1,0 +1,87 @@
+openapi: 3.1.0
+info:
+  title: Aegis API
+  version: 1.0.0
+  description: >
+    Contract shared by the fake API (api/server.cjs) and the future Spring Boot service.
+    Every error is application/problem+json. Every path except login, refresh and health needs `Authorization: Bearer <token>`.
+    MSP admins may send `X-Tenant-Id` to act for a child tenant.
+servers: [{ url: /api/v1 }]
+security: [{ bearer: [] }]
+paths:
+  /auth/login:
+    post: { security: [], summary: Sign in, requestBody: { content: { application/json: { schema: { $ref: '#/components/schemas/LoginRequest' } } } },
+      responses: { '200': { description: OK, content: { application/json: { schema: { $ref: '#/components/schemas/LoginResponse' } } } }, '400': { $ref: '#/components/responses/Problem' }, '401': { $ref: '#/components/responses/Problem' } } }
+  /auth/refresh:
+    post: { security: [], summary: Exchange a refresh token (rotating, single use), responses: { '200': { description: OK, content: { application/json: { schema: { $ref: '#/components/schemas/LoginResponse' } } } }, '401': { $ref: '#/components/responses/Problem' } } }
+  /auth/logout:
+    post: { summary: Revoke the current token, responses: { '204': { description: Signed out } } }
+  /me:
+    get: { responses: { '200': { description: OK, content: { application/json: { schema: { $ref: '#/components/schemas/Me' } } } } } }
+  /tenants/current:
+    get: { responses: { '200': { description: OK, content: { application/json: { schema: { $ref: '#/components/schemas/TenantView' } } } } } }
+  /tenants/children:
+    get: { summary: Child tenants of an MSP, responses: { '200': { description: OK, content: { application/json: { schema: { type: array, items: { $ref: '#/components/schemas/TenantView' } } } } } } }
+  /users:
+    get: { responses: { '200': { description: OK, content: { application/json: { schema: { type: array, items: { $ref: '#/components/schemas/UserView' } } } } } } }
+    post: { summary: ADMIN only, requestBody: { content: { application/json: { schema: { $ref: '#/components/schemas/CreateUserRequest' } } } },
+      responses: { '201': { description: Created }, '400': { $ref: '#/components/responses/Problem' }, '403': { $ref: '#/components/responses/Problem' }, '409': { $ref: '#/components/responses/Problem' } } }
+  /lists:
+    get: { summary: Sorted by name, responses: { '200': { description: OK, content: { application/json: { schema: { type: array, items: { $ref: '#/components/schemas/ListView' } } } } } } }
+    post: { summary: ADMIN or ANALYST, requestBody: { content: { application/json: { schema: { $ref: '#/components/schemas/CreateListRequest' } } } },
+      responses: { '201': { description: Created }, '400': { $ref: '#/components/responses/Problem' }, '403': { $ref: '#/components/responses/Problem' }, '409': { $ref: '#/components/responses/Problem' } } }
+  /lists/{id}:
+    parameters: [{ name: id, in: path, required: true, schema: { type: integer } }]
+    get: { responses: { '200': { description: OK, content: { application/json: { schema: { $ref: '#/components/schemas/ListView' } } } }, '404': { $ref: '#/components/responses/Problem' } } }
+    delete: { summary: ADMIN only, responses: { '204': { description: Deleted }, '403': { $ref: '#/components/responses/Problem' }, '404': { $ref: '#/components/responses/Problem' } } }
+  /lists/{id}/indicators:
+    parameters: [{ name: id, in: path, required: true, schema: { type: integer } }]
+    get:
+      parameters:
+        - { name: q, in: query, schema: { type: string } }
+        - { name: page, in: query, schema: { type: integer, minimum: 0, default: 0 } }
+        - { name: size, in: query, schema: { type: integer, minimum: 1, maximum: 200, default: 50 } }
+      responses: { '200': { description: Newest first, content: { application/json: { schema: { $ref: '#/components/schemas/IndicatorPage' } } } }, '400': { $ref: '#/components/responses/Problem' }, '404': { $ref: '#/components/responses/Problem' } }
+    post: { summary: ADMIN or ANALYST. Threat lists require category+score, other lists forbid them., requestBody: { content: { application/json: { schema: { $ref: '#/components/schemas/CreateIndicatorRequest' } } } },
+      responses: { '201': { description: Created }, '400': { $ref: '#/components/responses/Problem' }, '403': { $ref: '#/components/responses/Problem' }, '404': { $ref: '#/components/responses/Problem' }, '409': { $ref: '#/components/responses/Problem' } } }
+  /lists/{id}/indicators/{indicatorId}:
+    delete: { parameters: [{ name: id, in: path, required: true, schema: { type: integer } }, { name: indicatorId, in: path, required: true, schema: { type: integer } }], responses: { '204': { description: Deleted }, '404': { $ref: '#/components/responses/Problem' } } }
+  /verdict:
+    get:
+      summary: Allow beats block; block list → BLOCK; threat score ≥ threshold → BLOCK; else NONE
+      parameters: [{ name: q, in: query, required: true, schema: { type: string }, description: One IPv4 address or domain (not a CIDR) }]
+      responses: { '200': { description: OK, content: { application/json: { schema: { $ref: '#/components/schemas/VerdictView' } } } }, '400': { $ref: '#/components/responses/Problem' } }
+  /events:
+    get: { summary: Enforcement events (paged), responses: { '200': { description: OK } } }
+  /events/stream:
+    get: { summary: Server-sent events (`event: traffic`). EventSource can't send headers, so pass ?access_token=, responses: { '200': { description: text/event-stream } } }
+  /alerts:
+    get: { responses: { '200': { description: OK, content: { application/json: { schema: { type: array, items: { $ref: '#/components/schemas/Alert' } } } } } } }
+  /alerts/{id}:
+    patch: { summary: Change status / assignee, responses: { '200': { description: OK } } }
+  /audit:
+    get: { responses: { '200': { description: OK } } }
+  /actuator/health:
+    get: { security: [], responses: { '200': { description: '{"status":"UP"}' } } }
+components:
+  securitySchemes: { bearer: { type: http, scheme: bearer, bearerFormat: JWT } }
+  responses:
+    Problem: { description: RFC 9457 problem details, content: { application/problem+json: { schema: { $ref: '#/components/schemas/Problem' } } } }
+  schemas:
+    Role: { type: string, enum: [ADMIN, ANALYST, READ_ONLY] }
+    ListKind: { type: string, enum: [ALLOW, BLOCK, THREAT] }
+    IndicatorType: { type: string, enum: [IP, CIDR, DOMAIN] }
+    LoginRequest: { type: object, required: [email, password], properties: { email: { type: string }, password: { type: string } } }
+    LoginResponse: { type: object, properties: { token: { type: string }, refreshToken: { type: string }, expiresIn: { type: integer }, user: { $ref: '#/components/schemas/Me' } } }
+    Me: { type: object, properties: { id: { type: integer }, email: { type: string }, displayName: { type: string }, role: { $ref: '#/components/schemas/Role' }, tenantId: { type: integer }, tenantName: { type: string } } }
+    TenantView: { type: object, properties: { id: { type: integer }, name: { type: string }, slug: { type: string }, parentId: { type: [integer, 'null'] }, createdAt: { type: string, format: date-time } } }
+    UserView: { type: object, properties: { id: { type: integer }, email: { type: string }, displayName: { type: string }, role: { $ref: '#/components/schemas/Role' }, tenantId: { type: integer }, createdAt: { type: string, format: date-time } } }
+    CreateUserRequest: { type: object, required: [email, displayName, role, password], properties: { email: { type: string, maxLength: 254 }, displayName: { type: string, maxLength: 100 }, role: { $ref: '#/components/schemas/Role' }, password: { type: string, minLength: 8, maxLength: 72 } } }
+    ListView: { type: object, properties: { id: { type: integer }, name: { type: string }, kind: { $ref: '#/components/schemas/ListKind' }, description: { type: [string, 'null'] }, indicatorCount: { type: integer }, createdAt: { type: string, format: date-time } } }
+    CreateListRequest: { type: object, required: [name, kind], properties: { name: { type: string, maxLength: 80 }, kind: { $ref: '#/components/schemas/ListKind' }, description: { type: [string, 'null'], maxLength: 500 } } }
+    IndicatorView: { type: object, properties: { id: { type: integer }, listId: { type: integer }, value: { type: string }, type: { $ref: '#/components/schemas/IndicatorType' }, category: { type: [string, 'null'] }, score: { type: [integer, 'null'] }, description: { type: [string, 'null'] }, expiresAt: { type: [string, 'null'], format: date-time }, source: { type: string }, createdAt: { type: string, format: date-time } } }
+    IndicatorPage: { type: object, properties: { items: { type: array, items: { $ref: '#/components/schemas/IndicatorView' } }, page: { type: integer }, size: { type: integer }, total: { type: integer } } }
+    CreateIndicatorRequest: { type: object, required: [value], properties: { value: { type: string, maxLength: 253 }, category: { type: [string, 'null'], maxLength: 40 }, score: { type: [integer, 'null'], minimum: 1, maximum: 100 }, description: { type: [string, 'null'], maxLength: 500 }, expiresAt: { type: [string, 'null'], format: date-time } } }
+    VerdictView: { type: object, properties: { query: { type: string }, type: { $ref: '#/components/schemas/IndicatorType' }, verdict: { type: string, enum: [ALLOW, BLOCK, NONE] }, reason: { type: string, enum: [ALLOW_LIST, BLOCK_LIST, THREAT_SCORE, BELOW_THRESHOLD, NO_MATCH] }, threshold: { type: integer }, matches: { type: array, items: { type: object } }, engine: { type: string } } }
+    Alert: { type: object, properties: { id: { type: integer }, severity: { type: string }, title: { type: string }, status: { type: string, enum: [NEW, TRIAGED, RESOLVED] }, assignee: { type: [string, 'null'] }, at: { type: string, format: date-time } } }
+    Problem: { type: object, properties: { type: { type: string }, title: { type: string }, status: { type: integer }, detail: { type: string }, instance: { type: string }, errors: { type: object, additionalProperties: { type: string } } } }
