@@ -9,6 +9,7 @@ export const routes: Routes = [
       path: `${m.id}/${e.id}`,
       loadComponent: e.load,
       providers: e.providers,
+      children: e.children,
       title: `${m.id.toUpperCase()}.${e.id} · ${e.title}`,
     })),
   ),

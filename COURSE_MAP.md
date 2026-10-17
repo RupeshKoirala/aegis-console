@@ -91,12 +91,33 @@ Tick the boxes as you go. 📖 = read in Study Hub first.
 - [ ] 05 HttpContext, retry & cache
 - [ ] 06 Testing HTTP code
 
+## M13 · Forms (3 generations)
+📖 angular-manual/m15 · angular/l17 · cyber/l5
+- [ ] 01 Template-driven: ngModel & validation UX
+- [ ] 02 Reactive typed forms & validators
+- [ ] 03 FormArray: policy rule builder
+- [ ] 04 ControlValueAccessor: a CIDR input
+- [ ] 05 Signal Forms
+
+## M14 · Routing
+📖 angular-manual/m13 · angular/l15 · foundations/l15
+- [ ] 01 Routes, links & the outlet
+- [ ] 02 Route params as inputs
+- [ ] 03 Nested routes & query params
+- [ ] 04 Resolvers & titles
+- [ ] 05 Guards
+- [ ] 06 Lazy loading & preloading
+
+## M15 · Auth
+📖 foundations/l26 · foundations/l19 · cyber/l12
+- [ ] 01 Login & token storage
+- [ ] 02 Auth interceptor & refresh
+- [ ] 03 Guards & permissions
+- [ ] 04 MSP tenant switch & idle timeout
+
 ## Coming next
 | Module | Topic | Aegis feature |
 |---|---|---|
-| M13 | Forms: template-driven, reactive, Signal Forms | list-entry form, CIDR validators |
-| M14 | Routing, guards, resolvers | console sections, role guards |
-| M15 | Auth: JWT, refresh, MSP tenant switch | analyst login |
 | M16 | Lazy loading & @defer | charts, threat map |
 | M17 | Dynamic components | widget registry |
 | M18 | i18n | localized console |
