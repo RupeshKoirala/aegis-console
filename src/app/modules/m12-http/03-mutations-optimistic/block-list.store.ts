@@ -18,12 +18,29 @@ export class BlockListStore {
   }
 
   add(request: CreateIndicatorRequest) {
-    // TODO 1: POST the request to `base`. saving is true while in flight and the old error is cleared.
-    //         On 201, PREPEND the created IndicatorView. On error, store toProblem(err).
+    this.saving.set(true);
+    this.error.set(null);
+    this.http.post<IndicatorView>(base, request).subscribe({
+      next: created => {
+        this.items.update(list => [created, ...list]);
+        this.saving.set(false);
+      },
+      error: err => {
+        this.error.set(toProblem(err));
+        this.saving.set(false);
+      },
+    });
   }
 
   remove(id: number) {
-    // TODO 2: optimistic: remember the current items, remove the row immediately, then DELETE `${base}/${id}`
-    // TODO 3: on error restore the snapshot (same order) and store toProblem(err)
+    const snapshot = this.items();
+    this.error.set(null);
+    this.items.update(list => list.filter(i => i.id !== id));
+    this.http.delete<void>(`${base}/${id}`).subscribe({
+      error: err => {
+        this.items.set(snapshot);
+        this.error.set(toProblem(err));
+      },
+    });
   }
 }

@@ -4,13 +4,16 @@
   <label class="row"><input type="checkbox" [checked]="slow()" (change)="slow.set(!slow())" /> slow network</label>
 </div>
 
-<!--
-  TODO 3: render the resource states inside <section class="card result">:
-    verdict.isLoading()  →  <p class="loading muted">Checking {{ query() }}…</p>
-    verdict.error()      →  <p class="error error-text">Lookup failed. <button class="retry" (click)="verdict.reload()">Retry</button></p>
-    verdict.hasValue()   →  <h2><span class="pill" [class]="v.verdict">{{ v.verdict }}</span> <span class="reason">{{ v.reason }}</span></h2>
-                            <p class="muted">{{ v.matches.length }} matching list entries</p>
-                            (declare  @let v = verdict.value();  first)
-    otherwise            →  <p class="idle muted">Type something to check.</p>
--->
-<section class="card result"><p class="idle muted">Type something to check.</p></section>
+<section class="card result">
+  @if (verdict.isLoading()) {
+    <p class="loading muted">Checking {{ query() }}…</p>
+  } @else if (verdict.error()) {
+    <p class="error error-text">Lookup failed. <button class="retry" (click)="verdict.reload()">Retry</button></p>
+  } @else if (verdict.hasValue()) {
+    @let v = verdict.value();
+    <h2><span class="pill" [class]="v.verdict">{{ v.verdict }}</span> <span class="reason">{{ v.reason }}</span></h2>
+    <p class="muted">{{ v.matches.length }} matching list entries</p>
+  } @else {
+    <p class="idle muted">Type something to check.</p>
+  }
+</section>

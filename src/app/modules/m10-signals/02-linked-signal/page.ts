@@ -1,4 +1,4 @@
-import { Component, computed, signal } from '@angular/core';
+import { Component, computed, linkedSignal, signal } from '@angular/core';
 import { INDICATORS, LISTS } from '../../../shared/domain/sample-data';
 import { IndicatorView } from '../../../shared/domain/models';
 
@@ -33,12 +33,15 @@ export class Page {
     INDICATORS.filter(i => i.listId === this.listId() && i.value.includes(this.query().trim())),
   );
 
-  // TODO 1: a linkedSignal over `visible`:
-  //   keep the previous selection if it's still in the new items, otherwise select items[0] (or null).
-  //   linkedSignal<IndicatorView[], IndicatorView | null>({ source: this.visible, computation: (items, previous) => … })
-  readonly selected = signal<IndicatorView | null>(null);
+  readonly selected = linkedSignal<IndicatorView[], IndicatorView | null>({
+    source: this.visible,
+    computation: (items, previous) =>
+      previous?.value && items.some(i => i.id === previous.value!.id) ? previous.value : (items[0] ?? null),
+  });
 
-  // TODO 2: page must reset to 0 whenever listId() or query() changes, yet stay writable:
-  //   linkedSignal(() => { this.listId(); this.query(); return 0; })
-  readonly page = signal(0);
+  readonly page = linkedSignal(() => {
+    this.listId();
+    this.query();
+    return 0;
+  });
 }

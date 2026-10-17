@@ -26,21 +26,22 @@ export class Page {
   readonly filtered = computed(() => {
     runs.filtered++;
     const q = this.query().trim().toLowerCase();
-    // TODO 1: also filter by kind(): 'ALL' or listOf(i).kind === kind()
-    return INDICATORS.filter(i => i.value.includes(q));
+    const k = this.kind();
+    return INDICATORS.filter(i => (k === 'ALL' || listOf(i).kind === k) && i.value.includes(q));
   });
 
   /** Only the ids. Downstream readers shouldn't wake up if the SAME ids come back as a new array. */
-  // TODO 2: pass { equal: sameIds } as the second argument so equal arrays don't notify readers
-  readonly ids = computed(() => {
-    runs.ids++;
-    return this.filtered().map(i => i.id);
-  });
+  readonly ids = computed(
+    () => {
+      runs.ids++;
+      return this.filtered().map(i => i.id);
+    },
+    { equal: sameIds },
+  );
 
   readonly topScore = computed(() => {
     runs.topScore++;
-    // TODO 3: highest score among ids() (null when empty). Read ids(), NOT filtered(),
-    //         so topScore benefits from the equality gate of TODO 2.
-    return null as number | null;
+    const scores = this.ids().map(id => INDICATORS.find(i => i.id === id)!.score ?? 0);
+    return scores.length ? Math.max(...scores) : null;
   });
 }

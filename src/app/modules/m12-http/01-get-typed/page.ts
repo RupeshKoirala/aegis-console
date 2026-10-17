@@ -17,9 +17,19 @@ export class Page {
   readonly total = signal(0);
 
   constructor() {
-    // TODO 3: load the lists once; store them in `lists` and select the first one (listId)
-    // TODO 4: an effect that re-loads the indicators whenever listId(), query() or page() changes
-    //         (skip when listId() is null) and stores items in `rows` and total in `total`
+    this.api.lists().subscribe(lists => {
+      this.lists.set(lists);
+      this.listId.set(lists[0]?.id ?? null);
+    });
+
+    effect(() => {
+      const id = this.listId();
+      if (id === null) return;
+      this.api.indicators(id, { q: this.query(), page: this.page(), size: 10 }).subscribe(p => {
+        this.rows.set(p.items);
+        this.total.set(p.total);
+      });
+    });
   }
 
   pick(id: number) {
