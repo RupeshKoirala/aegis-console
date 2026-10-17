@@ -1,0 +1,17 @@
+<h1>Lists, with every state</h1>
+<div class="row">
+  <button class="reload" (click)="store.load()">Reload</button>
+  <button class="slow" (click)="store.load('_delay=1500')">Slow</button>
+  <button class="fail" (click)="store.load('_fail=500')">Fail (500)</button>
+  <button class="offline" (click)="store.load('_fail=503')">Fail (503)</button>
+</div>
+<!--
+  TODO 4: three state blocks above the list:
+    store.loading()          → <p class="loading muted">Loading lists…</p>
+    @if (store.error(); as p) → <div class="card problem" role="alert"><strong class="title">{{ p.title }}</strong>
+                                  <span class="detail">{{ p.detail }}</span> <button class="retry" (click)="store.load()">Retry</button></div>
+    store.empty()            → <p class="empty muted">No lists yet.</p>
+-->
+<ul class="card">
+  @for (l of store.items(); track l.id) { <li class="list">{{ l.name }}</li> }
+</ul>

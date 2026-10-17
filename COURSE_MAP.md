@@ -67,12 +67,33 @@ Tick the boxes as you go. 📖 = read in Study Hub first.
 - [ ] 03 ChangeDetectorRef: markForCheck, detach
 - [ ] 04 Zoneless audit
 
+## M10 · Signals in depth
+📖 angular-manual/m6 · angular-manual/m7 · angular/l10
+- [ ] 01 The reactive graph & equality
+- [ ] 02 linkedSignal
+- [ ] 03 untracked & effect cleanup
+- [ ] 04 resource & httpResource
+
+## M11 · RxJS & signal interop
+📖 js/l17 · angular-manual/m12 · foundations/l7
+- [ ] 01 Observables from scratch
+- [ ] 02 Search-as-you-type
+- [ ] 03 switch / concat / merge / exhaust
+- [ ] 04 Live attack stream (SSE)
+- [ ] 05 toSignal, toObservable, takeUntilDestroyed
+
+## M12 · HTTP & interceptors
+📖 foundations/l16 · js/l11 · angular-manual/m14 · capstone/l1
+- [ ] 01 Typed GET with params
+- [ ] 02 Loading, errors, problem+json
+- [ ] 03 POST, DELETE & optimistic updates
+- [ ] 04 Interceptors
+- [ ] 05 HttpContext, retry & cache
+- [ ] 06 Testing HTTP code
+
 ## Coming next
 | Module | Topic | Aegis feature |
 |---|---|---|
-| M10 | Signals in depth, linkedSignal, resource | list filtering & selection |
-| M11 | RxJS + signal interop | live attack stream (SSE) |
-| M12 | HTTP & interceptors, problem+json | indicator CRUD against the API |
 | M13 | Forms: template-driven, reactive, Signal Forms | list-entry form, CIDR validators |
 | M14 | Routing, guards, resolvers | console sections, role guards |
 | M15 | Auth: JWT, refresh, MSP tenant switch | analyst login |
