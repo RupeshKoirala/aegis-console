@@ -1,6 +1,6 @@
 // The course map. Each module lists the Study Hub lessons to read first and its exercises.
 // Done for you; the sidebar and the router are generated from this file.
-import { Type } from '@angular/core';
+import { EnvironmentProviders, Provider, Type } from '@angular/core';
 import { M00 } from '../modules/m00-setup/module';
 import { M01 } from '../modules/m01-components/module';
 import { M02 } from '../modules/m02-modules/module';
@@ -11,11 +11,16 @@ import { M06 } from '../modules/m06-directives/module';
 import { M07 } from '../modules/m07-pipes/module';
 import { M08 } from '../modules/m08-di/module';
 import { M09 } from '../modules/m09-change-detection/module';
+import { M10 } from '../modules/m10-signals/module';
+import { M11 } from '../modules/m11-rxjs/module';
+import { M12 } from '../modules/m12-http/module';
 
 export interface Exercise {
   id: string;
   title: string;
   load: () => Promise<Type<unknown>>;
+  /** Route-level providers, e.g. an exercise's own HTTP interceptors. */
+  providers?: (Provider | EnvironmentProviders)[];
 }
 
 export interface CourseModule {
@@ -37,13 +42,13 @@ export const CURRICULUM: CourseModule[] = [
   M07,
   M08,
   M09,
+  M10,
+  M11,
+  M12,
   // @@modules
 ];
 
 export const COMING_SOON: string[] = [
-  'M10 Signals in depth',
-  'M11 RxJS',
-  'M12 HTTP & interceptors',
   'M13 Forms (3 generations)',
   'M14 Routing',
   'M15 Auth',

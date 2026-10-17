@@ -124,7 +124,9 @@ api.post('/auth/refresh', (req, res) => {
 // Everything below needs a valid bearer token.
 api.use((req, res, next) => {
   const token = (req.headers.authorization ?? '').replace(/^Bearer /, '') || req.query.access_token; // EventSource can't send headers
-  const claims = token && !revoked.has(token) ? verifyToken(token) : null;
+  // Training shortcut (until you build real login in M15): "Bearer dev:<email>" acts as that seeded user.
+  const devUser = String(token ?? '').startsWith('dev:') ? db.users.find(u => u.email === token.slice(4)) : null;
+  const claims = devUser ? { sub: String(devUser.id) } : token && !revoked.has(token) ? verifyToken(token) : null;
   if (!claims) { res.set('WWW-Authenticate', 'Bearer'); return problem(res, 401, 'Unauthorized', 'Missing, invalid or expired token'); }
   req.user = db.users.find(u => u.id === +claims.sub);
   req.token = token;

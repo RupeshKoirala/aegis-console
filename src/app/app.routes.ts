@@ -8,6 +8,7 @@ export const routes: Routes = [
     m.exercises.map(e => ({
       path: `${m.id}/${e.id}`,
       loadComponent: e.load,
+      providers: e.providers,
       title: `${m.id.toUpperCase()}.${e.id} · ${e.title}`,
     })),
   ),

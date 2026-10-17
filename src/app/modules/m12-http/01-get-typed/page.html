@@ -1,0 +1,19 @@
+<h1>Lists</h1>
+<div class="split">
+  <ul class="card">
+    @for (l of lists(); track l.id) {
+      <li class="list" [class.on]="l.id === listId()" (click)="pick(l.id)">
+        <span class="pill" [class]="l.kind">{{ l.kind }}</span> {{ l.name }} <small class="muted">({{ l.indicatorCount }})</small>
+      </li>
+    }
+  </ul>
+  <section>
+    <div class="row"><input class="q" placeholder="search value or category" [value]="query()" (input)="query.set($any($event.target).value); page.set(0)" />
+      <span class="muted total">{{ total() }} total</span></div>
+    <table class="card">
+      @for (i of rows(); track i.id) { <tr class="ind-row"><td class="mono">{{ i.value }}</td><td>{{ i.type }}</td><td>{{ i.category ?? '' }}</td><td>{{ i.score ?? '' }}</td></tr> }
+    </table>
+    <div class="row"><button class="prev" [disabled]="page() === 0" (click)="page.set(page() - 1)">‹</button> page {{ page() + 1 }}
+      <button class="next" [disabled]="(page() + 1) * 10 >= total()" (click)="page.set(page() + 1)">›</button></div>
+  </section>
+</div>
