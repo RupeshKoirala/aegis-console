@@ -1,9 +1,18 @@
-<!--
-  TODO 8: when planner.rows() has rows, render the table with one <tr class="result-row"> per row
-          (track r.month). Format with pipes:
-            added / expired / total  →  {{ r.added | number }}
-            utilization              →  {{ r.utilization | percent: '1.0-1' }}   (in the <td class="util">)
-          On the <tr>: [class.warn]="r.utilization >= warnAt"   [class.full]="r.utilization >= 1"
-          Otherwise show the empty paragraph below.
--->
-<p class="empty muted">Enter your numbers and press <strong>Project</strong>.</p>
+@if (planner.rows().length) {
+  <table class="card results">
+    <thead><tr><th>Month</th><th>Added</th><th>Expired</th><th>Total entries</th><th>Capacity used</th></tr></thead>
+    <tbody>
+      @for (r of planner.rows(); track r.month) {
+        <tr class="result-row" [class.warn]="r.utilization >= warnAt" [class.full]="r.utilization >= 1">
+          <td>{{ r.month }}</td>
+          <td>{{ r.added | number }}</td>
+          <td>{{ r.expired | number }}</td>
+          <td>{{ r.total | number }}</td>
+          <td class="util">{{ r.utilization | percent: '1.0-1' }}</td>
+        </tr>
+      }
+    </tbody>
+  </table>
+} @else {
+  <p class="empty muted">Enter your numbers and press <strong>Project</strong>.</p>
+}

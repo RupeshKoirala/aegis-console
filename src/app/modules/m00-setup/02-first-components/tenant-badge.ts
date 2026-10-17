@@ -1,8 +1,13 @@
-// TODO 2: make this a component with an INLINE template:
-//   selector: 'aegis-tenant-badge'
-//   template: `<span class="badge">🏫 Acme Schools <small>managed by Shieldline MSP</small></span>`
-//   styles:   `.badge { display: inline-flex; gap: 8px; align-items: center; padding: 4px 12px; border-radius: 999px;
-//              background: var(--surface-2); border: 1px solid var(--border); }  small { color: var(--muted); }`
+import { Component } from '@angular/core';
+
+@Component({
+  selector: 'aegis-tenant-badge',
+  template: `<span class="badge">🏫 Acme Schools <small>managed by Shieldline MSP</small></span>`,
+  styles: `
+    .badge { display: inline-flex; gap: 8px; align-items: center; padding: 4px 12px; border-radius: 999px; background: var(--surface-2); border: 1px solid var(--border); }
+    small { color: var(--muted); }
+  `,
+})
 export class TenantBadge {}
 
 /* ── The same component across Angular generations ──────────────────────────────

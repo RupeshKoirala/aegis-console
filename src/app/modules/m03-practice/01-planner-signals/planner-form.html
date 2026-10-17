@@ -1,11 +1,9 @@
 <form class="card planner-form" (ngSubmit)="submit()">
-  <!-- TODO 6a: two-way bind every input to its signal with [(ngModel)]="currentSize" etc.
-               (ngModel inside a <form> also needs a name="…" attribute, which is already there) -->
-  <div><label for="cs">Current entries</label><input id="cs" name="currentSize" type="number" value="250000" /></div>
-  <div><label for="da">New per day</label><input id="da" name="dailyAdditions" type="number" value="4000" /></div>
-  <div><label for="gr">Growth / month (%)</label><input id="gr" name="monthlyGrowthPct" type="number" value="10" /></div>
-  <div><label for="ex">Avg. expiry (days)</label><input id="ex" name="expiryDays" type="number" value="90" /></div>
-  <div><label for="mo">Months</label><input id="mo" name="months" type="number" value="12" /></div>
+  <div><label for="cs">Current entries</label><input id="cs" name="currentSize" type="number" [(ngModel)]="currentSize" /></div>
+  <div><label for="da">New per day</label><input id="da" name="dailyAdditions" type="number" [(ngModel)]="dailyAdditions" /></div>
+  <div><label for="gr">Growth / month (%)</label><input id="gr" name="monthlyGrowthPct" type="number" [(ngModel)]="monthlyGrowthPct" /></div>
+  <div><label for="ex">Avg. expiry (days)</label><input id="ex" name="expiryDays" type="number" [(ngModel)]="expiryDays" /></div>
+  <div><label for="mo">Months</label><input id="mo" name="months" type="number" [(ngModel)]="months" /></div>
   <div class="actions">
     <button type="button" class="reset" (click)="reset()">Reset</button>
     <button type="submit" class="primary">Project</button>

@@ -1,14 +1,14 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
+import { DecimalPipe, PercentPipe } from '@angular/common';
 import { PlannerService } from './planner.service';
 
 @Component({
   selector: 'aegis-results-table',
-  // TODO 7a: import DecimalPipe and PercentPipe (from '@angular/common') once you use them in the template
-  imports: [],
+  imports: [DecimalPipe, PercentPipe],
   templateUrl: './results-table.html',
   styleUrl: './results-table.css',
 })
 export class ResultsTable {
-  // TODO 7b: inject the PlannerService as `planner` (protected readonly)
+  protected readonly planner = inject(PlannerService);
   protected readonly warnAt = 0.8;
 }

@@ -1,4 +1,5 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { NgClass, NgForOf, NgIf, NgStyle, NgSwitch, NgSwitchCase, NgSwitchDefault } from '@angular/common';
 import { ALERTS } from '../../../shared/domain/sample-data';
 import { Alert } from '../../../shared/domain/models';
 
@@ -7,10 +8,7 @@ type StatusFilter = 'ALL' | Alert['status'];
 /** Deliberately Gen 1 style: plain fields, a getter, structural directives. */
 @Component({
   selector: 'app-m01-05',
-  // TODO 1: import the legacy directives from '@angular/common':
-  //         NgIf, NgForOf, NgSwitch, NgSwitchCase, NgSwitchDefault, NgClass, NgStyle
-  //         (Gen 1 code often just imports CommonModule, which bundles all of them)
-  imports: [],
+  imports: [NgIf, NgForOf, NgSwitch, NgSwitchCase, NgSwitchDefault, NgClass, NgStyle],
   // Gen 1 apps ran with the "Default" strategy (now called Eager): every component re-checked on every event.
   changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './page.html',

@@ -1,4 +1,4 @@
-import { Component, booleanAttribute, input } from '@angular/core';
+import { Component, booleanAttribute, input, output } from '@angular/core';
 import { IndicatorView } from '../../../shared/domain/models';
 import { riskLevel } from '../../../shared/domain/risk';
 
@@ -22,13 +22,15 @@ export class IndicatorRow {
   readonly indicator = input.required<IndicatorView>();
   readonly active = input(false, { transform: booleanAttribute });
   protected readonly level = () => riskLevel(this.indicator().score);
-  // TODO 3: two outputs: `picked` emitting an IndicatorView, `removeRequested` emitting the indicator id (number)
+  readonly picked = output<IndicatorView>();
+  readonly removeRequested = output<number>();
 
   pick() {
-    // TODO 4a: emit the current indicator on `picked`
+    this.picked.emit(this.indicator());
   }
 
   remove(event: MouseEvent) {
-    // TODO 4b: stop the click from ALSO reaching the row (event.stopPropagation()), then emit the id on `removeRequested`
+    event.stopPropagation();
+    this.removeRequested.emit(this.indicator().id);
   }
 }

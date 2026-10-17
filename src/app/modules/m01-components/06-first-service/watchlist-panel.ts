@@ -1,4 +1,4 @@
-import { Component, computed } from '@angular/core';
+import { Component, computed, inject } from '@angular/core';
 import { INDICATORS } from '../../../shared/domain/sample-data';
 import { WatchlistService } from './watchlist.service';
 
@@ -16,7 +16,6 @@ import { WatchlistService } from './watchlist.service';
   styles: `.watched { margin: 6px 0; } .count { color: var(--muted); font-weight: 400; }`,
 })
 export class WatchlistPanel {
-  // TODO 6b: same fix as in the picker
-  protected readonly watchlist = new WatchlistService();
+  protected readonly watchlist = inject(WatchlistService);
   protected readonly items = computed(() => INDICATORS.filter(i => this.watchlist.watched().includes(i.id)));
 }

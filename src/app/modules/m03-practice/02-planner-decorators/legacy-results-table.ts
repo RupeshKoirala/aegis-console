@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
 import { DecimalPipe, PercentPipe } from '@angular/common';
 import { ProjectionRow } from './projection';
 
@@ -26,6 +26,5 @@ import { ProjectionRow } from './projection';
   styleUrl: '../01-planner-signals/results-table.css',
 })
 export class LegacyResultsTable {
-  // TODO 5: make this an input:  @Input() rows: ProjectionRow[] = [];
-  rows: ProjectionRow[] = [];
+  @Input() rows: ProjectionRow[] = [];
 }

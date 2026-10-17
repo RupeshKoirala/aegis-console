@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { IndicatorView } from '../../../shared/domain/models';
 
 /** Gen 1 style: @Input / @Output + EventEmitter. */
@@ -14,7 +14,9 @@ import { IndicatorView } from '../../../shared/domain/models';
 })
 export class LegacyRow {
   @Input({ required: true }) indicator!: IndicatorView;
-  // TODO 5: add  @Output() removeRequested = new EventEmitter<number>();  (import Output + EventEmitter)
-  //         and emit this.indicator.id from onRemove()
-  onRemove() {}
+  @Output() removeRequested = new EventEmitter<number>();
+
+  onRemove() {
+    this.removeRequested.emit(this.indicator.id);
+  }
 }

@@ -5,12 +5,10 @@
          its own declarations + the EXPORTS of the modules it imports. @for needs no import. -->
     @for (u of users; track u.id) {
       <tr class="user-row">
-        <!-- TODO 3 (after TODO 1 + 2): avatar text → {{ u.displayName | initials }}
-                                       role cell   → <aegis-role-badge [role]="u.role" /> -->
-        <td><span class="avatar">?</span></td>
+        <td><span class="avatar">{{ u.displayName | initials }}</span></td>
         <td>{{ u.displayName }}</td>
         <td class="mono">{{ u.email }}</td>
-        <td>{{ u.role }}</td>
+        <td><aegis-role-badge [role]="u.role" /></td>
       </tr>
     }
   </tbody>

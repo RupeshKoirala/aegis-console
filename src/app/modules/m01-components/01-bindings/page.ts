@@ -1,4 +1,4 @@
-import { Component, computed } from '@angular/core';
+import { Component, computed, signal } from '@angular/core';
 import { INDICATORS, listOf } from '../../../shared/domain/sample-data';
 import { IndicatorView } from '../../../shared/domain/models';
 
@@ -12,11 +12,9 @@ export class Page {
   protected readonly now = new Date('2026-10-30T00:00:00Z').getTime();
   protected readonly role: 'ADMIN' | 'READ_ONLY' = 'READ_ONLY';
 
-  // TODO 1: add two writable signals: `index` starting at 0 and `copied` starting at false
-  //         (protected readonly index = signal(0); …)
-
-  // TODO 2: make `indicator` depend on the index: computed(() => this.indicators[this.index()])
-  protected readonly indicator = computed(() => this.indicators[0]);
+  protected readonly index = signal(0);
+  protected readonly copied = signal(false);
+  protected readonly indicator = computed(() => this.indicators[this.index()]);
   protected readonly list = computed(() => listOf(this.indicator()));
   protected readonly isExpired = computed(() => {
     const e = this.indicator().expiresAt;
@@ -24,14 +22,17 @@ export class Page {
   });
 
   next() {
-    // TODO 3a: move to the next indicator (wrap around to 0 after the last one), and reset `copied` to false
+    this.index.update(i => (i + 1) % this.indicators.length);
+    this.copied.set(false);
   }
 
   previous() {
-    // TODO 3c: like next(), but backwards (from 0 wrap to the last index)
+    this.index.update(i => (i - 1 + this.indicators.length) % this.indicators.length);
+    this.copied.set(false);
   }
 
   copy() {
-    // TODO 3b: copy the value (navigator.clipboard?.writeText(...).catch(() => {})) and set `copied` to true
+    navigator.clipboard?.writeText(this.indicator().value).catch(() => {});
+    this.copied.set(true);
   }
 }

@@ -7,30 +7,35 @@ export const IPV4 = new RegExp(`^${OCTET}(\\.${OCTET}){3}$`);
 export const DOMAIN = /^(?=.{1,253}$)([a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z]{2,63}$/;
 
 export function classify(value: string): IndicatorType | null {
-  // TODO 1: trim + lower-case, then return 'IP' | 'CIDR' | 'DOMAIN' | null
-  //   - 'IP'     → IPV4.test(v)
-  //   - 'CIDR'   → split on '/', the left part is an IPv4 and the right part is a whole number 0..32
-  //   - 'DOMAIN' → DOMAIN.test(v)
+  const v = value.trim().toLowerCase();
+  if (IPV4.test(v)) return 'IP';
+  const [ip, bits, ...rest] = v.split('/');
+  if (rest.length === 0 && bits !== undefined && IPV4.test(ip) && /^\d{1,2}$/.test(bits) && Number(bits) <= 32) return 'CIDR';
+  if (DOMAIN.test(v)) return 'DOMAIN';
   return null;
 }
 
 export function riskLevel(score: number | null): Severity {
-  // TODO 2: null → 'INFO', ≥90 'CRITICAL', ≥70 'HIGH', ≥40 'MEDIUM', else 'LOW'
-  return 'INFO';
+  if (score === null) return 'INFO';
+  if (score >= 90) return 'CRITICAL';
+  if (score >= 70) return 'HIGH';
+  if (score >= 40) return 'MEDIUM';
+  return 'LOW';
 }
 
 export function isExpired(indicator: Pick<IndicatorView, 'expiresAt'>, now: Date = new Date()): boolean {
-  // TODO 3: true only when expiresAt is set AND earlier than `now`
-  return false;
+  return indicator.expiresAt !== null && Date.parse(indicator.expiresAt) < now.getTime();
 }
 
-// TODO 4: make this generic:  groupBy<T, K extends PropertyKey>(items: readonly T[], key: (item: T) => K): Record<K, T[]>
-//         Build a new object; never mutate `items`.
-export function groupBy(items: readonly any[], key: (item: any) => PropertyKey): Record<PropertyKey, any[]> {
-  return {};
+export function groupBy<T, K extends PropertyKey>(items: readonly T[], key: (item: T) => K): Record<K, T[]> {
+  const out = {} as Record<K, T[]>;
+  for (const item of items) {
+    (out[key(item)] ??= []).push(item);
+  }
+  return out;
 }
 
 export function label(indicator: IndicatorView): string {
-  // TODO 5: "203.0.113.66 (IP) · Botnets 97" when category and score are set, otherwise "evil.example (DOMAIN)"
-  return indicator.value;
+  const base = `${indicator.value} (${indicator.type})`;
+  return indicator.category && indicator.score !== null ? `${base} · ${indicator.category} ${indicator.score}` : base;
 }

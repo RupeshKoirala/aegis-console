@@ -1,48 +1,49 @@
 <h1>Indicators</h1>
 
 <div class="toolbar row">
-  <!-- TODO 1: one <button class="kind"> per entry in `kinds` (use @for, track k).
-               [class.on]="kindFilter() === k"   (click)="kindFilter.set(k)"   text: {{ k }} -->
-  <button class="kind on">ALL</button>
+  @for (k of kinds; track k) {
+    <button class="kind" [class.on]="kindFilter() === k" (click)="kindFilter.set(k)">{{ k }}</button>
+  }
   <label class="check"><input type="checkbox" [checked]="onlyScored()" (change)="onlyScored.set(!onlyScored())" /> only scored</label>
-  <!-- TODO 2: declare  @let total = visible().length;  then show "{{ total }} indicators"
-               (singular "indicator" when total is 1) -->
-  <span class="total muted">? indicators</span>
+  @let total = visible().length;
+  <span class="total muted">{{ total }} {{ total === 1 ? 'indicator' : 'indicators' }}</span>
 </div>
 
 <div class="split">
   <table class="card">
     <thead><tr><th>#</th><th>Value</th><th>Type</th><th>List</th><th>Score</th></tr></thead>
     <tbody>
-      <!--
-        TODO 3: repeat this row for every indicator in visible() with @for, tracking by i.id.
-                - number column: $index + 1   (give it a name: let n = $index)
-                - [class.odd]="$odd"   [class.active]="selected() === i"   (click)="select(i)"
-                - add an @empty block:  <tr><td colspan="5" class="empty">No indicators match these filters</td></tr>
-        TODO 4: in the List cell, use @switch (kindOf(i)) to show ONE icon:
-                'ALLOW' → <span class="kind-icon allow">✔</span>
-                'BLOCK' → <span class="kind-icon block">⛔</span>
-                default → <span class="kind-icon threat">⚠</span>
-                followed by {{ listName(i) }}
-      -->
-      <tr class="ind-row">
-        <td class="n">1</td>
-        <td class="mono">192.0.2.10</td>
-        <td>IP</td>
-        <td><span class="kind-icon allow">✔</span> Partner allow list</td>
-        <td>—</td>
-      </tr>
+      @for (i of visible(); track i.id; let n = $index, last = $last) {
+        <tr class="ind-row" [class.odd]="$odd" [class.last]="last" [class.active]="selected() === i" (click)="select(i)">
+          <td class="n">{{ n + 1 }}</td>
+          <td class="mono">{{ i.value }}</td>
+          <td>{{ i.type }}</td>
+          <td>
+            @switch (kindOf(i)) {
+              @case ('ALLOW') { <span class="kind-icon allow">✔</span> }
+              @case ('BLOCK') { <span class="kind-icon block">⛔</span> }
+              @default { <span class="kind-icon threat">⚠</span> }
+            }
+            {{ listName(i) }}
+          </td>
+          <td>{{ i.score ?? '—' }}</td>
+        </tr>
+      } @empty {
+        <tr><td colspan="5" class="empty">No indicators match these filters</td></tr>
+      }
     </tbody>
   </table>
 
   <aside class="card details">
-    <!--
-      TODO 5: @if (selected(); as s) { …details… } @else { …hint… }
-              details:  <h3 class="mono">{{ s.value }}</h3>  <p>{{ s.description ?? 'No description' }}</p>
-      TODO 6: inside the details, ONLY for threat indicators (s.category is set):
-              <p class="cat">{{ s.category }} · score {{ s.score }}</p>
-    -->
-    <p class="hint muted">Select a row to see details</p>
+    @if (selected(); as s) {
+      <h3 class="mono">{{ s.value }}</h3>
+      <p>{{ s.description ?? 'No description' }}</p>
+      @if (s.category) {
+        <p class="cat">{{ s.category }} · score {{ s.score }}</p>
+      }
+    } @else {
+      <p class="hint muted">Select a row to see details</p>
+    }
   </aside>
 </div>
 

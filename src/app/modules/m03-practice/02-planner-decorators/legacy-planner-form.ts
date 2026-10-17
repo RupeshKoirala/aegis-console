@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component, EventEmitter, Output } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { PlannerInput } from './projection';
 
@@ -17,9 +17,16 @@ export class LegacyPlannerForm {
   expiryDays = this.defaults.expiryDays;
   months = this.defaults.months;
 
-  // TODO 1: an output  @Output() calculate = new EventEmitter<PlannerInput>();
+  @Output() calculate = new EventEmitter<PlannerInput>();
 
   submit() {
-    // TODO 2: emit the plain field values (plus capacity: 1_000_000) on `calculate`
+    this.calculate.emit({
+      currentSize: this.currentSize,
+      dailyAdditions: this.dailyAdditions,
+      monthlyGrowthPct: this.monthlyGrowthPct,
+      expiryDays: this.expiryDays,
+      months: this.months,
+      capacity: 1_000_000,
+    });
   }
 }

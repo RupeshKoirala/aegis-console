@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { INDICATORS, listOf } from '../../../shared/domain/sample-data';
 import { WatchlistService } from './watchlist.service';
 
@@ -21,7 +21,5 @@ import { WatchlistService } from './watchlist.service';
 })
 export class IndicatorPicker {
   protected readonly threats = INDICATORS.filter(i => listOf(i).kind === 'THREAT');
-  // TODO 6a: this creates a PRIVATE copy of the service, so the panel never sees your changes.
-  //          Ask Angular for the shared instance instead:  inject(WatchlistService)
-  protected readonly watchlist = new WatchlistService();
+  protected readonly watchlist = inject(WatchlistService);
 }

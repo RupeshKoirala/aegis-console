@@ -1,4 +1,4 @@
-import { computed, signal } from '@angular/core';
+import { Injectable, computed, effect, signal } from '@angular/core';
 
 export const WATCHLIST_KEY = 'aegis.watchlist';
 
@@ -10,26 +10,25 @@ function load(): number[] {
   }
 }
 
-// TODO 1: make this an injectable singleton:  @Injectable({ providedIn: 'root' })  (import Injectable)
+@Injectable({ providedIn: 'root' })
 export class WatchlistService {
   private readonly ids = signal<number[]>(load());
+  readonly watched = this.ids.asReadonly();
+  readonly count = computed(() => this.ids().length);
 
-  // TODO 2: a public read-only view of the ids  →  this.ids.asReadonly()
-  readonly watched = this.ids;
-  // TODO 3: the number of watched ids, as a computed
-  readonly count = computed(() => 0);
-
-  // TODO 4: in a constructor, an effect() that saves ids() to localStorage under WATCHLIST_KEY (JSON)
+  constructor() {
+    effect(() => localStorage.setItem(WATCHLIST_KEY, JSON.stringify(this.ids())));
+  }
 
   has(id: number): boolean {
-    return false; // TODO 5a
+    return this.ids().includes(id);
   }
 
   toggle(id: number) {
-    // TODO 5b: add if missing, remove if present (immutably)
+    this.ids.update(ids => (ids.includes(id) ? ids.filter(x => x !== id) : [...ids, id]));
   }
 
   clear() {
-    // TODO 5c
+    this.ids.set([]);
   }
 }

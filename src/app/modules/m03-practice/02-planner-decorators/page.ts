@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { LegacyPlannerForm } from './legacy-planner-form';
 import { LegacyResultsTable } from './legacy-results-table';
-import { ProjectionRow } from './projection';
+import { PlannerInput, ProjectionRow, project } from './projection';
 
 @Component({
   selector: 'app-m03-02',
@@ -12,5 +12,7 @@ import { ProjectionRow } from './projection';
 export class Page {
   rows: ProjectionRow[] = [];
 
-  // TODO 6: onCalculate(input: PlannerInput) { … }  → this.rows = project(input)
+  onCalculate(input: PlannerInput) {
+    this.rows = project(input);
+  }
 }

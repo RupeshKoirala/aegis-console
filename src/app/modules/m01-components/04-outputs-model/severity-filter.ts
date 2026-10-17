@@ -1,4 +1,4 @@
-import { Component, signal } from '@angular/core';
+import { Component, model } from '@angular/core';
 import { Severity } from '../../../shared/domain/models';
 
 @Component({
@@ -18,10 +18,9 @@ import { Severity } from '../../../shared/domain/models';
 })
 export class SeverityFilter {
   protected readonly all: Severity[] = ['CRITICAL', 'HIGH', 'MEDIUM', 'LOW'];
-  // TODO 1: make this a two-way bindable model, default []  →  model<Severity[]>([])
-  readonly selected = signal<Severity[]>([]);
+  readonly selected = model<Severity[]>([]);
 
   toggle(s: Severity) {
-    // TODO 2: add s if missing, remove it if present. Use .update() and return a NEW array.
+    this.selected.update(cur => (cur.includes(s) ? cur.filter(x => x !== s) : [...cur, s]));
   }
 }

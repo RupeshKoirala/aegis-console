@@ -1,6 +1,10 @@
 import { NgModule } from '@angular/core';
-// TODO 2: declarations: [UserTableComponent]
-//         imports:      [SharedModule]
-//         exports:      [UserTableComponent]   (so the standalone page can use <aegis-user-table>)
-@NgModule({})
+import { SharedModule } from './shared.module';
+import { UserTableComponent } from './user-table.component';
+
+@NgModule({
+  declarations: [UserTableComponent],
+  imports: [SharedModule],
+  exports: [UserTableComponent],
+})
 export class AdminModule {}

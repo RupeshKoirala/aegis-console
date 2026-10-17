@@ -27,7 +27,7 @@ export class Page {
   }
 
   onRemove(id: number) {
-    // TODO 6: remove the indicator with this id from `items` (immutably, with .update and .filter),
-    //         and clear `picked` if it was the removed one
+    this.items.update(list => list.filter(i => i.id !== id));
+    if (this.picked()?.id === id) this.picked.set(null);
   }
 }

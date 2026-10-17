@@ -1,11 +1,10 @@
 import { Component, Input } from '@angular/core';
+import { DecimalPipe, NgIf } from '@angular/common';
 import { Report } from './reports';
 
 @Component({
   selector: 'aegis-report-card',
-  // TODO 1: make this standalone: delete `standalone: false` and import what the template uses
-  //         (*ngIf → NgIf, | number → DecimalPipe, both from '@angular/common')
-  standalone: false,
+  imports: [NgIf, DecimalPipe],
   template: `
     <article class="card report">
       <h4>{{ report.title }}</h4>

@@ -1,10 +1,9 @@
 import { Component } from '@angular/core';
-import { ReportsModule } from './reports.module';
+import { ReportsListComponent } from './reports-list.component';
 
 @Component({
   selector: 'app-m02-02',
-  // TODO 4: import ReportsListComponent directly instead of the module
-  imports: [ReportsModule],
+  imports: [ReportsListComponent],
   template: `
     <h1>Weekly reports</h1>
     <aegis-reports-list />
