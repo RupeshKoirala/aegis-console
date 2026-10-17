@@ -4,11 +4,9 @@
   <tbody>
     @for (i of indicators; track i.id) {
       <tr class="ind-row">
-        <!-- TODO 4a: defang the value; for IP/CIDR rows show  (i.value | cidrSize | number)  and
-                      (i.value | cidrSize: 'hosts' | number); for domains show '—'. Chaining: | cidrSize | number -->
-        <td class="mono defanged">{{ i.value }}</td>
-        <td class="size">—</td>
-        <td class="hosts">—</td>
+        <td class="mono defanged">{{ i.value | defang }}</td>
+        <td class="size">{{ i.type === 'DOMAIN' ? '—' : (i.value | cidrSize | number) }}</td>
+        <td class="hosts">{{ i.type === 'DOMAIN' ? '—' : (i.value | cidrSize: 'hosts' | number) }}</td>
       </tr>
     }
   </tbody>
@@ -17,7 +15,6 @@
 <h3>Alert queue</h3>
 <ul class="card queue">
   @for (a of alerts; track a.id) {
-    <!-- TODO 4b: when → {{ a.at | relativeTime: now }} and defang the title -->
-    <li class="alert-row"><span class="when muted">{{ a.at }}</span> {{ a.title }}</li>
+    <li class="alert-row"><span class="when muted">{{ a.at | relativeTime: now }}</span> {{ a.title | defang }}</li>
   }
 </ul>

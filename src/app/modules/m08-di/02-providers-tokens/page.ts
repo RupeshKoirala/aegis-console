@@ -1,15 +1,15 @@
 import { Component, inject } from '@angular/core';
 import { JsonPipe } from '@angular/common';
-import { AEGIS_CONFIG, AUDIT_LOGGER, FEATURE_FLAGS, Logger } from './tokens';
+import { AEGIS_CONFIG, AUDIT_LOGGER, ConsoleLogger, FEATURE_FLAGS, Logger, flagsFor } from './tokens';
 
 @Component({
   selector: 'app-m08-02',
   imports: [JsonPipe],
   providers: [
-    // TODO 1: AEGIS_CONFIG → useValue: Object.freeze({ apiBase: '/api/v1', threshold: 90, env: 'prod' })
-    // TODO 2: FEATURE_FLAGS → useFactory: () => flagsFor(inject(AEGIS_CONFIG).env)
-    // TODO 3: Logger (the abstract class) → useClass: ConsoleLogger
-    // TODO 4: AUDIT_LOGGER → useExisting: Logger   (an alias: the very same instance, not a second one)
+    { provide: AEGIS_CONFIG, useValue: Object.freeze({ apiBase: '/api/v1', threshold: 90, env: 'prod' }) },
+    { provide: FEATURE_FLAGS, useFactory: () => flagsFor(inject(AEGIS_CONFIG).env) },
+    { provide: Logger, useClass: ConsoleLogger },
+    { provide: AUDIT_LOGGER, useExisting: Logger },
   ],
   template: `
     <h1>Providers & tokens</h1>

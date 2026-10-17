@@ -4,9 +4,7 @@ export const checks = { total: 0 };
 
 @Component({
   selector: 'aegis-point-row',
-  // TODO 1: this row only changes when its input changes, so let Angular skip it otherwise.
-  //         Remove this Eager override (OnPush is the v22 default) or write ChangeDetectionStrategy.OnPush.
-  changeDetection: ChangeDetectionStrategy.Eager,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   template: `<span class="mono">{{ name() }}</span> <span class="muted">{{ countCheck() }}</span>`,
   styles: `:host { display: flex; justify-content: space-between; padding: 2px 8px; font-size: 12px; border-bottom: 1px solid var(--border); }`,
 })

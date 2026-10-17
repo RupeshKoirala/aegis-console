@@ -1,30 +1,29 @@
-import { ChangeDetectionStrategy, Component, DestroyRef, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, inject, signal } from '@angular/core';
 
 @Component({
   selector: 'aegis-feed-health',
-  changeDetection: ChangeDetectionStrategy.Eager,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <p class="last-sync">last sync: {{ lastSync }}</p>
-    <p class="entries">entries: {{ entries }}</p>
-    <p class="online">network: {{ online ? 'online' : 'offline' }}</p>
+    <p class="last-sync">last sync: {{ lastSync() }}</p>
+    <p class="entries">entries: {{ entries() }}</p>
+    <p class="online">network: {{ online() ? 'online' : 'offline' }}</p>
   `,
 })
 export class FeedHealth {
-  // TODO 1–3: make these three fields signals, write them with .set(), and read them with () in the template
-  lastSync = 'never';
-  entries = 0;
-  online = true;
+  readonly lastSync = signal('never');
+  readonly entries = signal(0);
+  readonly online = signal(true);
 
   constructor() {
     const timer = setTimeout(() => {
-      this.lastSync = '12:00 UTC';
+      this.lastSync.set('12:00 UTC');
     }, 500);
 
     Promise.resolve(19).then(count => {
-      this.entries = count;
+      this.entries.set(count);
     });
 
-    const onOffline = () => (this.online = false);
+    const onOffline = () => this.online.set(false);
     window.addEventListener('offline', onOffline);
 
     inject(DestroyRef).onDestroy(() => {

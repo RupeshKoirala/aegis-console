@@ -1,11 +1,10 @@
 import { Component } from '@angular/core';
+import { AsyncPipe, CurrencyPipe, DatePipe, DecimalPipe, I18nPluralPipe, I18nSelectPipe, JsonPipe, KeyValuePipe, PercentPipe, SlicePipe, TitleCasePipe, UpperCasePipe } from '@angular/common';
 import { of } from 'rxjs';
 
 @Component({
   selector: 'app-m07-01',
-  // TODO 1: import every pipe you use from '@angular/common': DatePipe, DecimalPipe, PercentPipe, CurrencyPipe, SlicePipe,
-  //         UpperCasePipe, TitleCasePipe, KeyValuePipe, JsonPipe, I18nPluralPipe, I18nSelectPipe, AsyncPipe
-  imports: [],
+  imports: [DatePipe, DecimalPipe, PercentPipe, CurrencyPipe, SlicePipe, UpperCasePipe, TitleCasePipe, KeyValuePipe, JsonPipe, I18nPluralPipe, I18nSelectPipe, AsyncPipe],
   templateUrl: './page.html',
   styles: `dl { display: grid; grid-template-columns: 200px 1fr; gap: 8px 16px; } dt { color: var(--muted); } dd { margin: 0; }`,
 })

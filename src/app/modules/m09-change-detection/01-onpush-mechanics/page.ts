@@ -17,7 +17,6 @@ export class Page {
   alert: Alert = { ...ALERTS[0] };
 
   resolve() {
-    // TODO 1: this MUTATES the object the OnPush card already has. Create a new object instead: { ...this.alert, status: 'RESOLVED' }
-    this.alert.status = 'RESOLVED';
+    this.alert = { ...this.alert, status: 'RESOLVED' };
   }
 }

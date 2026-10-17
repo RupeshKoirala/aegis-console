@@ -1,4 +1,4 @@
-import { Component, OnDestroy } from '@angular/core';
+import { ChangeDetectorRef, Component, OnDestroy, inject } from '@angular/core';
 
 /** Gen 1/2 style: plain field updated from a timer inside an OnPush component. */
 @Component({
@@ -7,10 +7,10 @@ import { Component, OnDestroy } from '@angular/core';
 })
 export class LegacyFeedStatus implements OnDestroy {
   status = 'syncing…';
-  // TODO 1: after the timeout the field changes but nothing re-renders. Inject ChangeDetectorRef
-  //         and call markForCheck() right after setting status.
+  private readonly cdr = inject(ChangeDetectorRef);
   private readonly timer = setTimeout(() => {
     this.status = 'up to date';
+    this.cdr.markForCheck();
   }, 1000);
 
   ngOnDestroy() {

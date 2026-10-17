@@ -35,12 +35,10 @@ export class Page {
   }
 
   addImmutable() {
-    // TODO 1: add a new item WITHOUT mutating: assign a new array
-    this.items.push(this.next());
+    this.items = [...this.items, this.next()];
   }
 
   noop() {
-    // TODO 2: nothing to write here. Read it: this click changes no data, yet triggers change detection.
-    //         Watch the impure counter go up anyway in the tests.
+    // Intentionally empty. Every click still triggers change detection.
   }
 }

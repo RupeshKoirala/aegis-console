@@ -12,11 +12,7 @@ import { Component, Signal, computed, inject, input } from '@angular/core';
 })
 export class TreeNode {
   readonly name = input.required<string>();
-  // TODO 1: inject the PARENT TreeNode: skip yourself, and allow "none" for the root:
-  //         private readonly parent: TreeNode | null = inject(TreeNode, { skipSelf: true, optional: true })
-  //         (the explicit type is needed because a class referring to itself confuses inference)
-  // TODO 2: depth = 0 for the root, otherwise parent.depth() + 1
-  readonly depth = computed<number>(() => 0);
-  // TODO 3: path = "Shieldline MSP / Acme Schools / Main campus" (the parent's path + " / " + name)
-  readonly path = computed<string>(() => this.name());
+  private readonly parent: TreeNode | null = inject(TreeNode, { skipSelf: true, optional: true });
+  readonly depth: Signal<number> = computed(() => (this.parent ? this.parent.depth() + 1 : 0));
+  readonly path: Signal<string> = computed(() => (this.parent ? `${this.parent.path()} / ${this.name()}` : this.name()));
 }

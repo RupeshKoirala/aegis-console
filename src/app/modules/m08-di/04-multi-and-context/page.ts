@@ -1,11 +1,14 @@
 import { Component, inject, signal } from '@angular/core';
-import { Enrichment } from './enrichers';
+import { ENRICHERS, asnEnricher, geoEnricher, reputationEnricher, Enrichment } from './enrichers';
 import { EnrichmentService } from './enrichment.service';
 
 @Component({
   selector: 'app-m08-04',
-  // TODO 1: register geoEnricher, asnEnricher and reputationEnricher on the ENRICHERS token with multi: true
-  providers: [],
+  providers: [
+    { provide: ENRICHERS, useValue: geoEnricher, multi: true },
+    { provide: ENRICHERS, useValue: asnEnricher, multi: true },
+    { provide: ENRICHERS, useValue: reputationEnricher, multi: true },
+  ],
   template: `
     <h1>Enrich an indicator</h1>
     <button class="enrich" (click)="run('203.0.113.66')">Enrich 203.0.113.66</button>

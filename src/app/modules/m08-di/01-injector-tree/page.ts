@@ -6,7 +6,7 @@ import { IsolatedCounter } from './isolated-counter';
 @Component({
   selector: 'app-m08-01',
   imports: [SharedCounter, IsolatedCounter],
-  // TODO 2: provide ONE CounterService here so both <aegis-shared-counter>s share it:  providers: [CounterService]
+  providers: [CounterService],
   template: `
     <h1>Injector tree</h1>
     <section class="card shared"><h3>Shared (provided by the page)</h3>
