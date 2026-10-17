@@ -8,6 +8,9 @@ import { M03 } from '../modules/m03-practice/module';
 import { M04 } from '../modules/m04-debugging/module';
 import { M05 } from '../modules/m05-components-deep/module';
 import { M06 } from '../modules/m06-directives/module';
+import { M07 } from '../modules/m07-pipes/module';
+import { M08 } from '../modules/m08-di/module';
+import { M09 } from '../modules/m09-change-detection/module';
 
 export interface Exercise {
   id: string;
@@ -31,13 +34,13 @@ export const CURRICULUM: CourseModule[] = [
   M04,
   M05,
   M06,
+  M07,
+  M08,
+  M09,
   // @@modules
 ];
 
 export const COMING_SOON: string[] = [
-  'M07 Pipes',
-  'M08 Dependency injection',
-  'M09 Change detection',
   'M10 Signals in depth',
   'M11 RxJS',
   'M12 HTTP & interceptors',
