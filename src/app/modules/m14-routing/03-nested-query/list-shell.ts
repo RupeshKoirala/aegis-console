@@ -53,10 +53,9 @@ export class IndicatorsTab {
   private readonly route = inject(ActivatedRoute);
   private readonly listId = toSignal(this.route.parent!.paramMap.pipe(map(p => Number(p.get('listId')))), { initialValue: 0 });
 
-  // TODO 2: ?q= and ?type= query params as inputs (input binding covers query params too).
-  //         Careful: when the param is ABSENT the router binds undefined; use the orEmpty transform below.
-  readonly q = computed(() => '');
-  readonly type = computed(() => '');
+  /** ?q=… and ?type=… arrive as inputs too. GOTCHA: an ABSENT param is bound as undefined, not your default. */
+  readonly q = input('', { transform: orEmpty });
+  readonly type = input('', { transform: orEmpty });
 
   readonly rows = computed(() => {
     const q = this.q().toLowerCase();
@@ -71,6 +70,7 @@ export class IndicatorsTab {
    *   dropping empty values (null removes a param), and replacing the history entry (no back-button spam).
    */
   setFilter(change: { q?: string; type?: string }) {
-    return Promise.resolve(false);
+    const queryParams = Object.fromEntries(Object.entries(change).map(([k, v]) => [k, v || null]));
+    return this.router.navigate([], { relativeTo: this.route, queryParams, queryParamsHandling: 'merge', replaceUrl: true });
   }
 }

@@ -1,5 +1,6 @@
 import { Routes } from '@angular/router';
 import { PConsole, PForbidden, PLists, PLogin, PUsers } from './pages';
+import { authGuard, requirePermission } from './guards';
 
 export const AUTH_ROUTES: Routes = [
   { path: '', redirectTo: 'console', pathMatch: 'full' },
@@ -8,13 +9,12 @@ export const AUTH_ROUTES: Routes = [
   {
     path: 'console',
     component: PConsole,
-    // TODO 2c: authGuard on this route AND its children (canActivate + canActivateChild):
-    //          signing out while on /console/lists must bounce on the next navigation.
+    canActivate: [authGuard],
+    canActivateChild: [authGuard],
     children: [
       { path: '', redirectTo: 'lists', pathMatch: 'full' },
       { path: 'lists', component: PLists },
-      // TODO 2d: users requires the 'user:manage' permission
-      { path: 'users', component: PUsers },
+      { path: 'users', component: PUsers, canActivate: [requirePermission('user:manage')] },
     ],
   },
 ];

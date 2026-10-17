@@ -11,14 +11,16 @@ export function featureUrl(router: Router, state: RouterStateSnapshot, path: str
 /** TODO 1: a guard FACTORY. Allowed role → true; otherwise redirect to featureUrl(router, state, 'forbidden'). */
 export function requireRole(...roles: Role[]): CanActivateFn {
   return (_route, state) => {
-    return true;
+    if (roles.includes(inject(DemoSession).role())) return true;
+    const router = inject(Router);
+    return featureUrl(router, state, 'forbidden');
   };
 }
 
 /** TODO 2: CanMatch: the route only EXISTS while the flag is on (false → the router tries the next route). */
 export function featureFlag(name: string): CanMatchFn {
   return () => {
-    return true;
+    return inject(DemoSession).flags()[name] === true;
   };
 }
 
@@ -28,5 +30,5 @@ export interface HasUnsavedChanges {
 
 /** TODO 3: leaving a component with unsaved changes asks ConfirmService.ask('Discard unsaved changes?'). */
 export const unsavedChanges: CanDeactivateFn<HasUnsavedChanges> = component => {
-  return true;
+  return !component.hasUnsavedChanges() || inject(ConfirmService).ask('Discard unsaved changes?');
 };

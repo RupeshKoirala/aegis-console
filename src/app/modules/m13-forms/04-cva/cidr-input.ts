@@ -12,8 +12,10 @@ export function parseCidr(value: string | null | undefined): { ip: string; prefi
 
 @Component({
   selector: 'aegis-cidr-input',
-  // TODO 1: register this component as the control's value accessor AND as a validator
-  //         (NG_VALUE_ACCESSOR / NG_VALIDATORS, useExisting + forwardRef, multi: true)
+  providers: [
+    { provide: NG_VALUE_ACCESSOR, useExisting: forwardRef(() => CidrInput), multi: true },
+    { provide: NG_VALIDATORS, useExisting: forwardRef(() => CidrInput), multi: true },
+  ],
   host: { class: 'cidr-input' },
   template: `
     <input class="ip mono" placeholder="198.51.100.0" [value]="ip()" [disabled]="disabled()"
@@ -39,23 +41,37 @@ export class CidrInput implements ControlValueAccessor, Validator {
     return n === 1 ? 'one host' : `${n.toLocaleString('en-US')} addresses`;
   }
 
-  // TODO 2: the four ControlValueAccessor methods
-  //   writeValue(value)       the FORM → the UI   (parseCidr, set ip + prefix; do NOT call onChange here)
-  //   registerOnChange(fn)    keep fn, call it with "ip/prefix" (or '' when ip is empty) whenever the UI changes
-  //   registerOnTouched(fn)   keep fn, call it on blur
-  //   setDisabledState(b)     reflect into the disabled signal
-  writeValue(_value: string | null): void {}
-  registerOnChange(_fn: (value: string) => void): void {}
-  registerOnTouched(_fn: () => void): void {}
-  setDisabledState(_isDisabled: boolean): void {}
-
-  // TODO 3: validate(control): empty is fine (required is the form's decision); an IP part that isn't IPv4 → { cidr: { ip } }
-  validate(_control: AbstractControl<string>): ValidationErrors | null {
-    return null;
+  writeValue(value: string | null): void {
+    const { ip, prefix } = parseCidr(value);
+    this.ip.set(ip);
+    this.prefix.set(prefix);
+  }
+  registerOnChange(fn: (value: string) => void): void {
+    this.onChange = fn;
+  }
+  registerOnTouched(fn: () => void): void {
+    this.onTouched = fn;
+  }
+  setDisabledState(isDisabled: boolean): void {
+    this.disabled.set(isDisabled);
+  }
+  validate(control: AbstractControl<string>): ValidationErrors | null {
+    const { ip } = parseCidr(control.value);
+    return !ip || IPV4.test(ip) ? null : { cidr: { ip } };
   }
 
-  // TODO 4: the template handlers: update the signal, then tell the form (onChange / onTouched)
-  onIp(_ip: string) {}
-  onPrefix(_prefix: number) {}
-  touched() {}
+  onIp(ip: string) {
+    this.ip.set(ip.trim());
+    this.emit();
+  }
+  onPrefix(prefix: number) {
+    this.prefix.set(prefix);
+    this.emit();
+  }
+  touched() {
+    this.onTouched();
+  }
+  private emit() {
+    this.onChange(this.ip() ? `${this.ip()}/${this.prefix()}` : '');
+  }
 }

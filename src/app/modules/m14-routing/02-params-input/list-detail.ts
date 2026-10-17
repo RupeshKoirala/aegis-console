@@ -33,10 +33,8 @@ export class ListIndex {
   `,
 })
 export class ListDetail {
-  // TODO 2: receive :listId as an INPUT (the router sets it because the app uses withComponentInputBinding()).
-  //         Params are strings: use input.required({ transform: numberAttribute }).
-  //         Replace this placeholder; everything below already reads it as a signal.
-  readonly listId = computed(() => 2);
+  /** Bound from the :listId route param by withComponentInputBinding(). numberAttribute turns "2" into 2. */
+  readonly listId = input.required({ transform: numberAttribute });
   readonly list = computed(() => LISTS.find(l => l.id === this.listId()));
   readonly indicators = computed(() => INDICATORS.filter(i => i.listId === this.listId()));
   private readonly index = computed(() => LISTS.findIndex(l => l.id === this.listId()));

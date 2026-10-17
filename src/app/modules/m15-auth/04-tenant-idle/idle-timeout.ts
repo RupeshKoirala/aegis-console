@@ -41,8 +41,20 @@ export class IdleTimeout {
   }
 
   check() {
+    const left = this.config.timeoutMs - (Date.now() - this.lastActivity);
+    if (left <= 0) {
+      this.stop();
+      this.session.clear();
+      this.secondsLeft.set(null);
+      this.expired.set(true);
+    } else {
+      this.secondsLeft.set(left <= this.config.warnMs ? Math.ceil(left / 1000) : null);
+    }
   }
 
   activity() {
+    if (this.expired()) return;
+    this.lastActivity = Date.now();
+    this.secondsLeft.set(null);
   }
 }

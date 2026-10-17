@@ -7,13 +7,13 @@ import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
   template: `
     <h1>Console shell <small class="muted">routes & links</small></h1>
     <nav class="row tabs">
-      <!-- TODO 2: real router links. href="..." reloads the whole app; routerLink doesn't.
-           Each link: routerLink="<relative path>" routerLinkActive="active" ariaCurrentWhenActive="page".
-           Keep the 4th link pointing at "nope" to see your ** route. -->
-      <a href="#">Overview</a> <a href="#">Lists</a> <a href="#">Alerts</a> <a href="#">Broken link</a>
+      <a routerLink="overview" routerLinkActive="active" ariaCurrentWhenActive="page">Overview</a>
+      <a routerLink="lists" routerLinkActive="active" ariaCurrentWhenActive="page">Lists</a>
+      <a routerLink="alerts" routerLinkActive="active" ariaCurrentWhenActive="page">Alerts</a>
+      <a routerLink="nope">Broken link</a>
     </nav>
     <section class="card">
-      <!-- TODO 3: the outlet the child routes render into -->
+      <router-outlet />
     </section>
   `,
   styles: `.tabs a { padding: 6px 12px; border-radius: 6px; } .tabs a.active { background: var(--accent); color: white; }`,

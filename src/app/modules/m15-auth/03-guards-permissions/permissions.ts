@@ -17,7 +17,8 @@ export class Permissions {
 
   /** TODO 1: true when the signed-in user's role is listed for `p`. Read the role SIGNAL so callers stay reactive. */
   allows(p: Permission): boolean {
-    return true;
+    const role = this.session.role();
+    return !!role && (PERMISSIONS[p] as readonly Role[]).includes(role);
   }
 }
 
@@ -33,6 +34,15 @@ export class Can {
   private readonly tpl = inject(TemplateRef);
   private readonly vcr = inject(ViewContainerRef);
   private readonly permissions = inject(Permissions);
+  private shown: TemplateRef<unknown> | null | undefined;
+
   constructor() {
+    effect(() => {
+      const next = this.permissions.allows(this.aegisCan()) ? this.tpl : this.aegisCanElse();
+      if (next === this.shown) return;
+      this.vcr.clear();
+      if (next) this.vcr.createEmbeddedView(next);
+      this.shown = next;
+    });
   }
 }

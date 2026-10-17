@@ -5,6 +5,7 @@ import { JsonPipe } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ListKind } from '../../../shared/domain/models';
 import { THREAT_CATEGORIES } from '../indicator-format';
+import { indicatorValidator, threatNeedsScore, uniqueOnList } from './indicator-validators';
 
 const LIST_FOR: Record<ListKind, number> = { ALLOW: 1, BLOCK: 2, THREAT: 3 };
 
@@ -50,16 +51,16 @@ export class Page {
   readonly saved = signal<unknown>(null);
   private readonly listKind = this.fb.nonNullable.control<ListKind>('BLOCK');
 
-  // TODO 4: wire your validators in. Keep the typed shape (fb.nonNullable):
-  //   value: [Validators.required, indicatorValidator] + async uniqueOnList(this.http, () => LIST_FOR[this.listKind.value])
-  //          with updateOn: 'blur' so the API is hit once per edit, not per keystroke
-  //   the whole group: threatNeedsScore
   readonly form = this.fb.nonNullable.group({
     listKind: this.listKind,
-    value: '',
+    value: this.fb.nonNullable.control('', {
+      validators: [Validators.required, indicatorValidator],
+      asyncValidators: [uniqueOnList(this.http, () => LIST_FOR[this.listKind.value])],
+      updateOn: 'blur',
+    }),
     category: '',
     score: this.fb.control<number | null>(null),
-  });
+  }, { validators: threatNeedsScore });
 
   /** OnPush: reactive-form state isn't a signal. Reading this in the template re-renders when an async validator settles. */
   protected readonly status = toSignal(this.form.statusChanges, { initialValue: this.form.status });

@@ -2,10 +2,13 @@ import { HttpClient } from '@angular/common/http';
 import { AbstractControl, AsyncValidatorFn, ValidationErrors, ValidatorFn } from '@angular/forms';
 import { Observable, catchError, map, of } from 'rxjs';
 import { IndicatorView, Page } from '../../../shared/domain/models';
+import { classify } from '../indicator-format';
 
 /** TODO 1: null when empty (that's `required`'s job) or classify() recognises it; otherwise { indicator: { value } }. */
 export const indicatorValidator: ValidatorFn = (control: AbstractControl<string>): ValidationErrors | null => {
-  return null;
+  const value = control.value?.trim();
+  if (!value) return null;
+  return classify(value) ? null : { indicator: { value } };
 };
 
 /**
@@ -13,7 +16,12 @@ export const indicatorValidator: ValidatorFn = (control: AbstractControl<string>
  * Otherwise return { threatFields: ['category', 'score'] } listing only the bad field names. Non-threat lists: null.
  */
 export const threatNeedsScore: ValidatorFn = (group: AbstractControl): ValidationErrors | null => {
-  return null;
+  const { listKind, category, score } = group.value as { listKind: string; category: string; score: number | null };
+  if (listKind !== 'THREAT') return null;
+  const bad: string[] = [];
+  if (!category?.trim()) bad.push('category');
+  if (!(Number.isInteger(score) && score! >= 1 && score! <= 100)) bad.push('score');
+  return bad.length ? { threatFields: bad } : null;
 };
 
 /**
@@ -23,6 +31,11 @@ export const threatNeedsScore: ValidatorFn = (group: AbstractControl): Validatio
  */
 export function uniqueOnList(http: HttpClient, listId: () => number): AsyncValidatorFn {
   return (control: AbstractControl<string>): Observable<ValidationErrors | null> => {
-    return of(null);
+    const value = control.value?.trim().toLowerCase();
+    if (!value) return of(null);
+    return http.get<Page<IndicatorView>>(`/api/v1/lists/${listId()}/indicators`, { params: { q: value, size: 200 } }).pipe(
+      map(page => (page.items.some(i => i.value === value) ? { duplicate: true } : null)),
+      catchError(() => of(null)),
+    );
   };
 }

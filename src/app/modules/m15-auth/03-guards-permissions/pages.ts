@@ -16,7 +16,9 @@ export class PLogin {
   private readonly session = inject(Session);
   private readonly router = inject(Router);
   constructor() {
-    // TODO 4: once signed in, go to returnUrl (fallback: this exercise's /console). An effect on isAuthenticated does it.
+    effect(() => {
+      if (this.session.isAuthenticated()) this.router.navigateByUrl(this.returnUrl() ?? this.router.url.replace(/\/login.*$/, '/console'));
+    });
   }
 }
 

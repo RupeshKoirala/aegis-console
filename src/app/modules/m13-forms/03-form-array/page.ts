@@ -1,4 +1,5 @@
 import { Component, computed } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { FormArray, ReactiveFormsModule } from '@angular/forms';
 import { THREAT_CATEGORIES } from '../indicator-format';
 import { RuleForm, newRule, noDuplicateCategories } from './rules';
@@ -38,13 +39,19 @@ export class Page {
     validators: noDuplicateCategories,
   });
 
-  // TODO 3: summary: a signal of lines like "BLOCK Botnets when score ≥ 90" (use '?' for an empty category)
-  //         that updates as the user edits. Bridge with toSignal(this.rules.valueChanges, { initialValue: ... }).
-  readonly summary = computed(() => [] as string[]);
+  private readonly value = toSignal(this.rules.valueChanges, { initialValue: this.rules.getRawValue() });
+  readonly summary = computed(() => this.value().map(r => `${r.action} ${r.category || '?'} when score ≥ ${r.minScore}`));
 
-  // TODO 4: add() pushes newRule(); remove(i) removes row i; moveUp(i) swaps row i with the one above
-  //         (keep the SAME FormGroup instance, don't copy values; emit ONE valueChanges for the move).
-  add() {}
-  remove(_i: number) {}
-  moveUp(_i: number) {}
+  add() {
+    this.rules.push(newRule());
+  }
+  remove(i: number) {
+    this.rules.removeAt(i);
+  }
+  moveUp(i: number) {
+    if (i <= 0) return;
+    const row = this.rules.at(i);
+    this.rules.removeAt(i, { emitEvent: false });
+    this.rules.insert(i - 1, row);
+  }
 }

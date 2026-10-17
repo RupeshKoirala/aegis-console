@@ -43,11 +43,12 @@ export class Page {
   readonly f = form(this.model, indicatorSchema);
   readonly saved = signal<NewIndicator[]>([]);
 
-  // TODO 4: save() with submit(this.f, async () => { ... }):
-  //   submit() marks every field touched and only runs your action when the form is valid.
-  //   In the action: append the model (value trimmed + lower-cased) to saved, then this.f().reset({ ...EMPTY }).
-  //   Return the promise submit() gives you (the tests await it).
-  save(): Promise<boolean> {
-    return Promise.resolve(false);
+  save() {
+    return submit(this.f, async () => {
+      const v = this.model();
+      this.saved.update(list => [...list, { ...v, value: v.value.trim().toLowerCase() }]);
+      this.f().reset({ ...EMPTY });
+      return undefined;
+    });
   }
 }

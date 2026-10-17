@@ -1,5 +1,6 @@
 import { ListKind } from '../../../shared/domain/models';
-import { schema } from '@angular/forms/signals';
+import { applyWhen, hidden, max, maxLength, min, required, schema, validate } from '@angular/forms/signals';
+import { classify } from '../indicator-format';
 
 export interface NewIndicator {
   listKind: ListKind;
@@ -19,4 +20,16 @@ export const EMPTY: NewIndicator = { listKind: 'BLOCK', value: '', category: '',
  *          Otherwise category and score are HIDDEN (hidden fields don't validate and the UI doesn't render them).
  */
 export const indicatorSchema = schema<NewIndicator>(p => {
+  required(p.value, { message: 'Required' });
+  validate(p.value, ({ value }) =>
+    value() && !classify(value()) ? { kind: 'indicator', message: 'Not an IPv4, CIDR or domain' } : undefined);
+  maxLength(p.description, 200);
+  applyWhen(p, ({ value }) => value().listKind === 'THREAT', t => {
+    required(t.category, { message: 'Pick a category' });
+    required(t.score, { message: 'Score 1–100' });
+    min(t.score, 1);
+    max(t.score, 100);
+  });
+  hidden(p.category, ({ valueOf }) => valueOf(p.listKind) !== 'THREAT');
+  hidden(p.score, ({ valueOf }) => valueOf(p.listKind) !== 'THREAT');
 });

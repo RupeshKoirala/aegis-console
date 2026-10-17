@@ -8,8 +8,7 @@ import { CidrInput } from './cidr-input';
   template: `
     <h1>Block a range <small class="muted">ControlValueAccessor</small></h1>
     <div class="card stack">
-      <!-- TODO 5: bind [formControl]="range" once TODO 1–2 work (before that Angular throws "No value accessor") -->
-      <aegis-cidr-input />
+      <aegis-cidr-input [formControl]="range" />
       <p class="mono" [attr.data-tick]="tick()">value: "{{ range.value }}" · {{ range.status }} · {{ range.touched ? 'touched' : 'untouched' }}</p>
       @if (range.hasError('cidr')) { <p class="error-text">"{{ range.getError('cidr').ip }}" is not an IPv4 address.</p> }
       <label class="row"><input type="checkbox" (change)="toggle()" /> lock (disable the control)</label>

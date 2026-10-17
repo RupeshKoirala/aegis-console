@@ -1,5 +1,8 @@
-import { ResolveFn } from '@angular/router';
-import { of } from 'rxjs';
+import { HttpErrorResponse } from '@angular/common/http';
+import { inject } from '@angular/core';
+import { RedirectCommand, ResolveFn, Router } from '@angular/router';
+import { catchError, map, of, throwError } from 'rxjs';
+import { ListsApi } from './lists-api';
 import { ListView } from '../../../shared/domain/models';
 
 /**
@@ -10,10 +13,14 @@ import { ListView } from '../../../shared/domain/models';
  *  - any other error → rethrow (the navigation fails; a global handler shows it)
  */
 export const listResolver: ResolveFn<ListView> = (route, state) => {
-  return of({ id: 0, name: '?', kind: 'BLOCK', description: null, indicatorCount: 0, createdAt: '' } as ListView);
+  const router = inject(Router);
+  return inject(ListsApi).get(Number(route.paramMap.get('listId'))).pipe(
+    catchError((err: HttpErrorResponse) =>
+      err.status === 404 ? of(new RedirectCommand(router.parseUrl(state.url.replace(/lists\/[^/]+$/, 'not-found')))) : throwError(() => err)),
+  );
 };
 
 /** TODO 2: the tab title, e.g. "Manual blocks · Lists". Use the same ListsApi.get (TODO 3 makes it one request). */
 export const listTitle: ResolveFn<string> = route => {
-  return 'Lists';
+  return inject(ListsApi).get(Number(route.paramMap.get('listId'))).pipe(map(l => `${l.name} · Lists`), catchError(() => of('Lists')));
 };

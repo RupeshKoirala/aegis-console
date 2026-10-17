@@ -12,12 +12,13 @@ export function featureUrl(router: Router, state: RouterStateSnapshot, path: str
 
 /** TODO 2a: signed in → true. Otherwise → the 'login' page with ?returnUrl=<the url they wanted>. */
 export const authGuard: CanActivateFn = (_route, state) => {
-  return true;
+  if (inject(Session).isAuthenticated()) return true;
+  return featureUrl(inject(Router), state, 'login', { returnUrl: state.url });
 };
 
 /** TODO 2b: a factory: allowed → true, otherwise → 'forbidden'. */
 export function requirePermission(p: Permission): CanActivateFn {
   return (_route, state) => {
-    return true;
+    return inject(Permissions).allows(p) || featureUrl(inject(Router), state, 'forbidden');
   };
 }

@@ -14,14 +14,15 @@ export class TenantContext {
   /** Children of the signed-in tenant (empty for normal tenants). Done for you. */
   readonly children = httpResource<TenantView[]>(() => (this.session.isAuthenticated() ? '/api/v1/tenants/children' : undefined), { defaultValue: [] });
 
-  // TODO 1: actingFor: the child tenant we act for (null = our own tenant). It must RESET to null whenever
-  //         session.user changes: sign out, sign in as someone else. (Hint: M10.02.) Replace this placeholder:
-  readonly actingFor = linkedSignal<TenantView | null>(() => null);
+  /** The child tenant we're acting for, or null = our own. RESETS whenever the signed-in user changes. */
+  readonly actingFor = linkedSignal<unknown, TenantView | null>({ source: this.session.user, computation: () => null });
 
   readonly label = computed(() => this.actingFor()?.name ?? this.session.user()?.tenantName ?? '');
 }
 
 /** TODO 2: add X-Tenant-Id: <actingFor id> to /api/ requests (not /api/v1/auth/*) while acting for a child. */
 export const tenantInterceptor: HttpInterceptorFn = (req, next) => {
-  return next(req);
+  const acting = inject(TenantContext).actingFor();
+  if (!acting || !req.url.startsWith('/api/') || req.url.includes('/auth/')) return next(req);
+  return next(req.clone({ setHeaders: { 'X-Tenant-Id': String(acting.id) } }));
 };

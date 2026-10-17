@@ -11,4 +11,6 @@ class LazyHome {}
  */
 export const LAZY_ROUTES: Routes = [
   { path: '', component: LazyHome },
+  { path: 'admin', loadChildren: () => import('./admin/admin.routes'), data: { preload: true } },
+  { path: 'reports', loadComponent: () => import('./reports') },
 ];

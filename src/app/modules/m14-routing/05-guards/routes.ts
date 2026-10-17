@@ -1,5 +1,6 @@
 import { Routes } from '@angular/router';
 import { GComingSoon, GForbidden, GLists, GNewList, GThreatMap, GUsers } from './sections';
+import { featureFlag, requireRole, unsavedChanges } from './guards';
 
 /**
  * TODO 4: protect the routes
@@ -11,9 +12,9 @@ import { GComingSoon, GForbidden, GLists, GNewList, GThreatMap, GUsers } from '.
 export const GUARDED_ROUTES: Routes = [
   { path: '', redirectTo: 'lists', pathMatch: 'full' },
   { path: 'lists', component: GLists },
-  { path: 'lists/new', component: GNewList },
-  { path: 'admin/users', component: GUsers },
-  { path: 'threat-map', component: GThreatMap },
-  { path: 'threat-map/soon', component: GComingSoon },
+  { path: 'lists/new', component: GNewList, canDeactivate: [unsavedChanges] },
+  { path: 'admin/users', component: GUsers, canActivate: [requireRole('ADMIN')] },
+  { path: 'threat-map', component: GThreatMap, canMatch: [featureFlag('threatMap')] },
+  { path: 'threat-map', component: GComingSoon },
   { path: 'forbidden', component: GForbidden },
 ];
