@@ -1,0 +1,27 @@
+<section class="panel" [class.danger]="tone() === 'danger'">
+  <header class="panel-head">
+<!--@@sol-->
+    <ng-content select="[panelTitle]" />
+<!--@@stub-->
+    <!-- TODO 1a: the title slot  →  <ng-content select="[panelTitle]" /> -->
+<!--@@end-->
+    @if (actionNames().length) {
+      <span class="action-count muted">{{ actionNames().length }} actions</span>
+    }
+  </header>
+  <div class="panel-body">
+<!--@@sol-->
+    <ng-content />
+<!--@@stub-->
+    <!-- TODO 1b: the default slot  →  <ng-content /> -->
+<!--@@end-->
+  </div>
+  <footer class="panel-foot">
+<!--@@sol-->
+    <ng-content select="[panelFooter]"><span class="fallback muted">Last updated just now</span></ng-content>
+<!--@@stub-->
+    <!-- TODO 2: the footer slot WITH fallback content shown when the consumer passes no footer:
+         <ng-content select="[panelFooter]"><span class="fallback muted">Last updated just now</span></ng-content> -->
+<!--@@end-->
+  </footer>
+</section>
