@@ -11,8 +11,7 @@ import { INDICATORS } from '../../../shared/domain/sample-data';
       @for (i of indicators; track i.id) {
         <li class="row">
           <span class="mono">{{ i.value }}</span>
-          <!-- TODO 4: <button class="copy" [aegisCopy]="i.value" #c="aegisCopy">{{ c.copied() ? '✓ Copied' : 'Copy' }}</button> -->
-          <button class="copy">Copy</button>
+          <button class="copy" [aegisCopy]="i.value" #c="aegisCopy">{{ c.copied() ? '✓ Copied' : 'Copy' }}</button>
         </li>
       }
     </ul>

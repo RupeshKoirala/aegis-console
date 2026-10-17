@@ -1,21 +1,15 @@
 <h1>Smart table</h1>
 
-<!--
-  TODO 4: declare a row template and pass it to the table:
-    <ng-template #threatRow let-ind let-i="index">
-      <tr class="threat-row">
-        <td class="n muted">{{ i + 1 }}</td>
-        <td class="mono">{{ ind.value }}</td>
-        <td class="sev" [class]="level(ind.score)">{{ level(ind.score) }}</td>
-      </tr>
-    </ng-template>
-    <aegis-smart-table class="t-threats" caption="Top threats" [rows]="threats" [rowTemplate]="threatRow" />
+<ng-template #threatRow let-ind let-i="index">
+  <tr class="threat-row">
+    <td class="n muted">{{ i + 1 }}</td>
+    <td class="mono">{{ ind.value }}</td>
+    <td class="sev" [class]="level(ind.score)">{{ level(ind.score) }}</td>
+  </tr>
+</ng-template>
+<aegis-smart-table class="t-threats" caption="Top threats" [rows]="threats" [rowTemplate]="threatRow" />
 
-  TODO 5: a custom empty state for the alerts table:
-    <ng-template #calm><tr><td class="calm">✅ No open alerts. Enjoy the quiet.</td></tr></ng-template>
-    <aegis-smart-table class="t-alerts" caption="Open alerts" [rows]="noAlerts" [emptyTemplate]="calm" />
--->
-<aegis-smart-table class="t-threats" caption="Top threats" [rows]="threats" />
-<aegis-smart-table class="t-alerts" caption="Open alerts" [rows]="noAlerts" />
+<ng-template #calm><tr><td class="calm">✅ No open alerts. Enjoy the quiet.</td></tr></ng-template>
+<aegis-smart-table class="t-alerts" caption="Open alerts" [rows]="noAlerts" [emptyTemplate]="calm" />
 
 <aegis-smart-table class="t-tenants" caption="Tenants (no template → defaults)" [rows]="tenants" />

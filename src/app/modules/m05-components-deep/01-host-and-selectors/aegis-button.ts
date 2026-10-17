@@ -3,13 +3,13 @@ import { Component, booleanAttribute, input } from '@angular/core';
 export type ButtonVariant = 'primary' | 'danger' | 'ghost';
 
 @Component({
-  // TODO 1: an ATTRIBUTE selector so this component enhances a native button:  'button[aegisBtn]'
-  selector: 'aegis-btn-todo',
-  // TODO 2: host metadata:
-  //   class: 'aegis-btn'                        (static class)
-  //   '[attr.data-variant]': 'variant()'
-  //   '[attr.aria-busy]': 'busy()'
-  //   '(click)': 'guard($event)'
+  selector: 'button[aegisBtn]',
+  host: {
+    class: 'aegis-btn',
+    '[attr.data-variant]': 'variant()',
+    '[attr.aria-busy]': 'busy()',
+    '(click)': 'guard($event)',
+  },
   template: `
     @if (busy()) { <span class="spinner" aria-hidden="true"></span> }
     <ng-content />
@@ -28,7 +28,9 @@ export class AegisButton {
   readonly busy = input(false, { transform: booleanAttribute });
 
   guard(event: Event) {
-    // TODO 3: while busy(), swallow the click so the consumer's (click) handler never runs:
-    //         event.preventDefault() + event.stopImmediatePropagation()
+    if (this.busy()) {
+      event.preventDefault();
+      event.stopImmediatePropagation();
+    }
   }
 }

@@ -14,10 +14,10 @@ export class Page {
   readonly selected = signal<Alert | null>(null);
 
   readonly newestFirst = computed(() =>
-    ALERTS.sort((a, b) => b.at.localeCompare(a.at)),
+    ALERTS.toSorted((a, b) => b.at.localeCompare(a.at)),
   );
 
-  readonly pageCount = computed(() => Math.floor(this.newestFirst().length / this.pageSize));
+  readonly pageCount = computed(() => Math.ceil(this.newestFirst().length / this.pageSize));
   readonly visible = computed(() => this.newestFirst().slice(this.page() * this.pageSize, (this.page() + 1) * this.pageSize));
 
   readonly bySeverity = computed(() => {

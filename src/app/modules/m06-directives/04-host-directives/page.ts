@@ -10,8 +10,7 @@ import { INDICATORS } from '../../../shared/domain/sample-data';
     <p class="muted">Tab to a chip, then press Enter.</p>
     <div class="card">
       @for (i of indicators; track i.id) {
-        <!-- TODO 2: after TODO 1 add  [tip]="i.category + ' · score ' + i.score"  and  (activated)="opened.set(i.value)" -->
-        <aegis-indicator-chip [value]="i.value" />
+        <aegis-indicator-chip [value]="i.value" [tip]="i.category + ' · score ' + i.score" (activated)="opened.set(i.value)" />
       }
     </div>
     <p class="opened">Opened: {{ opened() ?? '—' }}</p>

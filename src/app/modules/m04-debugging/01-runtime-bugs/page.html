@@ -9,7 +9,7 @@
 <div class="split">
   <section class="card">
     <ul class="alerts">
-      @for (a of visible(); track a.severity) {
+      @for (a of visible(); track a.id) {
         <li class="alert" [class.active]="selected()?.id === a.id" (click)="selected.set(a)">
           <span class="sev" [class]="a.severity">{{ a.severity }}</span> {{ a.title }}
         </li>
@@ -23,8 +23,12 @@
   </section>
 
   <aside class="card details">
-    <h3>{{ selected()!.title }}</h3>
-    <p class="muted">{{ selected()!.status }} · {{ selected()!.assignee ?? 'unassigned' }}</p>
+    @if (selected(); as s) {
+      <h3>{{ s.title }}</h3>
+      <p class="muted">{{ s.status }} · {{ s.assignee ?? 'unassigned' }}</p>
+    } @else {
+      <p class="muted">Select an alert</p>
+    }
     <button class="clear" (click)="selected.set(null)">Clear selection</button>
   </aside>
 </div>

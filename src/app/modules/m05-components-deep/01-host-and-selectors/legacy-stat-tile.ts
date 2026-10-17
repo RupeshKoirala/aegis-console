@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, HostBinding, HostListener, Input } from '@angular/core';
 
 /** Gen 1: the same host behaviour with decorators. */
 @Component({
@@ -12,7 +12,13 @@ export class LegacyStatTile {
   @Input() limit = Infinity;
   clicks = 0;
 
-  // TODO 5: the Gen 1 way:
-  //   @HostBinding('class.breach') get breach() { return this.value >= this.limit; }
-  //   @HostListener('click') onClick() { this.clicks++; }
+  @HostBinding('class.breach')
+  get breach(): boolean {
+    return this.value >= this.limit;
+  }
+
+  @HostListener('click')
+  onClick() {
+    this.clicks++;
+  }
 }

@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, EventEmitter, Input, Output } from '@angular/core';
 
 /** Gen 1 two-way binding: @Input() tags + @Output() tagsChange. */
 @Component({
@@ -13,7 +13,9 @@ import { Component, Input } from '@angular/core';
 })
 export class LegacyTagInput {
   @Input() tags: string[] = [];
-  // TODO 5: the Gen 1 two-way pair: add @Output() tagsChange = new EventEmitter<string[]>()
-  //         and in add() EMIT the new array (don't mutate this.tags. The parent owns it!)
-  add(tag: string) {}
+  @Output() tagsChange = new EventEmitter<string[]>();
+
+  add(tag: string) {
+    if (!this.tags.includes(tag)) this.tagsChange.emit([...this.tags, tag]);
+  }
 }

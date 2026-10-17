@@ -4,11 +4,13 @@ import { DecimalPipe } from '@angular/common';
 @Component({
   selector: 'aegis-stat-tile',
   imports: [DecimalPipe],
-  // TODO 4: host metadata:
-  //   role: 'status'
-  //   '[class.breach]': 'breached()'       '[class.expanded]': 'expanded()'
-  //   '[attr.aria-label]': 'label() + ": " + value()'
-  //   '(click)': 'expanded.set(!expanded())'
+  host: {
+    role: 'status',
+    '[class.breach]': 'breached()',
+    '[class.expanded]': 'expanded()',
+    '[attr.aria-label]': 'label() + ": " + value()',
+    '(click)': 'expanded.set(!expanded())',
+  },
   template: `
     <p class="label">{{ label() }}</p>
     <p class="value">{{ value() | number }}</p>

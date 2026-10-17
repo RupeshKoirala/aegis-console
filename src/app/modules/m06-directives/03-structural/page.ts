@@ -1,11 +1,12 @@
 import { Component, inject } from '@angular/core';
 import { CurrentUser } from './current-user';
+import { HasRole } from './has-role.directive';
 import { LISTS } from '../../../shared/domain/sample-data';
 import { Role } from '../../../shared/domain/models';
 
 @Component({
   selector: 'app-m06-03',
-  imports: [], // TODO 6a: HasRole
+  imports: [HasRole],
   template: `
     <h1>Lists <small class="muted">as {{ user.role() }}</small></h1>
     <div class="row roles">
@@ -18,9 +19,8 @@ import { Role } from '../../../shared/domain/models';
         <tr class="list-row">
           <td>{{ l.name }}</td>
           <td class="actions">
-            <!-- TODO 6b:
-              <span class="edit" *aegisHasRole="['ADMIN', 'ANALYST']; let role">✏️ edit as {{ role }}</span>
-              <button class="delete danger" *aegisHasRole="'ADMIN'; else readOnly">Delete</button> -->
+            <span class="edit" *aegisHasRole="['ADMIN', 'ANALYST']; let role">✏️ edit as {{ role }}</span>
+            <button class="delete danger" *aegisHasRole="'ADMIN'; else readOnly">Delete</button>
           </td>
         </tr>
       }

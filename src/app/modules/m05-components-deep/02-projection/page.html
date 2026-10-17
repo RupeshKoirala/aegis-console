@@ -18,9 +18,7 @@
   <aegis-panel class="p-incident" tone="danger">
     <h3 panelTitle>Active incident</h3>
     <p class="body-text">Botnet traffic from 203.0.113.66</p>
-    <!-- TODO 5: project this link into the FOOTER slot without adding a wrapper element:
-         <ng-container ngProjectAs="[panelFooter]"><a href="#" class="report-link">Open report</a></ng-container> -->
-    <a href="#" class="report-link">Open report</a>
+    <ng-container ngProjectAs="[panelFooter]"><a href="#" class="report-link">Open report</a></ng-container>
   </aegis-panel>
 
   <aegis-legacy-panel>
