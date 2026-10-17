@@ -1,0 +1,30 @@
+<h1>Alert summary</h1>
+
+<div class="row counts">
+  @for (c of bySeverity(); track c[0]) {
+    <span class="count sev" [class]="c[0]">{{ c[0] }}: {{ c[1] }}</span>
+  }
+</div>
+
+<div class="split">
+  <section class="card">
+    <ul class="alerts">
+      @for (a of visible(); track a.severity) {
+        <li class="alert" [class.active]="selected()?.id === a.id" (click)="selected.set(a)">
+          <span class="sev" [class]="a.severity">{{ a.severity }}</span> {{ a.title }}
+        </li>
+      }
+    </ul>
+    <div class="row pager">
+      <button class="prev" [disabled]="page() === 0" (click)="prev()">‹</button>
+      <span class="pos">Page {{ page() + 1 }} of {{ pageCount() }}</span>
+      <button class="next" [disabled]="page() >= pageCount() - 1" (click)="next()">›</button>
+    </div>
+  </section>
+
+  <aside class="card details">
+    <h3>{{ selected()!.title }}</h3>
+    <p class="muted">{{ selected()!.status }} · {{ selected()!.assignee ?? 'unassigned' }}</p>
+    <button class="clear" (click)="selected.set(null)">Clear selection</button>
+  </aside>
+</div>

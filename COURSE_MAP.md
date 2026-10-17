@@ -26,12 +26,30 @@ Tick the boxes as you go. 📖 = read in Study Hub first.
 - [ ] 01 Planner, the v22 way
 - [ ] 02 Planner, the Gen 1 way
 
+## M04 · Debugging
+📖 foundations/l18 · toolkit/l4 · angular-manual/m17
+- [ ] 01 Hunt the runtime bugs
+- [ ] 02 Debug the verdict engine
+
+## M05 · Components deep dive
+📖 angular-manual/m3 · m9 · m10 · angular/l13
+- [ ] 01 Host elements & attribute selectors
+- [ ] 02 Content projection & content queries
+- [ ] 03 View encapsulation
+- [ ] 04 Lifecycle, DestroyRef, afterNextRender
+- [ ] 05 ng-template & ngTemplateOutlet
+- [ ] 06 View queries & custom two-way binding
+
+## M06 · Directives
+📖 angular-manual/m10 · m5
+- [ ] 01 Attribute directive + Renderer2
+- [ ] 02 exportAs: template-visible state
+- [ ] 03 Structural directive *aegisHasRole
+- [ ] 04 hostDirectives composition
+
 ## Coming next
 | Module | Topic | Aegis feature |
 |---|---|---|
-| M04 | Debugging & Angular DevTools | fix a seeded buggy alerts page |
-| M05 | Components deep dive: projection, host, encapsulation, lifecycle, queries, ng-template | dashboard widget kit |
-| M06 | Directives: attribute, structural, hostDirectives | `*hasRole`, copy-IOC |
 | M07 | Pipes: full catalog, custom, pure/impure | defang, CIDR, relative time |
 | M08 | Dependency injection in depth | tenant context, feature flags |
 | M09 | Change detection, OnPush, zoneless | live event ticker |

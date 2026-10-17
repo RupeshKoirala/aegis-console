@@ -1,0 +1,30 @@
+<h1>Widget kit: panels</h1>
+<div class="panels">
+  <aegis-panel class="p-blocked">
+    <h3 panelTitle>Blocked connections</h3>
+    <p class="body-text">1,284 in the last 24 h</p>
+    <div panelFooter>
+      <button panelAction="refresh">Refresh</button>
+      <span><button panelAction="export">Export CSV</button></span>
+    </div>
+  </aegis-panel>
+
+  <aegis-panel class="p-feeds">
+    <h3 panelTitle>Feeds</h3>
+    <p class="body-text">3 feeds healthy</p>
+    <!-- no footer → the fallback text appears -->
+  </aegis-panel>
+
+  <aegis-panel class="p-incident" tone="danger">
+    <h3 panelTitle>Active incident</h3>
+    <p class="body-text">Botnet traffic from 203.0.113.66</p>
+    <!-- TODO 5: project this link into the FOOTER slot without adding a wrapper element:
+         <ng-container ngProjectAs="[panelFooter]"><a href="#" class="report-link">Open report</a></ng-container> -->
+    <a href="#" class="report-link">Open report</a>
+  </aegis-panel>
+
+  <aegis-legacy-panel>
+    <button panelAction="ack">Acknowledge</button>
+    <button panelAction="assign">Assign</button>
+  </aegis-legacy-panel>
+</div>
