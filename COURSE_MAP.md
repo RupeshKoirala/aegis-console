@@ -90,6 +90,7 @@ Tick the boxes as you go. 📖 = read in Study Hub first.
 - [ ] 04 Interceptors
 - [ ] 05 HttpContext, retry & cache
 - [ ] 06 Testing HTTP code
+- [ ] 07 Trace the onion (see the interceptor order with timestamps)
 
 ## M13 · Forms (3 generations)
 📖 angular-manual/m15 · angular/l17 · cyber/l5
