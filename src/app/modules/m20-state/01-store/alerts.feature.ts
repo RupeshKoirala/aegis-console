@@ -32,10 +32,20 @@ export const alertsFeature = createFeature({
   name: 'alerts',
   reducer: createReducer(
     initialState,
-    on(AlertsPageActions.opened, (s): AlertsState => s),
+    on(AlertsPageActions.opened, (s): AlertsState => ({ ...s, loading: true, error: null })),
+    on(AlertsApiActions.loadSucceeded, (s, { alerts }): AlertsState => ({ ...s, alerts, loading: false })),
+    on(AlertsApiActions.loadFailed, (s, { error }): AlertsState => ({ ...s, error, loading: false })),
+    on(AlertsPageActions.filterChanged, (s, { filter }): AlertsState => ({ ...s, filter })),
+    on(AlertsPageActions.triageClicked, (s, { id, status }): AlertsState => ({ ...s, alerts: setStatus(s.alerts, id, status), error: null })),
+    on(AlertsApiActions.triageSucceeded, (s, { alert }): AlertsState => ({ ...s, alerts: s.alerts.map(a => (a.id === alert.id ? alert : a)) })),
+    on(AlertsApiActions.triageFailed, (s, { id, previous, error }): AlertsState => ({ ...s, alerts: setStatus(s.alerts, id, previous), error })),
   ),
   extraSelectors: ({ selectAlerts, selectFilter }) => ({
-    selectVisible: createSelector(selectAlerts, selectFilter, (_alerts, _filter) => [] as Alert[]),
-    selectCounts: createSelector(selectAlerts, _alerts => ({ NEW: 0, TRIAGED: 0, RESOLVED: 0 })),
+    selectVisible: createSelector(selectAlerts, selectFilter, (alerts, filter) => (filter === 'ALL' ? alerts : alerts.filter(a => a.status === filter))),
+    selectCounts: createSelector(selectAlerts, alerts => ({
+      NEW: alerts.filter(a => a.status === 'NEW').length,
+      TRIAGED: alerts.filter(a => a.status === 'TRIAGED').length,
+      RESOLVED: alerts.filter(a => a.status === 'RESOLVED').length,
+    })),
   }),
 });

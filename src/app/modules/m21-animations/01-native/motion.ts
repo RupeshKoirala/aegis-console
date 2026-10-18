@@ -13,5 +13,11 @@ export function prefersReducedMotion(): boolean {
  *                  { duration: 200, easing: 'ease-in' }).finished.then(() => event.animationComplete())
  */
 export function slideOut(event: AnimationCallbackEvent): void {
-  event.animationComplete();
+  if (prefersReducedMotion()) {
+    event.animationComplete();
+    return;
+  }
+  event.target
+    .animate([{ opacity: 1, transform: 'none' }, { opacity: 0, transform: 'translateX(40px)' }], { duration: 200, easing: 'ease-in' })
+    .finished.then(() => event.animationComplete());
 }

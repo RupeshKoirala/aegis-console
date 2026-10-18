@@ -20,6 +20,9 @@ export interface ResolvedWidget {
  *   'blocks-chart' → ./widgets/blocks-chart-widget
  */
 export const WIDGETS: Record<string, () => Promise<Type<unknown>>> = {
+  stat: () => import('./widgets/stat-widget').then(m => m.default),
+  'top-iocs': () => import('./widgets/top-iocs-widget').then(m => m.default),
+  'blocks-chart': () => import('./widgets/blocks-chart-widget').then(m => m.default),
 };
 
 /**
@@ -27,5 +30,10 @@ export const WIDGETS: Record<string, () => Promise<Type<unknown>>> = {
  * Unknown types → { component: UnknownWidget, inputs: { type } } (never crash the whole dashboard on a bad entry).
  */
 export async function resolveLayout(layout: WidgetConfig[]): Promise<ResolvedWidget[]> {
-  return layout.map(w => ({ component: UnknownWidget, inputs: { type: w.type } }));
+  return Promise.all(
+    layout.map(async w => {
+      const load = WIDGETS[w.type];
+      return load ? { component: await load(), inputs: w.inputs ?? {} } : { component: UnknownWidget, inputs: { type: w.type } };
+    }),
+  );
 }

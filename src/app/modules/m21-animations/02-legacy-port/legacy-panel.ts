@@ -12,7 +12,7 @@ import { animate, state, style, transition, trigger } from '@angular/animations'
       state('collapsed', style({ height: '0px', opacity: 0, overflow: 'hidden' })),
       state('expanded', style({ height: '*', opacity: 1 })),
       transition('collapsed => expanded', animate('200ms ease-out')),
-      // TODO 1: closing has no animation yet. Add the reverse transition: 'expanded => collapsed', 150ms ease-in
+      transition('expanded => collapsed', animate('150ms ease-in')),
     ]),
   ],
   template: `

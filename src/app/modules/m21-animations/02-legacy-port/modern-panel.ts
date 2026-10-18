@@ -13,10 +13,14 @@ import { Component, input, signal } from '@angular/core';
 @Component({
   selector: 'aegis-modern-panel',
   template: `
-    <button class="header" (click)="open.set(!open())">{{ title() }}</button>
-    @if (open()) { <div class="body"><ng-content /></div> }
+    <button class="header" (click)="open.set(!open())" [attr.aria-expanded]="open()">{{ title() }} {{ open() ? '▾' : '▸' }}</button>
+    <div class="body" [class.open]="open()"><div class="inner"><ng-content /></div></div>
   `,
   styles: `
+    .body { display: grid; grid-template-rows: 0fr; opacity: 0; transition: grid-template-rows 200ms ease-out, opacity 200ms; }
+    .body.open { grid-template-rows: 1fr; opacity: 1; }
+    .body > .inner { overflow: hidden; }
+    @media (prefers-reduced-motion: reduce) { .body { transition: none; } }
   `,
 })
 export class ModernPanel {

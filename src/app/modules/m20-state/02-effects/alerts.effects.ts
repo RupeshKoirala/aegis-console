@@ -1,8 +1,7 @@
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { inject } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
-import { EMPTY, Observable } from 'rxjs';
-import { Action } from '@ngrx/store';
+import { catchError, map, mergeMap, of, switchMap } from 'rxjs';
 import { Alert } from '../../../shared/domain/models';
 import { AlertsApiActions, AlertsPageActions } from '../01-store/alerts.actions';
 
@@ -16,7 +15,15 @@ const message = (e: HttpErrorResponse) => e.error?.detail ?? e.message;
  */
 export const loadAlerts = createEffect(
   (actions$ = inject(Actions), http = inject(HttpClient)) =>
-    EMPTY as Observable<Action>,
+    actions$.pipe(
+      ofType(AlertsPageActions.opened),
+      switchMap(() =>
+        http.get<Alert[]>('/api/v1/alerts').pipe(
+          map(alerts => AlertsApiActions.loadSucceeded({ alerts })),
+          catchError((e: HttpErrorResponse) => of(AlertsApiActions.loadFailed({ error: message(e) }))),
+        ),
+      ),
+    ),
   { functional: true },
 );
 
@@ -27,7 +34,15 @@ export const loadAlerts = createEffect(
  */
 export const triageAlert = createEffect(
   (actions$ = inject(Actions), http = inject(HttpClient)) =>
-    EMPTY as Observable<Action>,
+    actions$.pipe(
+      ofType(AlertsPageActions.triageClicked),
+      mergeMap(({ id, status, previous }) =>
+        http.patch<Alert>(`/api/v1/alerts/${id}`, { status }).pipe(
+          map(alert => AlertsApiActions.triageSucceeded({ alert })),
+          catchError((e: HttpErrorResponse) => of(AlertsApiActions.triageFailed({ id, previous, error: message(e) }))),
+        ),
+      ),
+    ),
   { functional: true },
 );
 

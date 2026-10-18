@@ -1,4 +1,7 @@
 import { formatDate, formatNumber, registerLocaleData } from '@angular/common';
+import localeFr from '@angular/common/locales/fr';
+import localeDe from '@angular/common/locales/de';
+import localeNe from '@angular/common/locales/ne';
 
 export const LOCALES = ['en-US', 'fr', 'de', 'ne'] as const;
 export type AppLocale = (typeof LOCALES)[number];
@@ -8,11 +11,14 @@ export type AppLocale = (typeof LOCALES)[number];
  * Register the others once: registerLocaleData(localeFr) etc. (import from '@angular/common/locales/fr', '/de', '/ne').
  */
 export function registerAegisLocales(): void {
+  registerLocaleData(localeFr);
+  registerLocaleData(localeDe);
+  registerLocaleData(localeNe);
 }
 
 /** TODO 2: a count with grouping for the locale: 12345 → "12,345" (en-US), "12 345" (fr), "12.345" (de). formatNumber(n, locale, '1.0-0'). */
 export function formatCount(n: number, locale: AppLocale): string {
-  return String(n);
+  return formatNumber(n, locale, '1.0-0');
 }
 
 /**
@@ -21,7 +27,8 @@ export function formatCount(n: number, locale: AppLocale): string {
  *   Return it followed by " (UTC+05:45)" so the zone is never ambiguous in an incident report.
  */
 export function formatInZone(iso: string, locale: AppLocale, offset: string): string {
-  return iso;
+  const label = `UTC${offset.slice(0, 3)}:${offset.slice(3)}`;
+  return `${formatDate(iso, 'yyyy-MM-dd HH:mm', locale, offset)} (${label})`;
 }
 
 /**
@@ -29,7 +36,13 @@ export function formatInZone(iso: string, locale: AppLocale, offset: string): st
  * picking the largest unit that fits: < 60 s → seconds, < 60 min → minutes, < 24 h → hours, else days (negative = past).
  */
 export function relativeTime(iso: string, now: Date, locale: AppLocale): string {
-  return `${iso} ${now.toISOString()} ${locale}`;
+  const seconds = Math.round((new Date(iso).getTime() - now.getTime()) / 1000);
+  const rtf = new Intl.RelativeTimeFormat(locale, { numeric: 'auto' });
+  const abs = Math.abs(seconds);
+  if (abs < 60) return rtf.format(seconds, 'second');
+  if (abs < 3600) return rtf.format(Math.round(seconds / 60), 'minute');
+  if (abs < 86400) return rtf.format(Math.round(seconds / 3600), 'hour');
+  return rtf.format(Math.round(seconds / 86400), 'day');
 }
 
 /**
@@ -37,5 +50,6 @@ export function relativeTime(iso: string, now: Date, locale: AppLocale): string 
  * case ignored, and numbers compared as numbers ("feed 2" before "feed 10"). new Intl.Collator(locale, { numeric: true, sensitivity: 'base' }).compare
  */
 export function sortNames(names: string[], locale: AppLocale): string[] {
-  return [...names].sort();
+  const collator = new Intl.Collator(locale, { numeric: true, sensitivity: 'base' });
+  return [...names].sort(collator.compare);
 }

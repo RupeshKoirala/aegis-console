@@ -1,4 +1,6 @@
 import { Injector } from '@angular/core';
+import { createCustomElement } from '@angular/elements';
+import { VerdictBadge } from './verdict-badge';
 
 export const TAG = 'aegis-verdict';
 
@@ -10,5 +12,7 @@ export const TAG = 'aegis-verdict';
  * Return true if this call defined it, false if it already existed.
  */
 export function defineVerdictElement(injector: Injector): boolean {
-  return false;
+  if (customElements.get(TAG)) return false;
+  customElements.define(TAG, createCustomElement(VerdictBadge, { injector }));
+  return true;
 }

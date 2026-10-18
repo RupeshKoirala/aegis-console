@@ -26,7 +26,7 @@ export const MANAGER_LAYOUT: WidgetConfig[] = [
     @if (widgets.isLoading()) { <p class="muted">Loading widgets…</p> }
     <div class="grid dash">
       @for (w of widgets.value(); track $index) {
-        <!-- TODO 3: render each resolved widget: <ng-container *ngComponentOutlet="w.component; inputs: w.inputs" /> -->
+        <ng-container *ngComponentOutlet="w.component; inputs: w.inputs" />
       }
     </div>
   `,

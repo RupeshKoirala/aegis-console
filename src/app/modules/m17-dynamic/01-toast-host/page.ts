@@ -1,4 +1,5 @@
 import { Component, ComponentRef, DestroyRef, ViewContainerRef, WritableSignal, inject, signal, viewChild } from '@angular/core';
+import { inputBinding, outputBinding } from '@angular/core';
 import { Severity } from '../../../shared/domain/models';
 import { AlertToast } from './alert-toast';
 
@@ -35,26 +36,40 @@ export class Page {
     inject(DestroyRef).onDestroy(() => this.timers.forEach(t => clearTimeout(t)));
   }
 
-  /**
-   * TODO 1: create an AlertToast in the slot:
-   *   const ref = this.slot().createComponent(AlertToast, { bindings: [
-   *     inputBinding('severity', sev), inputBinding('message', () => message),     // sev = signal(severity)
-   *     outputBinding('dismiss', () => this.close(ref)),
-   *   ]});
-   * Keep at most MAX_TOASTS: close the OLDEST first. Auto-close after AUTO_DISMISS_MS (setTimeout, kept in this.timers; clear it on close).
-   * Track refs in this.refs, keep each toast's `sev` signal in this.severities, keep count() in sync, return the ref.
-   */
-  show(_severity: Severity, _message: string): ComponentRef<AlertToast> {
-    return undefined as unknown as ComponentRef<AlertToast>;
+  show(severity: Severity, message: string): ComponentRef<AlertToast> {
+    if (this.refs.length >= MAX_TOASTS) this.close(this.refs[0]);
+    const sev = signal(severity);
+    const ref: ComponentRef<AlertToast> = this.slot().createComponent(AlertToast, {
+      bindings: [
+        inputBinding('severity', sev),
+        inputBinding('message', () => message),
+        outputBinding('dismiss', () => this.close(ref)),
+      ],
+    });
+    this.severities.set(ref, sev);
+    this.timers.set(ref, setTimeout(() => this.close(ref), AUTO_DISMISS_MS));
+    this.refs.push(ref);
+    this.count.set(this.refs.length);
+    return ref;
   }
 
-  /**
-   * TODO 2: change an input of an ALREADY CREATED toast: set the newest toast's severity signal to 'CRITICAL'.
-   * (Because the input is bound to a signal, the toast updates itself. ref.setInput() is the Gen 2 way, for
-   *  inputs you did NOT bind with `bindings`.)
-   */
-  escalateNewest() {}
+  escalateNewest() {
+    const newest = this.refs.at(-1);
+    if (newest) this.severities.get(newest)?.set('CRITICAL');
+  }
 
-  /** TODO 3: close(ref): remove from refs/timers/severities, clear its timer, ref.destroy() (removes it from the DOM), update count. clear() closes all. */
-  clear() {}
+  clear() {
+    [...this.refs].forEach(r => this.close(r));
+  }
+
+  private close(ref: ComponentRef<AlertToast>) {
+    const i = this.refs.indexOf(ref);
+    if (i < 0) return;
+    clearTimeout(this.timers.get(ref));
+    this.timers.delete(ref);
+    this.severities.delete(ref);
+    this.refs.splice(i, 1);
+    ref.destroy();
+    this.count.set(this.refs.length);
+  }
 }
