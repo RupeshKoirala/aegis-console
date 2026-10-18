@@ -1,5 +1,6 @@
 import { HttpErrorResponse, HttpEventType, HttpInterceptorFn } from '@angular/common/http';
 import { inject } from '@angular/core';
+import { catchError, finalize, tap, throwError } from 'rxjs';
 import { TraceLog } from './trace-log';
 
 /** The token the fake API accepts as admin@acme.test (the training shortcut from M12). */
@@ -14,7 +15,9 @@ export const TRACE_TOKEN = 'dev:admin@acme.test';
  *   way back: finalize(() => log 'loading:finalize')   (runs after success, error AND cancel)
  */
 export const traceLoading: HttpInterceptorFn = (req, next) => {
-  return next(req);
+  const log = inject(TraceLog);
+  log.add('loading:out');
+  return next(req).pipe(finalize(() => log.add('loading:finalize')));
 };
 
 /**
@@ -25,7 +28,16 @@ export const traceLoading: HttpInterceptorFn = (req, next) => {
  *   (Interceptors see EVENTS, not just the body: first a "Sent" event, later the Response.)
  */
 export const traceAuth: HttpInterceptorFn = (req, next) => {
-  return next(req);
+  const log = inject(TraceLog);
+  log.add('auth:out');
+  return next(req.clone({ setHeaders: { Authorization: `Bearer ${TRACE_TOKEN}` } })).pipe(
+    tap({
+      next: e => {
+        if (e.type === HttpEventType.Response) log.add('auth:back');
+      },
+      error: () => log.add('auth:back-error'),
+    }),
+  );
 };
 
 /**
@@ -34,8 +46,15 @@ export const traceAuth: HttpInterceptorFn = (req, next) => {
  *   way back: catchError(err => { log `unauth:caught ${err.status}`; RETHROW: return throwError(() => err) })
  */
 export const traceUnauthorized: HttpInterceptorFn = (req, next) => {
-  return next(req);
+  const log = inject(TraceLog);
+  log.add('unauth:out');
+  return next(req).pipe(
+    catchError((err: HttpErrorResponse) => {
+      log.add(`unauth:caught ${err.status}`);
+      return throwError(() => err);
+    }),
+  );
 };
 
 /** TODO 4: the order of the onion, outermost first: loading, auth, unauthorized. */
-export const TRACE_CHAIN: HttpInterceptorFn[] = [];
+export const TRACE_CHAIN: HttpInterceptorFn[] = [traceLoading, traceAuth, traceUnauthorized];
