@@ -12,6 +12,7 @@ From here on the console talks to the **fake API** (`npm start` runs it). Its co
 | 04 | Interceptors | functional interceptors (correlation id, tenant header, session expiry), a Gen 1 class interceptor, ordering |
 | 05 | HttpContext, retry & cache | per-request options, retrying only safe requests, a TTL cache |
 | 06 | Testing HTTP code | `HttpTestingController`: you write the tests this time |
+| 07 | Trace the onion | log every interceptor step with timestamps and see the out/back order, plus an interactive explainer |
 
 ### Generations
 - **Gen 1:** `HttpClientModule`, class interceptors via `HTTP_INTERCEPTORS`, `subscribe()` everywhere, `| async`.

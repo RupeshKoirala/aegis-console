@@ -3,6 +3,7 @@ import { provideHttpClient, withInterceptors, withInterceptorsFromDi, HTTP_INTER
 import { trainingAuthInterceptor } from '../../core/training-auth.interceptor';
 import { correlationIdInterceptor, tenantInterceptor, sessionInterceptor, TimingInterceptor } from './04-interceptors/interceptors';
 import { cachingInterceptor, retryInterceptor } from './05-context-retry-cache/interceptors';
+import { TRACE_CHAIN } from './07-trace/trace.interceptors';
 
 export const M12: CourseModule = {
   id: 'm12',
@@ -24,5 +25,9 @@ export const M12: CourseModule = {
       providers: [provideHttpClient(withInterceptors([cachingInterceptor, retryInterceptor, trainingAuthInterceptor]))],
     },
     { id: '06', title: 'Testing HTTP code', load: () => import('./06-testing-http/page').then(m => m.Page) },
+    {
+      id: '07', title: 'Trace the onion', load: () => import('./07-trace/page').then(m => m.Page),
+      providers: [provideHttpClient(withInterceptors(TRACE_CHAIN))],
+    },
   ],
 };
