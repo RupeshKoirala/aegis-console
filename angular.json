@@ -26,6 +26,9 @@
             ],
             "styles": [
               "src/styles.css"
+            ],
+            "polyfills": [
+              "@angular/localize/init"
             ]
           },
           "configurations": {
@@ -69,6 +72,12 @@
         },
         "test": {
           "builder": "@angular/build:unit-test"
+        },
+        "extract-i18n": {
+          "builder": "@angular/build:extract-i18n",
+          "options": {
+            "buildTarget": "aegis-console:build"
+          }
         }
       }
     }

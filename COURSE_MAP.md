@@ -115,15 +115,39 @@ Tick the boxes as you go. 📖 = read in Study Hub first.
 - [ ] 03 Guards & permissions
 - [ ] 04 MSP tenant switch & idle timeout
 
+## M16 · Lazy loading & @defer
+📖 angular-manual/m5 · angular-manual/m16 · foundations/l17
+- [ ] 01 @defer triggers
+- [ ] 02 @defer when, in lists, on timer
+
+## M17 · Dynamic components
+📖 angular-manual/m3 · angular-manual/m9
+- [ ] 01 Toast host: createComponent
+- [ ] 02 Configurable dashboard
+
+## M18 · i18n
+📖 angular-manual/m10 · angular-manual/m4
+- [ ] 01 Messages, ICU & $localize
+- [ ] 02 Locale formatting & time zones
+
+## M19 · Angular Elements
+📖 angular-manual/m3 · foundations/l20
+- [ ] 01 Embeddable verdict badge
+
+## M20 · State: NgRx & SignalStore
+📖 angular-manual/m12 · foundations/l20 · foundations/l12
+- [ ] 01 Store: actions, reducer, selectors
+- [ ] 02 Effects & optimistic triage
+- [ ] 03 SignalStore
+
+## M21 · Animations
+📖 angular-manual/m3 · foundations/l17
+- [ ] 01 Native animate.enter / animate.leave
+- [ ] 02 Port a legacy animation
+
 ## Coming next
 | Module | Topic | Aegis feature |
 |---|---|---|
-| M16 | Lazy loading & @defer | charts, threat map |
-| M17 | Dynamic components | widget registry |
-| M18 | i18n | localized console |
-| M19 | Angular Elements | embeddable verdict widget |
-| M20 | NgRx & SignalStore | alert triage |
-| M21 | Animations | alert toasts |
 | M22 | Testing: harnesses, Playwright | test the console |
 | M23 | SSR, SSG, hydration, deploy | public threat reports |
 | M24 | PWA / service worker | on-call view |
