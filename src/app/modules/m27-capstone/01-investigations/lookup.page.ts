@@ -35,11 +35,10 @@ export class LookupPage {
   readonly draft = linkedSignal(() => this.q());
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
-  // TODO R4: valid: q() classifies as 'IP' or 'DOMAIN' (classify from M13). A CIDR can't get a verdict.
-  //          verdict: httpResource<VerdictView> of GET /api/v1/verdict?q=<trimmed q> ONLY when valid (undefined otherwise: no request)
-  //          submit(): put the trimmed draft in the URL (?q=…, relative to this route). Empty → remove the param.
-  readonly valid = computed(() => !!classify(this.q()));
-  readonly verdict = httpResource<VerdictView>(() => undefined);
+  readonly valid = computed(() => ['IP', 'DOMAIN'].includes(classify(this.q()) ?? ''));
+  readonly verdict = httpResource<VerdictView>(() => (this.valid() ? { url: '/api/v1/verdict', params: { q: this.q().trim() } } : undefined));
+
   submit() {
+    this.router.navigate([], { relativeTo: this.route, queryParams: { q: this.draft().trim() || null } });
   }
 }

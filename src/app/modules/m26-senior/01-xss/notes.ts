@@ -6,7 +6,7 @@
 
 /** TODO 1: escape the five HTML-special characters: & < > " '  →  &amp; &lt; &gt; &quot; &#39;   (& FIRST!) */
 export function escapeHtml(text: string): string {
-  return text;
+  return text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
 }
 
 /**
@@ -14,7 +14,12 @@ export function escapeHtml(text: string): string {
  * → null. Parse with new URL(url) (it throws on garbage → null) and check .protocol.
  */
 export function safeUrl(url: string): string | null {
-  return url;
+  try {
+    const u = new URL(url.trim());
+    return ['http:', 'https:', 'mailto:'].includes(u.protocol) ? u.href : null;
+  } catch {
+    return null;
+  }
 }
 
 /**
@@ -25,5 +30,11 @@ export function safeUrl(url: string): string | null {
  * (After escaping, the url inside (…) may contain &amp; for &: unescape &amp; back to & before safeUrl.)
  */
 export function renderNote(markdown: string): string {
-  return markdown.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+  return escapeHtml(markdown)
+    .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+    .replace(/`(.+?)`/g, '<code>$1</code>')
+    .replace(/\[([^\]]+)\]\(([^)\s]+)\)/g, (_m, text: string, url: string) => {
+      const safe = safeUrl(url.replace(/&amp;/g, '&'));
+      return safe ? `<a href="${escapeHtml(safe)}" rel="noopener noreferrer" target="_blank">${text}</a>` : text;
+    });
 }

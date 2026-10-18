@@ -25,6 +25,12 @@ export interface NgswConfig {
  */
 export const NGSW_CONFIG: NgswConfig = {
   index: '/index.html',
-  assetGroups: [],
-  dataGroups: [],
+  assetGroups: [
+    { name: 'app', installMode: 'prefetch', resources: { files: ['/favicon.ico', '/index.csr.html', '/index.html', '/manifest.webmanifest', '/*.css', '/*.js'] } },
+    { name: 'assets', installMode: 'lazy', updateMode: 'prefetch', resources: { files: ['/**/*.(svg|png|woff2)'] } },
+  ],
+  dataGroups: [
+    { name: 'verdicts-and-lists', urls: ['/api/v1/lists/**', '/api/v1/verdict'], cacheConfig: { strategy: 'freshness', timeout: '3s', maxAge: '1h', maxSize: 50 } },
+    { name: 'reports', urls: ['/api/v1/reports/**'], cacheConfig: { strategy: 'performance', maxAge: '1d', maxSize: 20 } },
+  ],
 };

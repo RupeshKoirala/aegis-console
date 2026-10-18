@@ -29,10 +29,32 @@ export const ALLOWED: Record<ProjectType, ProjectType[]> = {
  *   ('app' projects may import any domain: they compose features.)
  */
 export function checkBoundaries(projects: Project[], imports: Import[]): Violation[] {
-  return [];
+  const byName = new Map(projects.map(p => [p.name, p]));
+  const out: Violation[] = [];
+  for (const { from, to } of imports) {
+    const a = byName.get(from);
+    const b = byName.get(to);
+    if (!a || !b) out.push({ from, to, rule: 'unknown' });
+    else if (!ALLOWED[a.type].includes(b.type)) out.push({ from, to, rule: 'layer' });
+    else if (a.type !== 'app' && a.domain !== b.domain && b.domain !== 'shared') out.push({ from, to, rule: 'domain' });
+  }
+  return out;
 }
 
 /** TODO 2: true if the import graph has a cycle (a → b → … → a). Depth-first search with a "visiting" set. */
 export function hasCycle(imports: Import[]): boolean {
-  return imports.length < 0;
+  const graph = new Map<string, string[]>();
+  for (const { from, to } of imports) graph.set(from, [...(graph.get(from) ?? []), to]);
+  const done = new Set<string>();
+  const visiting = new Set<string>();
+  const visit = (n: string): boolean => {
+    if (visiting.has(n)) return true;
+    if (done.has(n)) return false;
+    visiting.add(n);
+    const cyclic = (graph.get(n) ?? []).some(visit);
+    visiting.delete(n);
+    done.add(n);
+    return cyclic;
+  };
+  return [...graph.keys()].some(visit);
 }

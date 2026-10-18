@@ -42,7 +42,7 @@ export class IndicatorTable {
 
   readonly view = computed(() => {
     const q = this.query().trim();
-    const rows = this.rows().filter(r => r.value.includes(q));
+    const rows = this.rows().filter(r => r.value.toLowerCase().includes(q.toLowerCase()));
     const { key, dir } = this.sort();
     return [...rows].sort((a, b) => {
       const x = key === 'score' ? (a.score ?? -1) : a.value;

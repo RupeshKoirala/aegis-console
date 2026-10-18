@@ -1,5 +1,6 @@
 import { DestroyRef, Injectable, InjectionToken, inject, signal } from '@angular/core';
 import { SwUpdate, VersionReadyEvent } from '@angular/service-worker';
+import { filter, interval } from 'rxjs';
 
 /** How the page reloads. A token so tests can check it without actually reloading. */
 export const RELOAD = new InjectionToken<() => void>('RELOAD', { factory: () => () => location.reload() });
@@ -20,15 +21,20 @@ export class AppUpdates {
   readonly broken = signal(false);
 
   constructor() {
-    // TODO 1: if the service worker isn't enabled (dev server, old browser), do nothing.
-    // TODO 2: versionUpdates → only 'VERSION_READY' events (filter with a type guard: e is VersionReadyEvent)
-    //         → ready.set({ current: e.currentVersion.hash, latest: e.latestVersion.hash })
-    // TODO 3: unrecoverable → broken.set(true)
-    // TODO 4: every CHECK_EVERY_MS ask the server for a new version: interval(...) → this.sw.checkForUpdate()
-    //         (Unsubscribe everything via inject(DestroyRef).onDestroy.)
+    if (!this.sw.isEnabled) return;
+    const subs = [
+      this.sw.versionUpdates
+        .pipe(filter((e): e is VersionReadyEvent => e.type === 'VERSION_READY'))
+        .subscribe(e => this.ready.set({ current: e.currentVersion.hash, latest: e.latestVersion.hash })),
+      this.sw.unrecoverable.subscribe(() => this.broken.set(true)),
+      interval(CHECK_EVERY_MS).subscribe(() => void this.sw.checkForUpdate()),
+    ];
+    inject(DestroyRef).onDestroy(() => subs.forEach(s => s.unsubscribe()));
   }
 
   /** TODO 5: the analyst clicked "Reload now": activateUpdate() (switch this tab to the new version), THEN reload. */
   async applyUpdate(): Promise<void> {
+    await this.sw.activateUpdate();
+    this.reload();
   }
 }

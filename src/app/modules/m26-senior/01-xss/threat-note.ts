@@ -9,7 +9,9 @@ import { renderNote } from './notes';
 export class ThreatNote {
   readonly markdown = input.required<string>();
   private readonly sanitizer = inject(DomSanitizer);
-  // TODO 4: a previous developer "fixed" Angular stripping their markup with bypassSecurityTrustHtml. That turned off the
-  //         only protection left. Remove the bypass: return renderNote(...) as a plain string, and let [innerHTML] sanitize it.
-  readonly html = computed<string | SafeHtml>(() => this.sanitizer.bypassSecurityTrustHtml(renderNote(this.markdown())));
+  /**
+   * renderNote's output goes through Angular's sanitizer via [innerHTML], a SECOND line of defence.
+   * Never bypassSecurityTrustHtml on anything derived from user input.
+   */
+  readonly html = computed<string | SafeHtml>(() => renderNote(this.markdown()));
 }

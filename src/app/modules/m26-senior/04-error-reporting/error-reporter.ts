@@ -27,7 +27,11 @@ export const CLOCK = new InjectionToken<() => number>('CLOCK', { factory: () => 
  *   access_token=… / refreshToken=… in query strings → the value replaced with [redacted]
  */
 export function scrub(text: string): string {
-  return text;
+  return text
+    .replace(/Bearer\s+[^\s"']+/g, 'Bearer [redacted]')
+    .replace(/\b[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}\b/g, '[jwt]')
+    .replace(/[\w.+-]+@[\w-]+\.[\w.-]+/g, '[email]')
+    .replace(/((?:access_token|refreshToken|refresh_token)=)[^&\s]+/gi, '$1[redacted]');
 }
 
 /**
@@ -44,8 +48,25 @@ export class ErrorReporter implements ErrorHandler {
   private readonly sink = inject(REPORT_SINK);
   private readonly release = inject(RELEASE);
   private readonly clock = inject(CLOCK);
+  private readonly lastSent = new Map<string, number>();
 
   handleError(error: unknown): void {
     console.error(error);
+    const report: ClientErrorReport =
+      error instanceof HttpErrorResponse
+        ? {
+            kind: 'http', status: error.status, message: scrub(`${error.status} ${error.url ?? ''}`.trim()),
+            correlationId: error.headers?.get('X-Correlation-Id') ?? undefined,
+            url: location.pathname, release: this.release, at: new Date(this.clock()).toISOString(),
+          }
+        : {
+            kind: 'runtime', message: scrub(error instanceof Error ? error.message : String(error)),
+            url: location.pathname, release: this.release, at: new Date(this.clock()).toISOString(),
+          };
+    const now = this.clock();
+    const last = this.lastSent.get(report.message);
+    if (last !== undefined && now - last < 60_000) return;
+    this.lastSent.set(report.message, now);
+    this.sink(report);
   }
 }

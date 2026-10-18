@@ -18,10 +18,15 @@ export interface SearchIndex { rows: IndicatorView[]; haystack: string[] }
  * (`${value} ${category}`.toLowerCase()), so each search is a single .includes() per row with no allocations.
  */
 export function buildIndex(rows: IndicatorView[]): SearchIndex {
-  return { rows, haystack: [] };
+  return { rows, haystack: rows.map(r => `${r.value} ${r.category ?? ''}`.toLowerCase()) };
 }
 
 /** TODO 2: rows whose haystack contains the (trimmed, lower-cased) query, AND whose score ≥ minScore. Empty query = all. */
 export function search(index: SearchIndex, query: string, minScore = 0): IndicatorView[] {
-  return index.rows.filter(r => r.value.includes(query) && (r.score ?? 0) >= minScore);
+  const q = query.trim().toLowerCase();
+  const out: IndicatorView[] = [];
+  for (let i = 0; i < index.rows.length; i++) {
+    if ((index.rows[i].score ?? 0) >= minScore && (!q || index.haystack[i].includes(q))) out.push(index.rows[i]);
+  }
+  return out;
 }

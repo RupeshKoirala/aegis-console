@@ -28,15 +28,15 @@ export class ReportHeader {
   private readonly host = inject(ElementRef<HTMLElement>);
   private readonly title = inject(Title);
   private readonly meta = inject(Meta);
+  private readonly isBrowser = isPlatformBrowser(inject(PLATFORM_ID));
 
   constructor() {
-    // TODO 1: this crashes on the server ("localStorage is not defined"). Only read it in the browser:
-    //         isPlatformBrowser(inject(PLATFORM_ID)), as a field.
-    const saved = localStorage.getItem(DENSITY_KEY);
-    if (saved === 'compact' || saved === 'comfortable') this.density.set(saved);
-    // TODO 2: layout measuring only makes sense after rendering IN A BROWSER: move this into afterNextRender(() => …),
-    //         which Angular never runs on the server.
-    this.width.set(Math.round(this.host.nativeElement.getBoundingClientRect().width));
+    // Browser-only APIs: guarded by platform, or deferred to afterNextRender (which never runs on the server).
+    if (this.isBrowser) {
+      const saved = localStorage.getItem(DENSITY_KEY);
+      if (saved === 'compact' || saved === 'comfortable') this.density.set(saved);
+    }
+    afterNextRender(() => this.width.set(Math.round(this.host.nativeElement.getBoundingClientRect().width)));
   }
 
   /**
@@ -45,5 +45,8 @@ export class ReportHeader {
    *   Title and Meta work on the server too (they write into the rendered <head>), with no `document` needed.
    */
   setSeo(): void {
+    this.title.setTitle(`${this.headline()} · Aegis threat report`);
+    this.meta.updateTag({ name: 'description', content: this.summary() });
+    this.meta.updateTag({ property: 'og:title', content: this.headline() });
   }
 }

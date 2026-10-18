@@ -19,9 +19,8 @@ import { AlertOption } from './alert-option';
 
     @if (confirming(); as a) {
       <div class="backdrop">
-        <!-- TODO 4: a real modal dialog: role="dialog" aria-modal="true" aria-labelledby="confirm-title",
-             trap focus inside it (cdkTrapFocus [cdkTrapFocusAutoCapture]="true"), and close on Escape: (keydown.escape)="cancel()" -->
-        <div class="dialog card">
+        <div class="dialog card" role="dialog" aria-modal="true" aria-labelledby="confirm-title" cdkTrapFocus [cdkTrapFocusAutoCapture]="true"
+             (keydown.escape)="cancel()">
           <h3 id="confirm-title">Resolve "{{ a.title }}"?</h3>
           <div class="row"><button class="primary yes" (click)="confirm()">Resolve</button> <button class="no" (click)="cancel()">Cancel</button></div>
         </div>
@@ -45,17 +44,19 @@ export class AlertQueue {
 
   constructor() {
     afterNextRender(() => {
-      // TODO 1: the key manager does ↑/↓/Home/End and tells each option when it's active:
-      //   this.keys = new ActiveDescendantKeyManager(this.options, this.injector).withWrap().withHomeAndEnd();
-      //   (given a SIGNAL of items, the manager needs an injector to watch it)
-      //   on this.keys.change → activeId.set('alert-opt-' + activeItem.alert().id)   (screen readers read the
-      //   aria-activedescendant option while focus stays on the listbox); then setFirstItemActive()
-      this.keys = { onKeydown: () => {}, activeItem: null, setActiveItem: () => {} } as unknown as ActiveDescendantKeyManager<AlertOption>;
+      this.keys = new ActiveDescendantKeyManager(this.options, this.injector).withWrap().withHomeAndEnd();
+      this.keys.change.subscribe(() => this.activeId.set(this.keys.activeItem ? `alert-opt-${this.keys.activeItem.alert().id}` : null));
+      this.keys.setFirstItemActive();
     });
   }
 
   onKeydown(event: KeyboardEvent) {
-    // TODO 2: Enter on the active option → confirming.set(its alert) (preventDefault); any other key → this.keys.onKeydown(event)
+    if (event.key === 'Enter' && this.keys.activeItem) {
+      event.preventDefault();
+      this.confirming.set(this.keys.activeItem.alert());
+      return;
+    }
+    this.keys.onKeydown(event);
   }
 
   pick(index: number) {
@@ -67,8 +68,7 @@ export class AlertQueue {
     const a = this.confirming();
     if (!a) return;
     this.resolve.emit(a);
-    // TODO 3: tell screen-reader users what happened (the change is visual only otherwise):
-    //         this.announcer.announce(`Alert resolved: ${a.title}`, 'polite')
+    this.announcer.announce(`Alert resolved: ${a.title}`, 'polite');
     this.close();
   }
 

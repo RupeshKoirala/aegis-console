@@ -1,4 +1,5 @@
 import { PrerenderFallback, RenderMode, ServerRoute } from '@angular/ssr';
+import { fetchPublishedReports } from './reports';
 
 /**
  * In an SSR app, this file (app.routes.server.ts) tells the server how to render EACH route:
@@ -17,5 +18,17 @@ import { PrerenderFallback, RenderMode, ServerRoute } from '@angular/ssr';
  *   '**'               Client
  */
 export const serverRoutes: ServerRoute[] = [
-  { path: '**', renderMode: RenderMode.Server },
+  { path: '', renderMode: RenderMode.Prerender },
+  { path: 'reports', renderMode: RenderMode.Prerender },
+  {
+    path: 'reports/:slug',
+    renderMode: RenderMode.Prerender,
+    fallback: PrerenderFallback.Server,
+    async getPrerenderParams() {
+      return (await fetchPublishedReports()).map(r => ({ slug: r.slug }));
+    },
+  },
+  { path: 'status', renderMode: RenderMode.Server },
+  { path: 'console/**', renderMode: RenderMode.Client },
+  { path: '**', renderMode: RenderMode.Client },
 ];

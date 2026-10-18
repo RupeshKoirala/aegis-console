@@ -11,7 +11,8 @@ export const CHUNK_RELOAD = new InjectionToken<() => void>('CHUNK_RELOAD', { fac
  *   /Failed to fetch dynamically imported module|Loading chunk [\w-]+ failed|Importing a module script failed/i
  */
 export function isChunkLoadError(error: unknown): boolean {
-  return error === 'TODO';
+  const message = error instanceof Error ? error.message : String(error);
+  return /Failed to fetch dynamically imported module|Loading chunk [\w-]+ failed|Importing a module script failed/i.test(message);
 }
 
 /**
@@ -25,6 +26,14 @@ export function isChunkLoadError(error: unknown): boolean {
 export class ChunkErrorHandler implements ErrorHandler {
   private readonly reload = inject(CHUNK_RELOAD);
   handleError(error: unknown): void {
+    if (isChunkLoadError(error)) {
+      const last = Number(sessionStorage.getItem(RELOAD_GUARD_KEY) ?? 0);
+      if (Date.now() - last > 10_000) {
+        sessionStorage.setItem(RELOAD_GUARD_KEY, String(Date.now()));
+        this.reload();
+        return;
+      }
+    }
     console.error(error);
   }
 }
