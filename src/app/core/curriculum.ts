@@ -18,6 +18,12 @@ import { M12 } from '../modules/m12-http/module';
 import { M13 } from '../modules/m13-forms/module';
 import { M14 } from '../modules/m14-routing/module';
 import { M15 } from '../modules/m15-auth/module';
+import { M16 } from '../modules/m16-defer/module';
+import { M17 } from '../modules/m17-dynamic/module';
+import { M18 } from '../modules/m18-i18n/module';
+import { M19 } from '../modules/m19-elements/module';
+import { M20 } from '../modules/m20-state/module';
+import { M21 } from '../modules/m21-animations/module';
 
 export interface Exercise {
   id: string;
@@ -54,16 +60,16 @@ export const CURRICULUM: CourseModule[] = [
   M13,
   M14,
   M15,
+  M16,
+  M17,
+  M18,
+  M19,
+  M20,
+  M21,
   // @@modules
 ];
 
 export const COMING_SOON: string[] = [
-  'M16 Lazy loading & @defer',
-  'M17 Dynamic components',
-  'M18 i18n',
-  'M19 Angular Elements',
-  'M20 State: NgRx & SignalStore',
-  'M21 Animations',
   'M22 Testing',
   'M23 SSR, SSG & deploy',
   'M24 PWA',

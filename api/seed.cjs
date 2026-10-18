@@ -61,7 +61,7 @@ const indicators = [
 const ENFORCERS = ['edge-fw-01 (Enforce)', 'edge-fw-02 (Enforce)', 'dns-resolver-a (DNS)'];
 const SRC = ['10.1.4.22', '10.1.7.13', '10.2.0.51', '10.1.9.200', '10.3.3.3'];
 const events = Array.from({ length: 60 }, (_, i) => {
-  const hit = indicators[(i * 7) % indicators.length];
+  const hit = indicators[(i * 7 + Math.floor(i / 5)) % indicators.length];
   const allowed = hit.listId === 1;
   return {
     id: i + 1, tenantId: hit.tenantId, at: iso(i * 11 * 60_000),
@@ -74,7 +74,7 @@ const events = Array.from({ length: 60 }, (_, i) => {
 
 const alerts = events.filter(e => e.severity === 'CRITICAL' || e.severity === 'HIGH').map((e, i) => ({
   id: i + 1, tenantId: e.tenantId, eventId: e.id, at: e.at, severity: e.severity,
-  title: `Blocked traffic to ${e.destination}`, status: ['NEW', 'TRIAGED', 'RESOLVED'][i % 3], assignee: null,
+  title: `Blocked traffic to ${e.destination}${indicators.find(x => x.id === e.indicatorId)?.category ? ` (${indicators.find(x => x.id === e.indicatorId).category})` : ''}`, status: ['NEW', 'TRIAGED', 'RESOLVED'][i % 3], assignee: null,
 }));
 
 const audit = [
