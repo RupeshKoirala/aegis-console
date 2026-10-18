@@ -45,3 +45,7 @@ Thumbs.db
 
 # fake API state (rebuilt from api/seed.cjs)
 /api/db.json
+
+# Playwright
+/playwright-report/
+/test-results/

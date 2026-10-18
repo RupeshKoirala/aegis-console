@@ -25,7 +25,7 @@ Stuck for more than 15 minutes? Look at just that exercise's answer: `git diff m
 You'll write **Gen 3 (v22)**. Each exercise also shows, in comments or in a paired exercise, how the same thing looked in **Gen 1 (v2–v15: NgModules, `@Input`, `*ngIf`, constructor injection, zone.js)** and **Gen 2 (v16–v20: standalone opt-in, first signals, `@if`, `input()`)**. That's because the code you'll meet at work is a mix of all three.
 
 ## Modules
-See **[COURSE_MAP.md](COURSE_MAP.md)** for the full map and a progress checklist. New modules arrive with `git pull`.
+All 28 modules (M00–M27) are in. See **[COURSE_MAP.md](COURSE_MAP.md)** for the full map and a progress checklist. M27 is a capstone: a ticket, requirements and an acceptance suite, with no step-by-step TODOs.
 
 ## The fake backend (`api/`)
 - Implements the `/api/v1` contract in `api/openapi.yaml`, the same contract the backend series will later implement in Spring Boot.
@@ -38,6 +38,7 @@ See **[COURSE_MAP.md](COURSE_MAP.md)** for the full map and a progress checklist
 |---|---|
 | `npm start` | app + fake API |
 | `npm run ex -- m01/02` | one exercise's tests (watch) · `m01` = the whole module · add `--once` to run once |
+| `npm run e2e` | Playwright end-to-end tests (M22.03; run `npx playwright install chromium` once) |
 | `npm test` | all tests |
 | `npm run api:reset` | wipe the fake database back to the seed |
 

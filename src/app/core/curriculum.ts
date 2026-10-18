@@ -24,6 +24,12 @@ import { M18 } from '../modules/m18-i18n/module';
 import { M19 } from '../modules/m19-elements/module';
 import { M20 } from '../modules/m20-state/module';
 import { M21 } from '../modules/m21-animations/module';
+import { M22 } from '../modules/m22-testing/module';
+import { M23 } from '../modules/m23-ssr/module';
+import { M24 } from '../modules/m24-pwa/module';
+import { M25 } from '../modules/m25-cli-nx/module';
+import { M26 } from '../modules/m26-senior/module';
+import { M27 } from '../modules/m27-capstone/module';
 
 export interface Exercise {
   id: string;
@@ -66,15 +72,15 @@ export const CURRICULUM: CourseModule[] = [
   M19,
   M20,
   M21,
+  M22,
+  M23,
+  M24,
+  M25,
+  M26,
+  M27,
   // @@modules
 ];
 
 export const COMING_SOON: string[] = [
-  'M22 Testing',
-  'M23 SSR, SSG & deploy',
-  'M24 PWA',
-  'M25 CLI, schematics & Nx',
-  'M26 Senior frontend',
-  'M27 Capstone',
   // @@coming
 ];

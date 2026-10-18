@@ -4,6 +4,7 @@
  *
  *   npm run api            start on http://localhost:3000
  *   npm run api:reset      throw away db.json and start from seed.cjs again
+ *   POST /__reset          the same, while running (used by the e2e tests)
  *
  * Teaching switches (any request):
  *   ?_delay=1500           wait 1.5 s before answering (or env AEGIS_DELAY=ms for every request)
@@ -285,6 +286,16 @@ api.patch('/alerts/:id', requireRole('ADMIN', 'ANALYST'), (req, res) => {
 api.get('/audit', (req, res) => res.json(db.audit.filter(a => a.tenantId === req.tenantId).sort((a, b) => b.at.localeCompare(a.at))));
 api.get('/settings', (_req, res) => res.json(db.settings));
 
+// Test-only: e2e suites reset the data before each test (M22.03). Never ship an endpoint like this.
+app.post('/__reset', (_req, res) => {
+  delete require.cache[require.resolve('./seed.cjs')];
+  const fresh = require('./seed.cjs');
+  for (const k of Object.keys(db)) delete db[k];
+  Object.assign(db, JSON.parse(JSON.stringify(fresh)));
+  refreshTokens.clear();
+  save();
+  res.sendStatus(204);
+});
 app.use('/api/v1', api);
 app.use((req, res) => problem(res, 404, 'Not Found', `No route for ${req.method} ${req.path}`));
 

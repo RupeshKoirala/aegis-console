@@ -145,12 +145,37 @@ Tick the boxes as you go. 📖 = read in Study Hub first.
 - [ ] 01 Native animate.enter / animate.leave
 - [ ] 02 Port a legacy animation
 
-## Coming next
-| Module | Topic | Aegis feature |
-|---|---|---|
-| M22 | Testing: harnesses, Playwright | test the console |
-| M23 | SSR, SSG, hydration, deploy | public threat reports |
-| M24 | PWA / service worker | on-call view |
-| M25 | CLI, schematics, `ng update`, Nx | workspace & libraries |
-| M26 | Senior frontend: XSS/CSP, token storage, 100k-row virtual scroll, a11y, CDK | hardening |
-| M27 | Capstone | the console from requirements, reviewed like a PR |
+## M22 · Testing
+📖 angular-manual/m17 · foundations/l14
+- [ ] 01 Write the tests yourself
+- [ ] 02 Component harnesses
+- [ ] 03 End-to-end with Playwright
+
+## M23 · SSR, SSG & hydration
+📖 angular-manual/m16 · foundations/l15 · foundations/l30
+- [ ] 01 SSR-safe code
+- [ ] 02 Render modes per route (+ lab)
+
+## M24 · PWA & service worker
+📖 foundations/l25 · foundations/l30 · angular-manual/m16
+- [ ] 01 App updates with SwUpdate (+ lab)
+- [ ] 02 Offline caching & stale chunks
+
+## M25 · CLI, schematics & Nx
+📖 angular-manual/m17 · foundations/l29 · foundations/l20
+- [ ] 01 Architecture boundaries
+- [ ] 02 CLI, schematics & Nx lab
+
+## M26 · Senior frontend
+📖 cyber/l13 · foundations/l19 · foundations/l32 · angular-manual/m18
+- [ ] 01 XSS & sanitization
+- [ ] 02 100,000 rows: virtual scroll
+- [ ] 03 Accessibility: keyboard & focus
+- [ ] 04 Production error reporting
+
+## M27 · Capstone: investigation workspace
+📖 capstone/l1 · angular-manual/m18
+- [ ] 01 Investigation workspace (requirements + acceptance tests)
+
+## After the frontend series
+The same `/api/v1` contract (`api/openapi.yaml`) gets a real implementation next: **Spring Boot API → Postgres & Redis → AWS → integration (gateway, logging/tracing, CI/CD)**, each its own practice repo. Point this console's dev proxy at the real API and every exercise from M12 on keeps working.

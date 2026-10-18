@@ -9,7 +9,8 @@
     "api:reset": "node api/server.cjs --reset",
     "build": "ng build",
     "test": "ng test",
-    "ex": "node scripts/ex.mjs"
+    "ex": "node scripts/ex.mjs",
+    "e2e": "playwright test"
   },
   "private": true,
   "dependencies": {
@@ -22,7 +23,10 @@
     "@angular/forms": "^22.2.0",
     "@angular/localize": "^22.2.3",
     "@angular/platform-browser": "^22.2.0",
+    "@angular/platform-server": "^22.2.3",
     "@angular/router": "^22.2.0",
+    "@angular/service-worker": "^22.2.3",
+    "@angular/ssr": "^22.2.3",
     "@ngrx/effects": "^22.0.1",
     "@ngrx/signals": "^22.0.1",
     "@ngrx/store": "^22.0.1",
@@ -33,6 +37,7 @@
     "@angular/build": "^22.2.3",
     "@angular/cli": "^22.2.3",
     "@angular/compiler-cli": "^22.2.0",
+    "@playwright/test": "^1.56.1",
     "concurrently": "^9.2.5",
     "express": "^4.22.3",
     "jsdom": "^30.0.0",
