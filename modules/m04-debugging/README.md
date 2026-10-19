@@ -2,6 +2,10 @@
 
 📖 **Read first (Study Hub):** `foundations/l18` DevTools panel by panel · `toolkit/l4` debugging like a pro · `angular-manual/m17` testing & tooling
 
+![M04 map: components, services and data flow](../../../../public/diagrams/m04.svg)
+
+🧪 **After the exercises: [LAB.md](LAB.md)**: observe it in a debugger · break it on purpose · fix a seeded bug on a branch with one new git skill.
+
 These exercises have **no TODO hints**. Each file says how many bugs it contains, and the tests are your oracle: they describe correct behaviour. Find each bug with the tools below, fix it, and turn the tests green.
 
 ## Your debugging toolkit

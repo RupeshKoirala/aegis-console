@@ -1,0 +1,12 @@
+<h1>Your debugging bench</h1>
+<p class="muted">Tenant risk at a glance. Something is off: Globex at 82 should be <b>HIGH</b>, and after "Rescan" the average does not move.</p>
+<section class="card">
+  <p>Average risk: <b class="avg mono">{{ average() }}</b></p>
+  @for (t of tenants(); track t.id) {
+    <div class="row">
+      <aegis-risk-gauge [name]="t.name" [score]="t.score" />
+      <button class="rescan" (click)="rescan(t.id)">Rescan +10</button>
+    </div>
+  }
+  <p class="muted">Rescans this session: <b class="count">{{ rescans() }}</b></p>
+</section>

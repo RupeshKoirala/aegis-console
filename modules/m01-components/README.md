@@ -2,6 +2,10 @@
 
 📖 **Read first (Study Hub):** `angular/l8`–`l14` · `angular-manual/m3` components · `m4` template syntax & bindings · `m5` control flow · `m9` component communication
 
+![M01 map: components, services and data flow](../../../../public/diagrams/m01.svg)
+
+🧪 **After the exercises: [LAB.md](LAB.md)**: observe it in a debugger · break it on purpose · fix a seeded bug on a branch with one new git skill.
+
 | # | Exercise | You practise |
 |---|---|---|
 | 01 | Every kind of binding | interpolation, property/attribute/class/style bindings, events, key filters, signals 101 |
