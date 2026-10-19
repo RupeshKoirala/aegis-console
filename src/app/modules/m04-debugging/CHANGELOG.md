@@ -10,3 +10,4 @@
 - tightened the result spacing
 - listed every reason code
 - linked the debugging lesson
+- added an example verdict
