@@ -21,7 +21,7 @@ export class TagInput {
 
   add(raw: string) {
     const tag = raw.trim().toLowerCase();
-    if (tag && !this.tags().includes(tag)) this.tags.update(t => [...t, tag]);
+    if (tag && !this.tags().includes(tag)) this.tags().push(tag);
     this.entry().nativeElement.value = '';
   }
 
