@@ -1,0 +1,3 @@
+# Changelog
+
+- hasRole renders less
