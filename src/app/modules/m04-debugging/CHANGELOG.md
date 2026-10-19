@@ -8,3 +8,4 @@
 - explained the score threshold in the README
 - tidied the threat comparison
 - tightened the result spacing
+- listed every reason code
