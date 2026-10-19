@@ -7,7 +7,7 @@ export const IPV4 = new RegExp(`^${OCTET}(\\.${OCTET}){3}$`);
 export const DOMAIN = /^(?=.{1,253}$)([a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z]{2,63}$/;
 
 export function classify(value: string): IndicatorType | null {
-  const v = value.trim().toLowerCase();
+  const v = value.trim();
   if (IPV4.test(v)) return 'IP';
   const [ip, bits, ...rest] = v.split('/');
   if (rest.length === 0 && bits !== undefined && IPV4.test(ip) && /^\d{1,2}$/.test(bits) && Number(bits) <= 32) return 'CIDR';
