@@ -9,3 +9,4 @@
 - tidied the threat comparison
 - tightened the result spacing
 - listed every reason code
+- linked the debugging lesson
