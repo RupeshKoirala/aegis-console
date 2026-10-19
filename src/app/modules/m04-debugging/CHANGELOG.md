@@ -4,3 +4,4 @@
 - documented the match order: allow, block, threat
 - named the verdict test cases
 - commented covers() for CIDR ranges
+- better placeholder in the query box
