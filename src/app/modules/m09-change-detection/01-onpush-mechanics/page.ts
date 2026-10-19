@@ -17,6 +17,6 @@ export class Page {
   alert: Alert = { ...ALERTS[0] };
 
   resolve() {
-    this.alert = { ...this.alert, status: 'RESOLVED' };
+    this.alert.status = 'RESOLVED';
   }
 }
