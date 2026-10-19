@@ -7,3 +7,4 @@
 - better placeholder in the query box
 - explained the score threshold in the README
 - tidied the threat comparison
+- tightened the result spacing
