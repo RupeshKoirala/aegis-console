@@ -1,0 +1,3 @@
+# Changelog
+
+- alert demo simplified
