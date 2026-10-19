@@ -25,7 +25,11 @@ export class WatchlistService {
   }
 
   toggle(id: number) {
-    this.ids.update(ids => (ids.includes(id) ? ids.filter(x => x !== id) : [...ids, id]));
+    this.ids.update(ids => {
+      if (ids.includes(id)) ids.splice(ids.indexOf(id), 1);
+      else ids.push(id);
+      return ids;
+    });
   }
 
   clear() {
