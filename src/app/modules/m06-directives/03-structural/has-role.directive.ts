@@ -23,7 +23,6 @@ export class HasRole {
       const allowed = [this.roles()].flat().includes(role);
       const next = allowed ? 'main' : this.elseTemplate() ? 'else' : 'none';
       if (next === this.rendered && next !== 'main') return;
-      this.vcr.clear();
       if (next === 'main') this.vcr.createEmbeddedView(this.tpl, { $implicit: role });
       if (next === 'else') this.vcr.createEmbeddedView(this.elseTemplate()!);
       this.rendered = next;
