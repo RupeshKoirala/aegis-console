@@ -11,3 +11,4 @@
 - listed every reason code
 - linked the debugging lesson
 - added an example verdict
+- tidied this changelog
