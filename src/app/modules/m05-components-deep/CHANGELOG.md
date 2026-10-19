@@ -1,0 +1,3 @@
+# Changelog
+
+- panel slots documented
