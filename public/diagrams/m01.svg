@@ -1,0 +1,121 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 843" width="1000" height="843" role="img" aria-label="M01 · Components &amp; templates: how the pieces talk">
+<title>M01 · Components &amp; templates: how the pieces talk</title><style>
+  .bg { fill: #ffffff; } .title { fill: #0f172a; font: 700 20px system-ui, sans-serif; }
+  .lead { fill: #475569; font: 14px system-ui, sans-serif; }
+  .node { fill: #ffffff; stroke: #334155; stroke-width: 1.5; }
+  .node.svc, .node.store { fill: #eef2ff; stroke: #4f46e5; } .node.token { fill: #fdf4ff; stroke: #a21caf; }
+  .node.dir, .node.pipe { fill: #f0fdfa; stroke: #0f766e; } .node.fn { fill: #f8fafc; stroke: #64748b; stroke-dasharray: 2 3; }
+  .node.module { fill: #fff7ed; stroke: #9a3412; } .node.route { fill: #fff7ed; stroke: #ea580c; }
+  .node.ext, .node.tool { fill: #f1f5f9; stroke: #94a3b8; }
+  .node.hot { stroke: #dc2626; stroke-width: 2.5; }
+  .label { fill: #0f172a; font: 600 14px system-ui, sans-serif; } .sub { fill: #64748b; font: 10.5px ui-monospace, Menlo, monospace; }
+  .tag { fill: #64748b; font: italic 10px system-ui, sans-serif; }
+  .group { fill: none; stroke: #cbd5e1; stroke-dasharray: 6 5; } .gl { fill: #64748b; font: 700 12px system-ui, sans-serif; }
+  .e { fill: none; stroke-width: 1.8; } .e.data { stroke: #2563eb; } .e.event { stroke: #16a34a; }
+  .e.di { stroke: #7c3aed; stroke-dasharray: 6 4; } .e.router { stroke: #ea580c; } .e.call { stroke: #64748b; }
+  .el { font: 11px ui-monospace, Menlo, monospace; } .el.data { fill: #1d4ed8; } .el.event { fill: #15803d; }
+  .el.di { fill: #6d28d9; } .el.router { fill: #c2410c; } .el.call { fill: #475569; }
+  .elbg { fill: #ffffff; opacity: .92; }
+  .ah.data { fill: #2563eb; } .ah.event { fill: #16a34a; } .ah.di { fill: #7c3aed; } .ah.router { fill: #ea580c; } .ah.call { fill: #64748b; }
+  .legend { fill: #475569; font: 11px system-ui, sans-serif; } .note { fill: #334155; font: 12.5px system-ui, sans-serif; }
+  .rule { stroke: #e2e8f0; }
+  @media (prefers-color-scheme: dark) {
+    .bg { fill: #0b1220; } .title, .label { fill: #e2e8f0; } .lead, .note { fill: #94a3b8; }
+    .node { fill: #111a2e; stroke: #94a3b8; } .node.svc, .node.store { fill: #1e1b4b; stroke: #818cf8; }
+    .node.token { fill: #3b0764; stroke: #e879f9; } .node.dir, .node.pipe { fill: #042f2e; stroke: #2dd4bf; }
+    .node.fn { fill: #0f172a; stroke: #94a3b8; } .node.module, .node.route { fill: #431407; stroke: #fb923c; }
+    .node.ext, .node.tool { fill: #1e293b; stroke: #64748b; } .node.hot { stroke: #f87171; }
+    .sub, .tag, .gl, .legend { fill: #94a3b8; } .group { stroke: #334155; } .elbg { fill: #0b1220; } .rule { stroke: #1e293b; }
+    .e.data { stroke: #60a5fa; } .e.event { stroke: #4ade80; } .e.di { stroke: #a78bfa; } .e.router { stroke: #fb923c; } .e.call { stroke: #94a3b8; }
+    .el.data { fill: #93c5fd; } .el.event { fill: #86efac; } .el.di { fill: #c4b5fd; } .el.router { fill: #fdba74; } .el.call { fill: #cbd5e1; }
+    .ah.data { fill: #60a5fa; } .ah.event { fill: #4ade80; } .ah.di { fill: #a78bfa; } .ah.router { fill: #fb923c; } .ah.call { fill: #94a3b8; }
+  }</style>
+<defs><marker id="a-data" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="ah data" d="M0,0 L10,5 L0,10 z"/></marker><marker id="a-event" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="ah event" d="M0,0 L10,5 L0,10 z"/></marker><marker id="a-di" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="ah di" d="M0,0 L10,5 L0,10 z"/></marker><marker id="a-router" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="ah router" d="M0,0 L10,5 L0,10 z"/></marker><marker id="a-call" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="ah call" d="M0,0 L10,5 L0,10 z"/></marker></defs>
+<rect class="bg" width="1000" height="843" rx="12"/>
+<text class="title" x="34" y="40">M01 · Components &amp; templates: how the pieces talk</text>
+<text class="lead" x="34" y="64">Data flows DOWN through inputs (blue). Events flow UP through outputs (green). A service shares state SIDEWAYS between</text>
+<text class="lead" x="34" y="82">components that are not parent and child (purple, via inject()).</text>
+<rect class="group" x="20" y="96" width="224" height="224" rx="10"/><text class="gl" x="30" y="112">01–02 bindings &amp; control flow</text>
+<rect class="group" x="260" y="96" width="224" height="224" rx="10"/><text class="gl" x="270" y="112">03 inputs</text>
+<rect class="group" x="500" y="96" width="464" height="224" rx="10"/><text class="gl" x="510" y="112">04 outputs &amp; model()</text>
+<rect class="group" x="20" y="332" width="944" height="342" rx="10"/><text class="gl" x="30" y="348">06 first service</text>
+<path class="e call" d="M132,188 C132,216 132,216 132,244" marker-end="url(#a-call)"/>
+<path class="e data" d="M372,188 C372,216 372,216 372,244" marker-end="url(#a-data)"/>
+<path class="e data" d="M721,188 C721,216 601,216 601,244" marker-end="url(#a-data)"/>
+<path class="e event" d="M623,244 C623,216 743,216 743,188" marker-end="url(#a-event)"/>
+<path class="e data" d="M732,188 C732,216 852,216 852,244" marker-end="url(#a-data)" marker-start="url(#a-data)"/>
+<path class="e call" d="M492,424 C492,452 252,452 252,480" marker-end="url(#a-call)"/>
+<path class="e call" d="M492,424 C492,452 732,452 732,480" marker-end="url(#a-call)"/>
+<path class="e di" d="M252,542 C252,570 492,570 492,598" marker-end="url(#a-di)"/>
+<path class="e di" d="M732,542 C732,570 492,570 492,598" marker-end="url(#a-di)"/>
+<rect class="node comp" x="34" y="126" width="196" height="62" rx="3"/>
+<text class="tag" x="44" y="141">component</text>
+<text class="label" x="44" y="161">Page (01 bindings)</text>
+<text class="sub" x="44" y="178">01-bindings/page.ts</text>
+<rect class="node comp" x="34" y="244" width="196" height="62" rx="3"/>
+<text class="tag" x="44" y="259">component</text>
+<text class="label" x="44" y="279">Page (02 @for/@if)</text>
+<text class="sub" x="44" y="296">02-control-flow/page.ts</text>
+<rect class="node comp" x="274" y="126" width="196" height="62" rx="3"/>
+<text class="tag" x="284" y="141">component</text>
+<text class="label" x="284" y="161">Page</text>
+<text class="sub" x="284" y="178">03-inputs/page.ts</text>
+<rect class="node comp" x="274" y="244" width="196" height="62" rx="3"/>
+<text class="tag" x="284" y="259">component</text>
+<text class="label" x="284" y="279">IndicatorCard</text>
+<text class="sub" x="284" y="296">03-inputs/indicator-card.ts</text>
+<rect class="node comp" x="634" y="126" width="196" height="62" rx="3"/>
+<text class="tag" x="644" y="141">component</text>
+<text class="label" x="644" y="161">Page</text>
+<text class="sub" x="644" y="178">04-outputs-model/page.ts</text>
+<rect class="node comp" x="514" y="244" width="196" height="62" rx="3"/>
+<text class="tag" x="524" y="259">component</text>
+<text class="label" x="524" y="279">IndicatorRow</text>
+<text class="sub" x="524" y="296">indicator-row.ts</text>
+<rect class="node comp" x="754" y="244" width="196" height="62" rx="3"/>
+<text class="tag" x="764" y="259">component</text>
+<text class="label" x="764" y="279">SeverityFilter</text>
+<text class="sub" x="764" y="296">severity-filter.ts</text>
+<rect class="node comp" x="394" y="362" width="196" height="62" rx="3"/>
+<text class="tag" x="404" y="377">component</text>
+<text class="label" x="404" y="397">Page</text>
+<text class="sub" x="404" y="414">06-first-service/page.ts</text>
+<rect class="node comp" x="154" y="480" width="196" height="62" rx="3"/>
+<text class="tag" x="164" y="495">component</text>
+<text class="label" x="164" y="515">IndicatorPicker</text>
+<text class="sub" x="164" y="532">indicator-picker.ts</text>
+<rect class="node comp" x="634" y="480" width="196" height="62" rx="3"/>
+<text class="tag" x="644" y="495">component</text>
+<text class="label" x="644" y="515">WatchlistPanel</text>
+<text class="sub" x="644" y="532">watchlist-panel.ts</text>
+<rect class="node svc hot" x="394" y="598" width="196" height="62" rx="20"/>
+<text class="tag" x="404" y="613">service</text>
+<text class="label" x="404" y="633">WatchlistService</text>
+<text class="sub" x="404" y="650">watchlist.service.ts</text>
+<rect class="elbg" x="56.16" y="207" width="151.68" height="16" rx="4"/><text class="el call" x="132" y="219" text-anchor="middle">same ideas, more syntax</text>
+<rect class="elbg" x="320.8" y="207" width="102.4" height="16" rx="4"/><text class="el data" x="372" y="219" text-anchor="middle">[indicator]="i"</text>
+<rect class="elbg" x="551.4230400000001" y="213.94937600000003" width="77.76" height="16" rx="4"/><text class="el data" x="590.3030400000001" y="225.94937600000003" text-anchor="middle">[indicator]</text>
+<rect class="elbg" x="687" y="207" width="53.120000000000005" height="16" rx="4"/><text class="el event" x="713.56" y="219" text-anchor="middle">(block)</text>
+<rect class="elbg" x="787.09696" y="213.94937600000003" width="65.44" height="16" rx="4"/><text class="el data" x="819.81696" y="225.94937600000003" text-anchor="middle">[(level)]</text>
+<rect class="elbg" x="289.80608" y="449.94937600000003" width="53.120000000000005" height="16" rx="4"/><text class="el call" x="316.36608" y="461.94937600000003" text-anchor="middle">renders</text>
+<rect class="elbg" x="641.07392" y="449.94937600000003" width="53.120000000000005" height="16" rx="4"/><text class="el call" x="667.6339200000001" y="461.94937600000003" text-anchor="middle">renders</text>
+<rect class="elbg" x="280.56608" y="554.0506239999999" width="71.60000000000001" height="16" rx="4"/><text class="el di" x="316.36608" y="566.0506239999999" text-anchor="middle">toggle(id)</text>
+<rect class="elbg" x="616.4339199999998" y="554.0506239999999" width="102.4" height="16" rx="4"/><text class="el di" x="667.6339199999999" y="566.0506239999999" text-anchor="middle">ids() / count()</text>
+<line class="rule" x1="34" x2="966" y1="682" y2="682"/>
+<path class="e data" d="M34,700 L62,700" marker-end="url(#a-data)"/><text class="legend" x="68" y="704">data in (inputs, responses, signal reads)</text>
+<path class="e event" d="M348.56000000000006,700 L376.56000000000006,700" marker-end="url(#a-event)"/><text class="legend" x="382.56000000000006" y="704">events out (outputs, emits)</text>
+<path class="e di" d="M576.8800000000001,700 L604.8800000000001,700" marker-end="url(#a-di)"/><text class="legend" x="610.8800000000001" y="704">inject() / provides</text>
+<path class="e router" d="M755.9200000000001,700 L783.9200000000001,700" marker-end="url(#a-router)"/><text class="legend" x="789.9200000000001" y="704">router</text>
+<path class="e call" d="M34,722 L62,722" marker-end="url(#a-call)"/><text class="legend" x="68" y="726">renders / calls</text>
+<rect class="node comp" x="34" y="738" width="22" height="14" rx="3"/><text class="legend" x="62" y="749">component</text>
+<rect class="node svc" x="147.44" y="738" width="22" height="14" rx="7"/><text class="legend" x="175.44" y="749">service</text>
+<rect class="node dir" x="248.56" y="738" width="22" height="14" rx="3"/><text class="legend" x="276.56" y="749">directive / pipe</text>
+<rect class="node token" x="394" y="738" width="22" height="14" rx="3"/><text class="legend" x="422" y="749">token</text>
+<rect class="node fn" x="482.8" y="738" width="22" height="14" rx="3"/><text class="legend" x="510.8" y="749">functions</text>
+<rect class="node route" x="596.24" y="738" width="22" height="14" rx="3"/><text class="legend" x="624.24" y="749">route</text>
+<rect class="node ext" x="685.04" y="738" width="22" height="14" rx="7"/><text class="legend" x="713.04" y="749">outside</text>
+<rect class="node hot" x="786.16" y="738" width="22" height="14" rx="3"/><text class="legend" x="814.16" y="749">the bug hunt lives here</text>
+<text class="note" x="34" y="782">1. Inputs are read-only signals inside the child: card.indicator() — the child never writes them.</text>
+<text class="note" x="34" y="801">2. model() is an input AND an output in one: [(level)] keeps parent and child in sync (the double-headed arrow).</text>
+<text class="note" x="34" y="820">3. WatchlistService is providedIn: "root", so picker and panel get the SAME instance. Change its signal immutably or nobody re-renders.</text>
+</svg>

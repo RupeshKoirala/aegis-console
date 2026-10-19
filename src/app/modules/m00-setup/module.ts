@@ -7,5 +7,6 @@ export const M00: CourseModule = {
   exercises: [
     { id: '01', title: 'Typed domain helpers', load: () => import('./01-typed-domain/page').then(m => m.Page) },
     { id: '02', title: 'Your first components', load: () => import('./02-first-components/page').then(m => m.Page) },
+    { id: '03', title: 'Your debugging bench', load: () => import('./03-debug-bench/page').then(m => m.Page) },
   ],
 };

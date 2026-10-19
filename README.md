@@ -9,16 +9,22 @@ Every exercise is a small, real feature. **The HTML, CSS, data and fake backend 
 2. WebStorm → *File → New → Project from Version Control* → this repo.
 3. `npm install`
 4. `npm start` runs the app (http://localhost:4200) **and** the fake API (http://localhost:3000).
+5. Your own branch for your solutions: `git switch -c work && git push -u origin work`.
+6. Do **M00.03 · Your debugging bench** early: it installs Angular DevTools and sets up the debugger you'll use in every lab.
 
 ## The loop
 ```
 1. 📖 read     the Study Hub lessons listed in the module README
-2. 📄 open     src/app/modules/mNN-…/NN-…/README.md
-3. ▶ run      npm run ex -- m01/02          (tests in watch mode, red at first)
-4. ✍ write    every TODO in that folder (WebStorm: Edit → Find → Find in Files → "TODO")
-5. 👀 look     at it live in the sidebar
-6. ✅ commit   when green:  git commit -am "m01/02"
+2. 🗺 map      open the module's Map (sidebar) and trace the arrows before coding
+3. 📄 open     src/app/modules/mNN-…/NN-…/README.md
+4. ▶ run      npm run ex -- m01/02          (tests in watch mode, red at first)
+5. ✍ write    every TODO in that folder (WebStorm: Edit → Find → Find in Files → "TODO")
+6. 👀 look     at it live in the sidebar, and in Angular DevTools
+7. ✅ commit   when green:  git commit -am "m01/02"
+8. 🧪 lab      after the module: src/app/modules/mNN-…/LAB.md
+               observe in a debugger · break it on purpose · fix a seeded bug on a branch with one new git skill
 ```
+Reference: **[docs/DEBUGGING.md](docs/DEBUGGING.md)** (which tool for which question) · **[docs/GIT.md](docs/GIT.md)** (the git track) · **[PASS2.md](PASS2.md)** (doing it all a second time).
 Stuck for more than 15 minutes? Look at just that exercise's answer: `git diff main origin/solutions -- src/app/modules/m01-components/02-control-flow`
 
 ## Three generations, everywhere
@@ -38,6 +44,8 @@ All 28 modules (M00–M27) are in. See **[COURSE_MAP.md](COURSE_MAP.md)** for th
 |---|---|
 | `npm start` | app + fake API |
 | `npm run ex -- m01/02` | one exercise's tests (watch) · `m01` = the whole module · add `--once` to run once |
+| `npm run redo -- m05` | second pass: back up your M05 to branch `pass1/m05`, restore the starter files |
+| `npm run diagrams` | rebuild the module maps (`public/diagrams/*.svg`) from `scripts/diagrams/specs/` |
 | `npm run e2e` | Playwright end-to-end tests (M22.03; run `npx playwright install chromium` once) |
 | `npm test` | all tests |
 | `npm run api:reset` | wipe the fake database back to the seed |

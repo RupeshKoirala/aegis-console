@@ -2,6 +2,10 @@
 
 📖 **Read first (Study Hub):** `angular-manual/m11` dependency injection · `foundations/l12` design principles · `spring/l2` (Spring's DI: the same idea on the backend you'll build later)
 
+![M08 map: components, services and data flow](../../../../public/diagrams/m08.svg)
+
+🧪 **After the exercises: [LAB.md](LAB.md)**: observe it in a debugger · break it on purpose · fix a seeded bug on a branch with one new git skill.
+
 DI answers two questions: **who creates this object** and **which instance do I get**. Angular looks up a chain of injectors: the element injectors (component → parent component → … → root component), then the environment injectors (route → root → platform). The **first** injector that has a provider wins.
 
 | # | Exercise | You practise |

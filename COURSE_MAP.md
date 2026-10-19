@@ -1,11 +1,13 @@
 # Course map
 
-Tick the boxes as you go. 📖 = read in Study Hub first.
+Tick the boxes as you go. 📖 = read in Study Hub first. 🧪 = the module's `LAB.md` (debugging + git drills, see `docs/DEBUGGING.md` and `docs/GIT.md`). Second pass: `PASS2.md`.
 
 ## M00 · Setup, TypeScript & the compiler
 📖 js/l15 · js/l16 · angular/l7 · angular-manual/m1 · m2
 - [ ] 01 Typed domain helpers
 - [ ] 02 Your first components
+- [ ] 03 Your debugging bench
+- [ ] 🗺 Map explained out loud · 🧪 LAB: observe · break · bug hunt `bug/m00-classify` · git: branch · push · PR
 
 ## M01 · Components & templates
 📖 angular/l8–l14 · angular-manual/m3 · m4 · m5 · m9
@@ -15,21 +17,25 @@ Tick the boxes as you go. 📖 = read in Study Hub first.
 - [ ] 04 Outputs & model()
 - [ ] 05 Reading legacy templates
 - [ ] 06 A first shared service
+- [ ] 🗺 Map explained out loud · 🧪 LAB: observe · break · bug hunt `bug/m01-watchlist` · git: commit --amend
 
 ## M02 · NgModules → standalone
 📖 angular-manual/m3 · m11 · m18
 - [ ] 01 Build a feature with NgModules
 - [ ] 02 Migrate a module to standalone
+- [ ] 🗺 Map explained out loud · 🧪 LAB: observe · break · bug hunt `bug/m02-role-badge` · git: restore · diff --staged
 
 ## M03 · Practice: capacity planner ×2
 📖 angular/l17 · l18 · angular-manual/m9 · m15
 - [ ] 01 Planner, the v22 way
 - [ ] 02 Planner, the Gen 1 way
+- [ ] 🗺 Map explained out loud · 🧪 LAB: observe · break · bug hunt `bug/m03-projection` · git: stash
 
 ## M04 · Debugging
 📖 foundations/l18 · toolkit/l4 · angular-manual/m17
 - [ ] 01 Hunt the runtime bugs
 - [ ] 02 Debug the verdict engine
+- [ ] 🗺 Map explained out loud · 🧪 LAB: observe · break · bug hunt `bug/m04-verdicts` · git: bisect
 
 ## M05 · Components deep dive
 📖 angular-manual/m3 · m9 · m10 · angular/l13
@@ -39,6 +45,7 @@ Tick the boxes as you go. 📖 = read in Study Hub first.
 - [ ] 04 Lifecycle, DestroyRef, afterNextRender
 - [ ] 05 ng-template & ngTemplateOutlet
 - [ ] 06 View queries & custom two-way binding
+- [ ] 🗺 Map explained out loud · 🧪 LAB: observe · break · bug hunt `bug/m05-tags` · git: log -S · blame
 
 ## M06 · Directives
 📖 angular-manual/m10 · m5
@@ -46,12 +53,14 @@ Tick the boxes as you go. 📖 = read in Study Hub first.
 - [ ] 02 exportAs: template-visible state
 - [ ] 03 Structural directive *aegisHasRole
 - [ ] 04 hostDirectives composition
+- [ ] 🗺 Map explained out loud · 🧪 LAB: observe · break · bug hunt `bug/m06-has-role` · git: cherry-pick
 
 ## M07 · Pipes
 📖 angular-manual/m10 · angular/l9
 - [ ] 01 The built-in catalog
 - [ ] 02 Custom pipes: defang, cidr, relative time
 - [ ] 03 Pure vs impure
+- [ ] 🗺 Map explained out loud · 🧪 LAB: observe · break · bug hunt `bug/m07-sort` · git: revert
 
 ## M08 · Dependency injection
 📖 angular-manual/m11 · foundations/l12 · spring/l2
@@ -59,6 +68,7 @@ Tick the boxes as you go. 📖 = read in Study Hub first.
 - [ ] 02 Providers & InjectionTokens
 - [ ] 03 optional / self / skipSelf / host
 - [ ] 04 Multi providers & injection context
+- [ ] 🗺 Map explained out loud · 🧪 LAB: observe · break · bug hunt `bug/m08-injector` · git: rebase
 
 ## M09 · Change detection
 📖 angular-manual/m8 · foundations/l17 · foundations/l7
@@ -66,6 +76,7 @@ Tick the boxes as you go. 📖 = read in Study Hub first.
 - [ ] 02 Measure the render cost
 - [ ] 03 ChangeDetectorRef: markForCheck, detach
 - [ ] 04 Zoneless audit
+- [ ] 🗺 Map explained out loud · 🧪 LAB: observe · break · bug hunt `bug/m09-onpush` · git: rebase -i
 
 ## M10 · Signals in depth
 📖 angular-manual/m6 · angular-manual/m7 · angular/l10

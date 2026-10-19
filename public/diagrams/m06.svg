@@ -1,0 +1,121 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 763" width="1000" height="763" role="img" aria-label="M06 · Directives: behaviour without a template">
+<title>M06 · Directives: behaviour without a template</title><style>
+  .bg { fill: #ffffff; } .title { fill: #0f172a; font: 700 20px system-ui, sans-serif; }
+  .lead { fill: #475569; font: 14px system-ui, sans-serif; }
+  .node { fill: #ffffff; stroke: #334155; stroke-width: 1.5; }
+  .node.svc, .node.store { fill: #eef2ff; stroke: #4f46e5; } .node.token { fill: #fdf4ff; stroke: #a21caf; }
+  .node.dir, .node.pipe { fill: #f0fdfa; stroke: #0f766e; } .node.fn { fill: #f8fafc; stroke: #64748b; stroke-dasharray: 2 3; }
+  .node.module { fill: #fff7ed; stroke: #9a3412; } .node.route { fill: #fff7ed; stroke: #ea580c; }
+  .node.ext, .node.tool { fill: #f1f5f9; stroke: #94a3b8; }
+  .node.hot { stroke: #dc2626; stroke-width: 2.5; }
+  .label { fill: #0f172a; font: 600 14px system-ui, sans-serif; } .sub { fill: #64748b; font: 10.5px ui-monospace, Menlo, monospace; }
+  .tag { fill: #64748b; font: italic 10px system-ui, sans-serif; }
+  .group { fill: none; stroke: #cbd5e1; stroke-dasharray: 6 5; } .gl { fill: #64748b; font: 700 12px system-ui, sans-serif; }
+  .e { fill: none; stroke-width: 1.8; } .e.data { stroke: #2563eb; } .e.event { stroke: #16a34a; }
+  .e.di { stroke: #7c3aed; stroke-dasharray: 6 4; } .e.router { stroke: #ea580c; } .e.call { stroke: #64748b; }
+  .el { font: 11px ui-monospace, Menlo, monospace; } .el.data { fill: #1d4ed8; } .el.event { fill: #15803d; }
+  .el.di { fill: #6d28d9; } .el.router { fill: #c2410c; } .el.call { fill: #475569; }
+  .elbg { fill: #ffffff; opacity: .92; }
+  .ah.data { fill: #2563eb; } .ah.event { fill: #16a34a; } .ah.di { fill: #7c3aed; } .ah.router { fill: #ea580c; } .ah.call { fill: #64748b; }
+  .legend { fill: #475569; font: 11px system-ui, sans-serif; } .note { fill: #334155; font: 12.5px system-ui, sans-serif; }
+  .rule { stroke: #e2e8f0; }
+  @media (prefers-color-scheme: dark) {
+    .bg { fill: #0b1220; } .title, .label { fill: #e2e8f0; } .lead, .note { fill: #94a3b8; }
+    .node { fill: #111a2e; stroke: #94a3b8; } .node.svc, .node.store { fill: #1e1b4b; stroke: #818cf8; }
+    .node.token { fill: #3b0764; stroke: #e879f9; } .node.dir, .node.pipe { fill: #042f2e; stroke: #2dd4bf; }
+    .node.fn { fill: #0f172a; stroke: #94a3b8; } .node.module, .node.route { fill: #431407; stroke: #fb923c; }
+    .node.ext, .node.tool { fill: #1e293b; stroke: #64748b; } .node.hot { stroke: #f87171; }
+    .sub, .tag, .gl, .legend { fill: #94a3b8; } .group { stroke: #334155; } .elbg { fill: #0b1220; } .rule { stroke: #1e293b; }
+    .e.data { stroke: #60a5fa; } .e.event { stroke: #4ade80; } .e.di { stroke: #a78bfa; } .e.router { stroke: #fb923c; } .e.call { stroke: #94a3b8; }
+    .el.data { fill: #93c5fd; } .el.event { fill: #86efac; } .el.di { fill: #c4b5fd; } .el.router { fill: #fdba74; } .el.call { fill: #cbd5e1; }
+    .ah.data { fill: #60a5fa; } .ah.event { fill: #4ade80; } .ah.di { fill: #a78bfa; } .ah.router { fill: #fb923c; } .ah.call { fill: #94a3b8; }
+  }</style>
+<defs><marker id="a-data" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="ah data" d="M0,0 L10,5 L0,10 z"/></marker><marker id="a-event" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="ah event" d="M0,0 L10,5 L0,10 z"/></marker><marker id="a-di" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="ah di" d="M0,0 L10,5 L0,10 z"/></marker><marker id="a-router" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="ah router" d="M0,0 L10,5 L0,10 z"/></marker><marker id="a-call" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="ah call" d="M0,0 L10,5 L0,10 z"/></marker></defs>
+<rect class="bg" width="1000" height="763" rx="12"/>
+<text class="title" x="34" y="40">M06 · Directives: behaviour without a template</text>
+<text class="lead" x="34" y="64">A directive attaches to an element someone else renders. Attribute directives change it, structural ones create or</text>
+<text class="lead" x="34" y="82">remove it, and hostDirectives bolt several onto one component.</text>
+<rect class="group" x="20" y="96" width="224" height="224" rx="10"/><text class="gl" x="30" y="112">01 attribute</text>
+<rect class="group" x="260" y="96" width="224" height="224" rx="10"/><text class="gl" x="270" y="112">02 exportAs</text>
+<rect class="group" x="500" y="96" width="464" height="342" rx="10"/><text class="gl" x="510" y="112">03 structural *aegisHasRole</text>
+<rect class="group" x="20" y="332" width="464" height="224" rx="10"/><text class="gl" x="30" y="348">04 hostDirectives</text>
+<path class="e di" d="M132,188 C132,216 132,216 132,244" marker-end="url(#a-di)"/>
+<path class="e di" d="M361,188 C361,216 361,216 361,244" marker-end="url(#a-di)"/>
+<path class="e data" d="M383,244 C383,216 383,216 383,188" marker-end="url(#a-data)"/>
+<path class="e di" d="M612,188 C612,216 732,216 732,244" marker-end="url(#a-di)"/>
+<path class="e di" d="M732,244 C732,216 852,216 852,188" marker-end="url(#a-di)"/>
+<path class="e call" d="M732,306 C732,334 732,334 732,362" marker-end="url(#a-call)"/>
+<path class="e di" d="M252,424 C252,452 132,452 132,480" marker-end="url(#a-di)"/>
+<path class="e di" d="M252,424 C252,452 372,452 372,480" marker-end="url(#a-di)"/>
+<rect class="node ext" x="34" y="126" width="196" height="62" rx="10"/>
+<text class="tag" x="44" y="141">outside</text>
+<text class="label" x="44" y="161" textLength="176" lengthAdjust="spacingAndGlyphs">&lt;span [aegisSeverity]&gt;</text>
+<text class="sub" x="44" y="178">any element</text>
+<rect class="node dir" x="34" y="244" width="196" height="62" rx="3"/>
+<text class="tag" x="44" y="259">directive</text>
+<text class="label" x="44" y="279">SeverityHighlight</text>
+<text class="sub" x="44" y="296">Renderer2 · ElementRef</text>
+<rect class="node ext" x="274" y="126" width="196" height="62" rx="10"/>
+<text class="tag" x="284" y="141">outside</text>
+<text class="label" x="284" y="161" textLength="176" lengthAdjust="spacingAndGlyphs">&lt;button #c="aegisCopy"&gt;</text>
+<text class="sub" x="284" y="178">template reads c.copied()</text>
+<rect class="node dir" x="274" y="244" width="196" height="62" rx="3"/>
+<text class="tag" x="284" y="259">directive</text>
+<text class="label" x="284" y="279">CopyDirective</text>
+<text class="sub" x="284" y="296">exportAs: 'aegisCopy'</text>
+<rect class="node ext" x="514" y="126" width="196" height="62" rx="10"/>
+<text class="tag" x="524" y="141">outside</text>
+<text class="label" x="524" y="161" textLength="176" lengthAdjust="spacingAndGlyphs">&lt;ng-template&gt; (from *)</text>
+<text class="sub" x="524" y="178">the &lt;button&gt; you wrote</text>
+<rect class="node dir hot" x="634" y="244" width="196" height="62" rx="3"/>
+<text class="tag" x="644" y="259">directive</text>
+<text class="label" x="644" y="279">HasRole</text>
+<text class="sub" x="644" y="296" textLength="176" lengthAdjust="spacingAndGlyphs">TemplateRef + ViewContainerRef</text>
+<rect class="node svc" x="754" y="126" width="196" height="62" rx="20"/>
+<text class="tag" x="764" y="141">service</text>
+<text class="label" x="764" y="161">CurrentUser</text>
+<text class="sub" x="764" y="178">role signal</text>
+<rect class="node ext" x="634" y="362" width="196" height="62" rx="10"/>
+<text class="tag" x="644" y="377">outside</text>
+<text class="label" x="644" y="397">ViewContainerRef</text>
+<text class="sub" x="644" y="414">createEmbeddedView / clear</text>
+<rect class="node comp" x="154" y="362" width="196" height="62" rx="3"/>
+<text class="tag" x="164" y="377">component</text>
+<text class="label" x="164" y="397">IndicatorChip</text>
+<text class="sub" x="164" y="414">hostDirectives: [...]</text>
+<rect class="node dir" x="34" y="480" width="196" height="62" rx="3"/>
+<text class="tag" x="44" y="495">directive</text>
+<text class="label" x="44" y="515">Tooltip</text>
+<text class="sub" x="44" y="532">[tip] → aegisTooltip</text>
+<rect class="node dir" x="274" y="480" width="196" height="62" rx="3"/>
+<text class="tag" x="284" y="495">directive</text>
+<text class="label" x="284" y="515">Focusable</text>
+<text class="sub" x="284" y="532">(activated) output</text>
+<rect class="elbg" x="102.36" y="207" width="59.28" height="16" rx="4"/><text class="el di" x="132" y="219" text-anchor="middle">attaches</text>
+<rect class="elbg" x="297.72" y="207" width="59.28" height="16" rx="4"/><text class="el di" x="327.36" y="219" text-anchor="middle">attaches</text>
+<rect class="elbg" x="387" y="207" width="59.28" height="16" rx="4"/><text class="el data" x="416.64" y="219" text-anchor="middle">copied()</text>
+<rect class="elbg" x="608.48" y="207" width="127.04" height="16" rx="4"/><text class="el di" x="672" y="219" text-anchor="middle">inject(TemplateRef)</text>
+<rect class="elbg" x="796.33696" y="200.050624" width="46.96" height="16" rx="4"/><text class="el di" x="819.81696" y="212.050624" text-anchor="middle">role()</text>
+<rect class="elbg" x="693.1200000000001" y="331.94937600000003" width="77.76" height="16" rx="4"/><text class="el call" x="732.0000000000001" y="343.94937600000003" text-anchor="middle">show / hide</text>
+<rect class="elbg" x="119.14304" y="449.94937600000003" width="90.08000000000001" height="16" rx="4"/><text class="el di" x="164.18304" y="461.94937600000003" text-anchor="middle">inputs: [tip]</text>
+<rect class="elbg" x="273.21696" y="449.94937600000003" width="133.20000000000002" height="16" rx="4"/><text class="el di" x="339.81696" y="461.94937600000003" text-anchor="middle">outputs: [activated]</text>
+<line class="rule" x1="34" x2="966" y1="564" y2="564"/>
+<path class="e data" d="M34,582 L62,582" marker-end="url(#a-data)"/><text class="legend" x="68" y="586">data in (inputs, responses, signal reads)</text>
+<path class="e event" d="M348.56000000000006,582 L376.56000000000006,582" marker-end="url(#a-event)"/><text class="legend" x="382.56000000000006" y="586">events out (outputs, emits)</text>
+<path class="e di" d="M576.8800000000001,582 L604.8800000000001,582" marker-end="url(#a-di)"/><text class="legend" x="610.8800000000001" y="586">inject() / provides</text>
+<path class="e router" d="M755.9200000000001,582 L783.9200000000001,582" marker-end="url(#a-router)"/><text class="legend" x="789.9200000000001" y="586">router</text>
+<path class="e call" d="M34,604 L62,604" marker-end="url(#a-call)"/><text class="legend" x="68" y="608">renders / calls</text>
+<rect class="node comp" x="34" y="620" width="22" height="14" rx="3"/><text class="legend" x="62" y="631">component</text>
+<rect class="node svc" x="147.44" y="620" width="22" height="14" rx="7"/><text class="legend" x="175.44" y="631">service</text>
+<rect class="node dir" x="248.56" y="620" width="22" height="14" rx="3"/><text class="legend" x="276.56" y="631">directive / pipe</text>
+<rect class="node token" x="394" y="620" width="22" height="14" rx="3"/><text class="legend" x="422" y="631">token</text>
+<rect class="node fn" x="482.8" y="620" width="22" height="14" rx="3"/><text class="legend" x="510.8" y="631">functions</text>
+<rect class="node route" x="596.24" y="620" width="22" height="14" rx="3"/><text class="legend" x="624.24" y="631">route</text>
+<rect class="node ext" x="685.04" y="620" width="22" height="14" rx="7"/><text class="legend" x="713.04" y="631">outside</text>
+<rect class="node hot" x="786.16" y="620" width="22" height="14" rx="3"/><text class="legend" x="814.16" y="631">the bug hunt lives here</text>
+<text class="note" x="34" y="664">1. Desugar it: *aegisHasRole="'ADMIN'" becomes &lt;ng-template [aegisHasRole]="'ADMIN'"&gt;. The directive decides how many times (0 or 1) to</text>
+<text class="note" x="50" y="683">stamp that template.</text>
+<text class="note" x="34" y="702">2. Every role change must clear() before creating: otherwise views pile up. Watch the DOM in Elements while you switch roles.</text>
+<text class="note" x="34" y="721">3. Angular DevTools lists directives under the element that hosts them. Click a chip: you see IndicatorChip, Tooltip and Focusable on</text>
+<text class="note" x="50" y="740">one node.</text>
+</svg>

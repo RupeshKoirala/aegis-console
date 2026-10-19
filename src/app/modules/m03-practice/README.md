@@ -2,6 +2,10 @@
 
 📖 **Read first (Study Hub):** `angular/l17` forms · `angular/l18` putting it together · `angular-manual/m9` component communication · `m15` forms, three generations
 
+![M03 map: components, services and data flow](../../../../public/diagrams/m03.svg)
+
+🧪 **After the exercises: [LAB.md](LAB.md)**: observe it in a debugger · break it on purpose · fix a seeded bug on a branch with one new git skill.
+
 Inline enforcement appliances hold a limited number of blocklist entries. Before a customer onboards three new feeds, someone has to answer: *"When do we run out of room?"* You'll build the planner a sales engineer would use, **twice**:
 
 | # | Version | Uses |

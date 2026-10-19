@@ -9,6 +9,7 @@
       </button>
       @if (open() === m.id) {
         <ul>
+          <li><a [routerLink]="['/', m.id, 'map']" routerLinkActive="active" class="map">🗺 Map</a></li>
           @for (e of m.exercises; track e.id) {
             <li><a [routerLink]="['/', m.id, e.id]" routerLinkActive="active">{{ e.id }} · {{ e.title }}</a></li>
           }

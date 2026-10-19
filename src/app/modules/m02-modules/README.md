@@ -2,6 +2,10 @@
 
 📖 **Read first (Study Hub):** `angular-manual/m3` components (standalone) · `m11` dependency injection (module providers) · `m18` the whole picture
 
+![M02 map: components, services and data flow](../../../../public/diagrams/m02.svg)
+
+🧪 **After the exercises: [LAB.md](LAB.md)**: observe it in a debugger · break it on purpose · fix a seeded bug on a branch with one new git skill.
+
 From 2016 to 2023, **every** Angular app was organised in `NgModule`s. Any company with an Angular product older than two years has some, often hundreds. You need to **read** them fluently, **extend** them safely and **migrate** them.
 
 | # | Exercise | You practise |

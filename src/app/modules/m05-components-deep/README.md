@@ -2,6 +2,10 @@
 
 📖 **Read first (Study Hub):** `angular-manual/m3` components · `m9` component communication · `m10` directives, host bindings & pipes · `angular/l13`
 
+![M05 map: components, services and data flow](../../../../public/diagrams/m05.svg)
+
+🧪 **After the exercises: [LAB.md](LAB.md)**: observe it in a debugger · break it on purpose · fix a seeded bug on a branch with one new git skill.
+
 You're building the **dashboard widget kit**: buttons, tiles, panels, tables and tag inputs that the rest of the console reuses. This is where "I can use Angular" becomes "I can design components other people use".
 
 | # | Exercise | You practise |
