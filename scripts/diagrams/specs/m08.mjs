@@ -1,0 +1,35 @@
+export default {
+  id: 'm08',
+  title: 'M08 · Dependency injection: who gets which instance',
+  lead: 'inject(X) walks UP the tree: own element → parents → route/environment → root. The first injector that provides X wins, so where you write providers decides who shares.',
+  groups: [
+    ['01 injector tree', 0, 0, 1, 2],
+    ['02 providers & tokens', 2, 0, 2, 2],
+    ['04 multi providers', 3, 0, 3, 2],
+  ],
+  nodes: [
+    ['root', 'svc', 'RootCounter', "providedIn: 'root'", 0.5, 0],
+    ['p1', 'comp', 'Page', 'providers: [CounterService]', 0.5, 1],
+    ['shared', 'comp', 'SharedCounter ×2', 'no providers → uses Page’s', 0, 2],
+    ['iso', 'comp', 'IsolatedCounter ×2', 'own providers → own instance', 1, 2, { hot: true }],
+    ['p2', 'comp', 'Page', 'inject(AEGIS_CONFIG)…', 2, 1],
+    ['tok', 'token', 'AEGIS_CONFIG · FEATURE_FLAGS', 'useValue / useFactory', 2, 0, { w: 210 }],
+    ['log', 'svc', 'Logger', 'useClass / useExisting', 2, 2],
+    ['p4', 'comp', 'Page', 'providers: [ENRICHERS…]', 3, 0],
+    ['enr', 'svc', 'EnrichmentService', 'inject(ENRICHERS) → array', 3, 1],
+    ['multi', 'token', 'ENRICHERS (multi)', 'geo · asn · reputation', 3, 2],
+  ],
+  edges: [
+    ['p1', 'root', 'di', 'inject(RootCounter)'],
+    ['shared', 'p1', 'di', 'walks up'],
+    ['p2', 'tok', 'di', 'inject(TOKEN)'],
+    ['p2', 'log', 'di', 'inject(Logger)'],
+    ['p4', 'enr', 'di', 'inject'],
+    ['enr', 'multi', 'di', 'every provider'],
+  ],
+  notes: [
+    'Angular DevTools → select a counter → "Injector Tree" tab: you see exactly which injector resolved CounterService.',
+    '03 (resolution modifiers) is the same walk with rules: optional (null if missing), self (only my element), skipSelf (start at my parent), host (stop at my host).',
+    'Delete a providers entry and the error is NG0201 "No provider found". Read the path it prints: that is the walk.',
+  ],
+};

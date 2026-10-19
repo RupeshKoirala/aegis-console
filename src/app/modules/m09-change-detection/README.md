@@ -2,6 +2,10 @@
 
 📖 **Read first (Study Hub):** `angular-manual/m8` change detection · `foundations/l17` how browsers render · `foundations/l7` the event loop
 
+![M09 map: components, services and data flow](../../../../public/diagrams/m09.svg)
+
+🧪 **After the exercises: [LAB.md](LAB.md)**: observe it in a debugger · break it on purpose · fix a seeded bug on a branch with one new git skill.
+
 **Change detection (CD)** is Angular walking the component tree, re-evaluating template bindings and patching the DOM where values changed. What decides *when* it runs and *which* components it visits has changed across all three generations:
 
 | Gen | Trigger | Which components | Default strategy |

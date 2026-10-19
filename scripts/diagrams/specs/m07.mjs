@@ -1,0 +1,35 @@
+export default {
+  id: 'm07',
+  title: 'M07 · Pipes: format in the template, cache by input',
+  lead: 'value | pipe:arg is a function call the compiler wires for you. A pure pipe re-runs only when its input REFERENCE changes; an impure one runs on every check.',
+  groups: [
+    ['01 built-ins', 0, 0, 0, 1],
+    ['02 custom pipes', 1, 0, 2, 1],
+    ['03 pure vs impure', 3, 0, 3, 2],
+  ],
+  nodes: [
+    ['p1', 'comp', 'Page', 'date · currency · json · async…', 0, 0],
+    ['loc', 'token', 'LOCALE_ID', 'decides number/date format', 0, 1],
+    ['p2', 'comp', 'Page', '02-custom/page.ts', 1.5, 0],
+    ['def', 'pipe', 'DefangPipe', 'evil.com → evil[.]com', 1, 1, { tag: 'pipe' }],
+    ['cidr', 'pipe', 'CidrSizePipe', '/24 → 256 addresses', 2, 1, { tag: 'pipe' }],
+    ['rel', 'pipe', 'RelativeTimePipe', '"3 min ago"', 1.5, 2, { tag: 'pipe' }],
+    ['p3', 'comp', 'Page', 'push vs replace the list', 3, 0],
+    ['sort', 'pipe', 'SortByPipe (pure)', 'sort-by.pipe.ts', 3, 1, { tag: 'pipe', hot: true }],
+    ['imp', 'pipe', 'SortByImpurePipe', 'pure: false', 3, 2, { tag: 'pipe' }],
+    ['cnt', 'fn', 'calls counter', 'call-counter.ts', 2.3, 3],
+  ],
+  edges: [
+    ['loc', 'p1', 'di', 'formats'],
+    ['p2', 'def', 'data', 'value | defang'],
+    ['p2', 'cidr', 'data', '| cidrSize'],
+    ['p2', 'rel', 'data', '| relativeTime'],
+    ['p3', 'sort', 'data', "items | sortBy:'score'"],
+    ['sort', 'cnt', 'call', 'calls.sortBy++', { t: 0.8 }],
+    ['imp', 'cnt', 'call', 'calls.impure++', { t: 0.55 }],
+  ],
+  notes: [
+    'A pipe must never mutate its input. Array.sort() sorts IN PLACE, so sort a copy: [...items].sort(…).',
+    'Logpoint trick: right-click the line in transform() → "Add logpoint" → `transform ${items.length}`. Click around and count the runs.',
+  ],
+};

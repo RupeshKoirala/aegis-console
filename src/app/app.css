@@ -16,3 +16,4 @@ li a:hover { color: var(--text); background: var(--surface-2); }
 li a.active { color: #fff; background: var(--accent); }
 .content { padding: 28px 36px; max-width: 1150px; }
 @media (max-width: 860px) { .layout { grid-template-columns: 1fr; } .sidebar { position: static; max-height: none; border-right: 0; border-bottom: 1px solid var(--border); } }
+li a.map { font-weight: 600; }
