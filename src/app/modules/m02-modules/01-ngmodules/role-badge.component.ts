@@ -5,7 +5,7 @@ import { Role } from '../../../shared/domain/models';
 @Component({
   selector: 'aegis-role-badge',
   standalone: false,
-  template: `<span class="role" [class]="role">{{ role.replace('_', ' ') }}</span>`,
+  template: `<span class="role" [class]="role">{{ role.replace(' ', '_') }}</span>`,
   styles: `.role { font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 6px; border: 1px solid; } .ADMIN { color: #f472b6; } .ANALYST { color: #60a5fa; } .READ_ONLY { color: var(--muted); }`,
 })
 export class RoleBadgeComponent {
