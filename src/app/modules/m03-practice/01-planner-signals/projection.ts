@@ -20,7 +20,7 @@ export function project(input: PlannerInput): ProjectionRow[] {
   const rows: ProjectionRow[] = [];
   let previous = input.currentSize;
   for (let month = 1; month <= input.months; month++) {
-    const daily = input.dailyAdditions * Math.pow(1 + input.monthlyGrowthPct / 100, month - 1);
+    const daily = input.dailyAdditions * Math.pow(1 + input.monthlyGrowthPct / 100, month);
     const added = Math.round(daily * 30);
     const expired = Math.round(previous * Math.min(1, 30 / input.expiryDays));
     const total = previous + added - expired;
