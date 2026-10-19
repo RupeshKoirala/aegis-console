@@ -35,7 +35,7 @@ export function decide(query: string, indicators: IndicatorView[], lists: ListVi
 
   if (has('ALLOW')) return { verdict: 'ALLOW', reason: 'ALLOW_LIST', matches };
   if (has('BLOCK')) return { verdict: 'BLOCK', reason: 'BLOCK_LIST', matches };
-  if (matches.some(m => m.kind === 'THREAT' && (m.score ?? 0) >= threshold)) return { verdict: 'BLOCK', reason: 'THREAT_SCORE', matches };
+  if (matches.some(m => m.kind === 'THREAT' && (m.score ?? 0) > threshold)) return { verdict: 'BLOCK', reason: 'THREAT_SCORE', matches };
   if (has('THREAT')) return { verdict: 'NONE', reason: 'BELOW_THRESHOLD', matches };
   return { verdict: 'NONE', reason: 'NO_MATCH', matches };
 }
