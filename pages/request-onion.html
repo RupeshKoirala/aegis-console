@@ -1,0 +1,735 @@
+<title>Request Onion Lab</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: a lab bench. Each section is one instrument: the onion (with clock + log beside it), then the marble timeline, then the cheat sheet. */
+:root {
+  --bg: #f3f5f9; --surface: #ffffff; --surface-2: #e9edf4; --ink: #131926; --muted: #586377; --line: #d6dce7;
+  --out: #2c58d6; --out-soft: #e3eafc; --back: #0b8a69; --back-soft: #dcf3ea;
+  --err: #c4352b; --err-soft: #fbe3e0; --warn: #a96d10; --warn-soft: #fbefd8;
+  --display: "Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
+  --body: "IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #0d1118; --surface: #151b26; --surface-2: #1d2532; --ink: #e5e9f1; --muted: #97a1b5; --line: #2a3344;
+  --out: #85a6ff; --out-soft: #1c2847; --back: #46c9a1; --back-soft: #12332b;
+  --err: #ff7b6f; --err-soft: #3a1c1a; --warn: #f2b54d; --warn-soft: #3a2d14; color-scheme: dark } }
+:root[data-theme="dark"] {
+  --bg: #0d1118; --surface: #151b26; --surface-2: #1d2532; --ink: #e5e9f1; --muted: #97a1b5; --line: #2a3344;
+  --out: #85a6ff; --out-soft: #1c2847; --back: #46c9a1; --back-soft: #12332b;
+  --err: #ff7b6f; --err-soft: #3a1c1a; --warn: #f2b54d; --warn-soft: #3a2d14; color-scheme: dark }
+
+* { box-sizing: border-box; }
+body { background: var(--bg); color: var(--ink); font: 15px/1.6 var(--body); }
+.wrap { max-width: 1120px; margin: 0 auto; padding-block: 28px 64px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); display: grid; gap: 40px; }
+h1, h2, h3 { font-family: var(--display); text-wrap: balance; margin: 0; line-height: 1.15; }
+h1 { font-size: clamp(30px, 5vw, 46px); font-weight: 800; letter-spacing: -.01em; }
+h2 { font-size: clamp(22px, 3vw, 28px); font-weight: 800; }
+h3 { font-size: 17px; font-weight: 600; }
+p { margin: 0; max-width: 68ch; }
+code, .mono { font-family: var(--mono); font-size: .92em; }
+.muted { color: var(--muted); }
+.eyebrow { font: 600 12px/1 var(--mono); letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+section { display: grid; gap: 16px; }
+.intro { display: grid; gap: 12px; }
+.legend { display: flex; flex-wrap: wrap; gap: 8px 18px; font-size: 13px; color: var(--muted); }
+.legend i { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 6px; vertical-align: -1px; }
+
+/* function vs observable */
+.compare { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 12px; }
+.panel { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 16px; display: grid; gap: 10px; min-width: 0; }
+.panel pre { margin: 0; font: 13px/1.55 var(--mono); white-space: pre-wrap; overflow-x: auto; }
+
+/* controls */
+.controls { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+button, select { font: 500 14px var(--body); border: 1px solid var(--line); background: var(--surface); color: var(--ink);
+  border-radius: 8px; padding: 7px 14px; cursor: pointer; }
+button:hover { border-color: var(--out); }
+button:focus-visible, select:focus-visible { outline: 2px solid var(--out); outline-offset: 2px; }
+button.primary { background: var(--out); border-color: var(--out); color: var(--surface); }
+button:disabled { opacity: .45; cursor: not-allowed; }
+.seg { display: inline-flex; border: 1px solid var(--line); border-radius: 8px; overflow: hidden; }
+.seg button { border: 0; border-radius: 0; border-right: 1px solid var(--line); }
+.seg button:last-child { border-right: 0; }
+.seg button[aria-pressed="true"] { background: var(--surface-2); font-weight: 600; }
+
+/* onion bench */
+.bench { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); gap: 16px; align-items: start; }
+@media (max-width: 860px) { .bench { grid-template-columns: 1fr; } }
+.onion { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 14px; display: grid; gap: 10px; }
+.node { border: 1.5px solid var(--line); border-radius: 10px; padding: 10px 12px; display: grid; gap: 6px; transition: border-color .2s, background .2s; }
+.node .row { display: flex; justify-content: space-between; gap: 8px; align-items: baseline; flex-wrap: wrap; }
+.node .name { font: 600 13px var(--mono); }
+.node .what { font-size: 12.5px; color: var(--muted); }
+.layer { background: var(--bg); }
+.layer .layer { background: var(--surface); }
+.layer .layer .layer { background: var(--bg); }
+.server { background: var(--surface-2); text-align: center; }
+.node.on-out { border-color: var(--out); background: var(--out-soft); }
+.node.on-back { border-color: var(--back); background: var(--back-soft); }
+.node.on-err { border-color: var(--err); background: var(--err-soft); }
+.node.on-warn { border-color: var(--warn); background: var(--warn-soft); }
+.chip { font: 600 11px/1 var(--mono); padding: 4px 7px; border-radius: 999px; white-space: nowrap; visibility: hidden; }
+.node.on-out > .row .chip { visibility: visible; background: var(--out); color: var(--surface); }
+.node.on-back > .row .chip { visibility: visible; background: var(--back); color: var(--surface); }
+.node.on-err > .row .chip { visibility: visible; background: var(--err); color: var(--surface); }
+.node.on-warn > .row .chip { visibility: visible; background: var(--warn); color: var(--surface); }
+.component { background: var(--surface-2); }
+
+.readout { display: grid; gap: 12px; min-width: 0; }
+.gauges { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.gauge { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px; }
+.gauge b { display: block; font: 600 28px/1.1 var(--mono); font-variant-numeric: tabular-nums; }
+.spinbar { height: 4px; border-radius: 4px; background: var(--surface-2); margin-top: 8px; overflow: hidden; }
+.spinbar span { display: block; height: 100%; width: 0; background: var(--out); transition: width .25s; }
+.spinbar.busy span { width: 100%; animation: pulse 1.1s ease-in-out infinite alternate; }
+@keyframes pulse { from { opacity: .35 } to { opacity: 1 } }
+.now { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 14px; display: grid; gap: 6px; min-height: 112px; }
+.now .dir { font: 600 12px var(--mono); letter-spacing: .06em; }
+.equation { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px; overflow-x: auto; }
+.equation .f { font: 15px/1.9 var(--mono); white-space: nowrap; }
+.equation span[data-k] { padding: 1px 2px; border-radius: 4px; transition: background .2s, color .2s; }
+.equation span.done { color: var(--muted); }
+.equation span.cur { background: var(--out); color: var(--surface); }
+.equation span.cur.back { background: var(--back); }
+.equation span.cur.err { background: var(--err); }
+.equation span.cur.warn { background: var(--warn); }
+.log { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 10px 0; max-height: 260px; overflow: auto; }
+.log ol { list-style: none; margin: 0; padding: 0; font: 12.5px/1.5 var(--mono); }
+.log li { display: grid; grid-template-columns: 62px 1fr; gap: 8px; padding: 3px 14px; }
+.log li .t { color: var(--muted); font-variant-numeric: tabular-nums; text-align: right; }
+.log li.out .m { color: var(--out); }
+.log li.back .m { color: var(--back); }
+.log li.err .m { color: var(--err); }
+.log li.warn .m { color: var(--warn); }
+.log li.console .m { font-weight: 600; }
+.log li.latest { background: var(--surface-2); }
+.consoleout { font: 600 13px var(--mono); }
+
+/* marble */
+.lanes-wrap { overflow-x: auto; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; }
+.lanes { min-width: 700px; padding: 14px 16px 10px; position: relative; }
+.lane { display: grid; grid-template-columns: 190px 1fr; align-items: center; height: 46px; }
+.lane .lbl { font: 600 12.5px var(--mono); padding-right: 12px; }
+.lane .track { position: relative; height: 100%; border-bottom: 1px dashed var(--line); }
+.marble { position: absolute; top: 50%; transform: translate(-50%, -50%); font: 600 11.5px/1 var(--mono); padding: 6px 8px; border-radius: 999px;
+  background: var(--out-soft); color: var(--out); border: 1.5px solid var(--out); white-space: nowrap; transition: opacity .25s; }
+.marble.res { background: var(--back-soft); color: var(--back); border-color: var(--back); }
+.bar { position: absolute; top: 50%; height: 10px; transform: translateY(-50%); border-radius: 5px; background: var(--out); transition: opacity .25s; }
+.bar.cancelled { background: repeating-linear-gradient(45deg, var(--err) 0 5px, transparent 5px 9px); border: 1px solid var(--err); }
+.barlabel { position: absolute; top: 4px; font: 11px var(--mono); color: var(--muted); white-space: nowrap; transition: opacity .25s; }
+.axis { display: grid; grid-template-columns: 190px 1fr; height: 26px; }
+.axis .ticks { position: relative; }
+.axis .ticks span { position: absolute; transform: translateX(-50%); font: 11px var(--mono); color: var(--muted); top: 6px; }
+.cursor { position: absolute; top: 8px; bottom: 30px; width: 2px; background: var(--ink); opacity: .55; pointer-events: none; }
+.hidden-yet { opacity: .08; }
+
+/* inside the box */
+.dn { font: 700 11px/1 var(--mono); padding: 3px 6px; border-radius: 6px; background: var(--ink); color: var(--surface); }
+.build { margin-top: 20px; display: grid; gap: 12px; }
+.build[hidden] { display: none; }
+.tabs { display: flex; flex-wrap: wrap; gap: 6px; }
+.tabs button[aria-selected="true"] { background: var(--surface-2); border-color: var(--ink); font-weight: 600; }
+.code { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 10px 0; overflow-x: auto; font: 13px/1.6 var(--mono); }
+.code .cl { display: grid; grid-template-columns: 54px auto; padding: 1px 14px 1px 0; white-space: pre; border-left: 3px solid transparent; }
+.code .cl > i { font-style: normal; text-align: right; padding-right: 10px; color: var(--muted); user-select: none; }
+.code .cl[data-doll] { cursor: pointer; }
+.code .cl .cm { color: var(--muted); }
+.code .cl.down { background: var(--out-soft); border-left-color: var(--out); }
+.code .cl.up { background: var(--back-soft); border-left-color: var(--back); }
+.code .cl.drop { background: var(--warn-soft); border-left-color: var(--warn); }
+.code .cl.hover, .doll.hover { outline: 2px dashed var(--ink); outline-offset: 2px; }
+.out { background: var(--surface-2); border-radius: 10px; padding: 10px 14px; font: 12.5px/1.6 var(--mono); white-space: pre; overflow-x: auto; }
+.takeaway { border-left: 3px solid var(--out); padding: 4px 0 4px 12px; }
+
+.inside { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); gap: 16px; align-items: start; }
+@media (max-width: 860px) { .inside { grid-template-columns: 1fr; } }
+.doll { border: 1.5px solid var(--line); border-radius: 10px; padding: 10px 12px; display: grid; gap: 6px; background: var(--surface); transition: border-color .2s, background .2s; min-width: 0; }
+.doll .doll { background: var(--bg); }
+.doll .doll .doll { background: var(--surface); }
+.doll .doll .doll .doll { background: var(--bg); }
+.doll .head { font: 600 13px var(--mono); display: flex; flex-wrap: wrap; gap: 4px 10px; align-items: baseline; }
+.doll .op { font: 12.5px var(--mono); color: var(--muted); }
+.doll .op b { color: var(--ink); font-weight: 600; }
+.doll .plain { font-size: 13px; color: var(--muted); }
+.doll.down { border-color: var(--out); background: var(--out-soft); }
+.doll.up { border-color: var(--back); background: var(--back-soft); }
+.doll.drop { border-color: var(--warn); background: var(--warn-soft); }
+.reqobj { font: 12.5px/1.55 var(--mono); background: var(--surface-2); border-radius: 8px; padding: 8px 10px; white-space: pre; overflow-x: auto; }
+.status { display: grid; gap: 6px; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px; }
+.status div { display: flex; justify-content: space-between; gap: 10px; font: 13px var(--mono); }
+.status .no { color: var(--muted); }
+.status .yes { color: var(--back); font-weight: 600; }
+.status .busy { color: var(--out); font-weight: 600; }
+.carry { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px; display: grid; gap: 6px; min-height: 150px; }
+.carry .val { font: 12.5px/1.5 var(--mono); background: var(--surface-2); border-radius: 8px; padding: 8px 10px; white-space: pre-wrap; word-break: break-word; }
+.carry .val.dropped { text-decoration: line-through; color: var(--warn); }
+.tryit pre { margin: 0; font: 12.5px/1.6 var(--mono); white-space: pre; overflow-x: auto; }
+
+/* cheat sheet */
+.rules { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px; }
+.rule { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 14px; display: grid; gap: 6px; align-content: start; }
+.rule h3 { font-size: 15.5px; }
+.rule p { font-size: 14px; color: var(--muted); }
+footer { font-size: 13px; color: var(--muted); }
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+</style>
+
+<div class="wrap">
+  <header class="intro">
+    <span class="eyebrow">Angular · HttpClient · RxJS</span>
+    <h1>Follow one request through the onion</h1>
+    <p class="muted">Press <b>Subscribe</b>, then step through it. Each step shows the clock, what runs, which way the box is travelling, and which part of the formula is being evaluated.</p>
+    <div class="legend"><span><i style="background:var(--out)"></i>request going out</span><span><i style="background:var(--back)"></i>response coming back</span><span><i style="background:var(--err)"></i>error</span><span><i style="background:var(--warn)"></i>cancelled</span></div>
+  </header>
+
+  <section aria-labelledby="h-fn">
+    <h2 id="h-fn">A function answers now. An Observable answers later.</h2>
+    <div class="compare">
+      <div class="panel">
+        <span class="eyebrow">Function · vending machine</span>
+        <pre>const y = double(5);  // t=0ms  y = 10
+// input in, output out, same instant</pre>
+        <p class="muted">f : Input → Output. You get the value as the return value.</p>
+      </div>
+      <div class="panel">
+        <span class="eyebrow">Observable · pizza order</span>
+        <pre>const receipt = http.get(url); // t=0   nothing sent
+receipt.subscribe(m => show(m)); // t=1   order placed
+// … t=120ms: Angular CALLS show(m)</pre>
+        <p class="muted">obs : (observer) → unsubscribe. Subscribing <i>calls</i> it, and the value is pushed to your callback later.</p>
+      </div>
+    </div>
+  </section>
+
+  <section aria-labelledby="h-inside" id="inside">
+    <div class="intro">
+      <h2 id="h-inside">What's inside the box before subscribe</h2>
+      <p class="muted"><code>const obs = http.post('/api/watchlist', &#123; movieId: 3 &#125;)</code> gives you a plain JavaScript object: four <code>Observable</code> objects nested like dolls. Each one knows <b>what to do</b> (<code>operator</code>) and <b>which doll is inside it</b> (<code>source</code>). The smallest doll holds your request. This is Angular 22's real code: <code>of(req).pipe(concatMap(…), filter(…), map(…))</code>.</p>
+    </div>
+    <div class="controls">
+      <button id="in-step" class="primary">obs.subscribe(…)</button>
+      <button id="in-play">Play</button>
+      <button id="in-reset">Reset</button>
+    </div>
+    <div class="inside">
+      <div class="doll" id="d-map">
+        <div class="head"><span class="dn">doll1</span> obs = Observable <span class="op">operator: <b>map(res =&gt; res.body)</b></span></div>
+        <span class="plain">What you got back. On the way out, it takes just the body out of the response.</span>
+        <div class="doll" id="d-filter">
+          <div class="head"><span class="dn">doll2</span> .source = Observable <span class="op">operator: <b>filter(e =&gt; e instanceof HttpResponse)</b></span></div>
+          <span class="plain">Lets only the final response through. Throws away "request sent" notices.</span>
+          <div class="doll" id="d-concat">
+            <div class="head"><span class="dn">doll3</span> .source = Observable <span class="op">operator: <b>concatMap(req =&gt; handler.handle(req))</b></span></div>
+            <span class="plain">The interceptor onion and the network live here. Nothing runs until someone subscribes.</span>
+            <div class="doll" id="d-of">
+              <div class="head"><span class="dn">doll4</span> .source = Observable <span class="op">created by: <b>of(req)</b></span></div>
+              <span class="plain">Holds the request letter, ready to hand it out when asked.</span>
+              <div class="reqobj">HttpRequest {
+  method: 'POST',
+  url: '/api/watchlist',
+  body: { movieId: 3 },
+  headers: HttpHeaders { (empty) },
+  responseType: 'json'
+}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="readout">
+        <div class="status" aria-label="What exists right now">
+          <div><span>network request</span><span id="st-net" class="no">not sent</span></div>
+          <div><span>interceptors</span><span id="st-int" class="no">not run</span></div>
+          <div><span>response</span><span id="st-res" class="no">does not exist yet</span></div>
+          <div><span>your callback</span><span id="st-cb" class="no">not called</span></div>
+        </div>
+        <div class="carry" aria-live="polite">
+          <span class="eyebrow" id="in-dir">before subscribe · t = 0 ms</span>
+          <h3 id="in-title">Just a description</h3>
+          <p class="muted" id="in-text">All four dolls exist, and that is all. Building them took microseconds and touched no network.</p>
+          <div class="val" id="in-val" hidden></div>
+        </div>
+        <div class="panel tryit">
+          <span class="eyebrow">Try it in your app</span>
+          <pre>const obs = this.http.get('/api/movies');
+console.log(obs);        // Observable { source, operator }
+console.log(obs.source); // the filter doll
+// Network tab: still empty!
+obs.subscribe(x => console.log(x)); // now it appears</pre>
+          <span class="muted" style="font-size:12.5px">source and operator are RxJS internals: look, but don't use them in real code.</span>
+        </div>
+      </div>
+    </div>
+      <div class="build" id="build">
+      <div class="intro">
+        <span class="eyebrow">Build the dolls yourself</span>
+        <h3>The code that makes each box</h3>
+        <p class="muted">Every <code>.pipe(operator)</code> call wraps the Observable you already have in one new Observable. So you build the dolls from the inside out: first <span class="dn">doll4</span>, then wrap it, and so on. Hover a line to see its box, or press Next step above: the line that is working lights up too.</p>
+      </div>
+      <div class="tabs" role="tablist" aria-label="Code views">
+        <button role="tab" aria-selected="true" aria-controls="tab-a" id="tb-a">1 · Line by line (Angular)</button>
+        <button role="tab" aria-selected="false" aria-controls="tab-b" id="tb-b">2 · Run it yourself (plain RxJS)</button>
+        <button role="tab" aria-selected="false" aria-controls="tab-c" id="tb-c">3 · One operator written by hand</button>
+      </div>
+      <div role="tabpanel" id="tab-a" class="build">
+        <div class="code" id="code-a">
+<div class="cl"><i>1</i><span>import { of } from &#x27;rxjs&#x27;;</span></div>
+<div class="cl"><i>2</i><span>import { concatMap, filter, map } from &#x27;rxjs/operators&#x27;;</span></div>
+<div class="cl"><i>3</i><span>import { HttpRequest, HttpResponse } from &#x27;@angular/common/http&#x27;;</span></div>
+<div class="cl"><i>4</i><span> </span></div>
+<div class="cl"><i>5</i><span><span class="cm">// the letter: a plain object, nothing is sent</span></span></div>
+<div class="cl"><i>6</i><span>const req = new HttpRequest(&#x27;POST&#x27;, &#x27;/api/watchlist&#x27;, { movieId: 3 });</span></div>
+<div class="cl"><i>7</i><span> </span></div>
+<div class="cl"><i>8</i><span><span class="cm">// build the dolls from the INSIDE out, one .pipe(operator) per doll</span></span></div>
+<div class="cl" data-doll="of" id="cl-of"><i>9</i><span>const doll4 = of(req);                                   <span class="cm">// holds the letter</span></span></div>
+<div class="cl" data-doll="concat" id="cl-concat"><i>10</i><span>const doll3 = doll4.pipe(concatMap(r =&gt; handler.handle(r)));  <span class="cm">// onion + network</span></span></div>
+<div class="cl" data-doll="filter" id="cl-filter"><i>11</i><span>const doll2 = doll3.pipe(filter(e =&gt; e instanceof HttpResponse)); <span class="cm">// only the response</span></span></div>
+<div class="cl" data-doll="map" id="cl-map"><i>12</i><span>const doll1 = doll2.pipe(map(res =&gt; res.body));          <span class="cm">// just the body</span></span></div>
+<div class="cl"><i>13</i><span> </span></div>
+<div class="cl"><i>14</i><span><span class="cm">// doll1 is exactly what http.post(...) returns to you</span></span></div>
+<div class="cl"><i>15</i><span>doll1.source === doll2;   <span class="cm">// true</span></span></div>
+<div class="cl"><i>16</i><span>doll2.source === doll3;   <span class="cm">// true</span></span></div>
+<div class="cl"><i>17</i><span>doll3.source === doll4;   <span class="cm">// true</span></span></div>
+<div class="cl"><i>18</i><span> </span></div>
+<div class="cl"><i>19</i><span><span class="cm">// Angular writes the same four dolls in one line:</span></span></div>
+<div class="cl"><i>20</i><span>const obs = of(req).pipe(</span></div>
+<div class="cl" data-doll="concat" id="cl-concat2"><i>21</i><span>  concatMap(r =&gt; handler.handle(r)),   <span class="cm">// → doll3</span></span></div>
+<div class="cl" data-doll="filter" id="cl-filter2"><i>22</i><span>  filter(e =&gt; e instanceof HttpResponse), <span class="cm">// → doll2</span></span></div>
+<div class="cl" data-doll="map" id="cl-map2"><i>23</i><span>  map(res =&gt; res.body),                <span class="cm">// → doll1</span></span></div>
+<div class="cl"><i>24</i><span>);</span></div>
+        </div>
+        <p class="takeaway"><b>Same thing, two spellings.</b> <code>a.pipe(op1, op2, op3)</code> is exactly <code>a.pipe(op1).pipe(op2).pipe(op3)</code>. The operators are listed top to bottom, but each one wraps the result of the one above it, so the <b>last</b> operator (<code>map</code>) ends up as the <b>outermost</b> doll. <code>handler</code> is Angular's interceptor chain; you never build it yourself.</p>
+      </div>
+      <div role="tabpanel" id="tab-b" class="build" hidden>
+        <p class="muted">No Angular needed: save as <code>dolls.mjs</code> in any folder with RxJS (<code>npm i rxjs</code>), then run <code>node dolls.mjs</code>. A fake <code>handler</code> plays the server: it emits a "Sent" event straight away and the response 120 ms later, just like HttpClient.</p>
+        <div class="code">
+<div class="cl"><i>1</i><span>import { of, Observable } from &#x27;rxjs&#x27;;</span></div>
+<div class="cl"><i>2</i><span>import { concatMap, filter, map } from &#x27;rxjs/operators&#x27;;</span></div>
+<div class="cl"><i>3</i><span> </span></div>
+<div class="cl"><i>4</i><span>class FakeRequest  { constructor(method, url, body) { Object.assign(this, { method, url, body }); } }</span></div>
+<div class="cl"><i>5</i><span>class FakeResponse { constructor(body) { this.status = 201; this.body = body; } }</span></div>
+<div class="cl"><i>6</i><span>let t0 = Date.now(); const t = () =&gt; `t=${String(Date.now() - t0).padStart(3)}ms`;</span></div>
+<div class="cl"><i>7</i><span> </span></div>
+<div class="cl"><i>8</i><span><span class="cm">// stands in for handler.handle(req): the interceptor onion + the network</span></span></div>
+<div class="cl"><i>9</i><span>const handler = {</span></div>
+<div class="cl"><i>10</i><span>  handle: req =&gt; new Observable(sub =&gt; {</span></div>
+<div class="cl"><i>11</i><span>    console.log(t(), &#x27;  [network] request sent:&#x27;, req.method, req.url);</span></div>
+<div class="cl"><i>12</i><span>    sub.next({ type: &#x27;Sent&#x27; });                              <span class="cm">// event 1: &quot;request sent&quot;</span></span></div>
+<div class="cl"><i>13</i><span>    const id = setTimeout(() =&gt; {</span></div>
+<div class="cl"><i>14</i><span>      sub.next(new FakeResponse({ id: 7, movieId: req.body.movieId }));  <span class="cm">// event 2: the response</span></span></div>
+<div class="cl"><i>15</i><span>      sub.complete();</span></div>
+<div class="cl"><i>16</i><span>    }, 120);</span></div>
+<div class="cl"><i>17</i><span>    return () =&gt; clearTimeout(id);                           <span class="cm">// what unsubscribe() cancels</span></span></div>
+<div class="cl"><i>18</i><span>  }),</span></div>
+<div class="cl"><i>19</i><span>};</span></div>
+<div class="cl"><i>20</i><span> </span></div>
+<div class="cl"><i>21</i><span>const req   = new FakeRequest(&#x27;POST&#x27;, &#x27;/api/watchlist&#x27;, { movieId: 3 });</span></div>
+<div class="cl"><i>22</i><span>const doll4 = of(req);</span></div>
+<div class="cl"><i>23</i><span>const doll3 = doll4.pipe(concatMap(r =&gt; {</span></div>
+<div class="cl"><i>24</i><span>  console.log(t(), &#x27; concatMap got the request&#x27;);</span></div>
+<div class="cl"><i>25</i><span>  return handler.handle(r);</span></div>
+<div class="cl"><i>26</i><span>}));</span></div>
+<div class="cl"><i>27</i><span>const doll2 = doll3.pipe(filter(e =&gt; {</span></div>
+<div class="cl"><i>28</i><span>  const keep = e instanceof FakeResponse;</span></div>
+<div class="cl"><i>29</i><span>  console.log(t(), &#x27; filter saw&#x27;, keep ? &#x27;FakeResponse → keep&#x27; : `${e.type} → drop`);</span></div>
+<div class="cl"><i>30</i><span>  return keep;</span></div>
+<div class="cl"><i>31</i><span>}));</span></div>
+<div class="cl"><i>32</i><span>const doll1 = doll2.pipe(map(res =&gt; {</span></div>
+<div class="cl"><i>33</i><span>  console.log(t(), &#x27; map takes .body&#x27;);</span></div>
+<div class="cl"><i>34</i><span>  return res.body;</span></div>
+<div class="cl"><i>35</i><span>}));</span></div>
+<div class="cl"><i>36</i><span> </span></div>
+<div class="cl"><i>37</i><span>console.log(t(), &#x27;built 4 dolls. doll1.source === doll2:&#x27;, doll1.source === doll2);</span></div>
+<div class="cl"><i>38</i><span>t0 = Date.now();</span></div>
+<div class="cl"><i>39</i><span>console.log(t(), &#x27;calling subscribe…&#x27;);</span></div>
+<div class="cl"><i>40</i><span>doll1.subscribe(body =&gt; console.log(t(), &#x27;YOUR CALLBACK:&#x27;, body));</span></div>
+<div class="cl"><i>41</i><span>console.log(t(), &#x27;subscribe() returned (the response is not here yet)&#x27;);</span></div>
+        </div>
+        <span class="eyebrow">Real output (run with RxJS 7.8)</span>
+        <div class="out">t=  0ms built 4 dolls. doll1.source === doll2: true
+t=  0ms calling subscribe…
+t=  1ms  concatMap got the request
+t=  1ms   [network] request sent: POST /api/watchlist
+t=  1ms  filter saw Sent → drop
+t=  1ms subscribe() returned (the response is not here yet)
+t=122ms  filter saw FakeResponse → keep
+t=123ms  map takes .body
+t=123ms YOUR CALLBACK: { id: 7, movieId: 3 }</div>
+        <p class="takeaway">Read the output top to bottom. Nothing in the operators runs until <code>subscribe</code>. <code>subscribe()</code> <b>returns before</b> the response arrives (line 6 of the output). The "Sent" event dies in <code>filter</code>, so your callback only ever sees the body.</p>
+      </div>
+      <div role="tabpanel" id="tab-c" class="build" hidden>
+        <p class="muted">What is inside an operator? Here is <code>map</code> written without RxJS's version. An operator is just a function that takes the doll inside (<code>source</code>) and returns a new, bigger doll.</p>
+        <div class="code">
+<div class="cl"><i>1</i><span>import { of, Observable } from &#x27;rxjs&#x27;;</span></div>
+<div class="cl"><i>2</i><span> </span></div>
+<div class="cl"><i>3</i><span><span class="cm">// map, written by hand: a NEW Observable that subscribes to the one inside it</span></span></div>
+<div class="cl"><i>4</i><span>function myMap(fn) {</span></div>
+<div class="cl"><i>5</i><span>  return source =&gt; new Observable(subscriber =&gt; {</span></div>
+<div class="cl"><i>6</i><span>    console.log(&#x27;  myMap: someone subscribed to me → I subscribe to my source&#x27;);</span></div>
+<div class="cl"><i>7</i><span>    return source.subscribe({</span></div>
+<div class="cl"><i>8</i><span>      next: value =&gt; subscriber.next(fn(value)),   <span class="cm">// value comes OUT, transformed</span></span></div>
+<div class="cl"><i>9</i><span>      error: err =&gt; subscriber.error(err),</span></div>
+<div class="cl"><i>10</i><span>      complete: () =&gt; subscriber.complete(),</span></div>
+<div class="cl"><i>11</i><span>    });</span></div>
+<div class="cl"><i>12</i><span>  });</span></div>
+<div class="cl"><i>13</i><span>}</span></div>
+<div class="cl"><i>14</i><span> </span></div>
+<div class="cl"><i>15</i><span>const inner = of({ status: 201, body: { id: 7 } });</span></div>
+<div class="cl"><i>16</i><span>const outer = inner.pipe(myMap(res =&gt; res.body));   <span class="cm">// same as myMap(res =&gt; res.body)(inner)</span></span></div>
+<div class="cl"><i>17</i><span> </span></div>
+<div class="cl"><i>18</i><span>console.log(&#x27;built. nothing printed above this line yet.&#x27;);</span></div>
+<div class="cl"><i>19</i><span>outer.subscribe(v =&gt; console.log(&#x27;callback got&#x27;, v));</span></div>
+        </div>
+        <span class="eyebrow">Real output</span>
+        <div class="out">built. nothing printed above this line yet.
+  myMap: someone subscribed to me → I subscribe to my source
+callback got { id: 7 }</div>
+        <p class="takeaway">Look at line 6: when someone subscribes to the outer doll, it subscribes to the doll inside it. That's why subscribing walks <b>in</b> (outside → in). Then values come back <b>out</b> through each <code>next</code>, and each doll changes the value on the way (line 8). Every RxJS operator works like this.</p>
+      </div>
+    </div>
+  </section>
+
+  <section aria-labelledby="h-onion">
+    <div class="intro">
+      <h2 id="h-onion">The interceptor onion, millisecond by millisecond</h2>
+      <p class="muted">This is what happens inside the <b>concatMap</b> doll above, once you subscribe.</p>
+      <p class="muted">Component code: <code>console.log('A'); http.post('/api/watchlist', body).subscribe({ next: () =&gt; console.log('C'), error: e =&gt; console.log('E') }); console.log('B');</code></p>
+    </div>
+    <div class="controls">
+      <div class="seg" role="group" aria-label="Scenario">
+        <button id="sc-ok" aria-pressed="true">201 Created</button>
+        <button id="sc-401" aria-pressed="false">401 expired</button>
+        <button id="sc-cancel" aria-pressed="false">User leaves at 50 ms</button>
+      </div>
+      <button id="btn-step" class="primary">Subscribe</button>
+      <button id="btn-play">Play</button>
+      <button id="btn-reset">Reset</button>
+    </div>
+
+    <div class="bench">
+      <div class="onion" aria-label="Interceptor chain">
+        <div class="node component" id="n-component"><div class="row"><span class="name">Your component</span><span class="chip">box</span></div>
+          <span class="what">calls http.post(...).subscribe(...)</span></div>
+        <div class="node layer" id="n-loading"><div class="row"><span class="name">1 · loadingInterceptor</span><span class="chip">box</span></div>
+          <span class="what">out: inFlight + 1 · back: finalize(inFlight − 1)</span>
+          <div class="node layer" id="n-auth"><div class="row"><span class="name">2 · authInterceptor</span><span class="chip">box</span></div>
+            <span class="what">out: req.clone({ Authorization }) · back: nothing</span>
+            <div class="node layer" id="n-unauth"><div class="row"><span class="name">3 · unauthorizedInterceptor</span><span class="chip">box</span></div>
+              <span class="what">out: nothing · back: catchError(401 → logout, rethrow)</span>
+              <div class="node server" id="n-server"><div class="row" style="justify-content:center"><span class="name">network → server</span><span class="chip">box</span></div>
+                <span class="what">POST /api/watchlist</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="readout">
+        <div class="gauges">
+          <div class="gauge"><span class="eyebrow">clock</span><b id="clock">—</b></div>
+          <div class="gauge"><span class="eyebrow">inFlight (spinner)</span><b id="inflight">0</b><div class="spinbar" id="spinbar"><span></span></div></div>
+        </div>
+        <div class="now" aria-live="polite">
+          <span class="dir eyebrow" id="now-dir">ready</span>
+          <h3 id="now-title">Nothing has happened yet</h3>
+          <p class="muted" id="now-text">Building the request costs nothing. Press Subscribe to place the order.</p>
+        </div>
+        <div class="equation" aria-label="Formula">
+          <span class="eyebrow">result =</span>
+          <div class="f" id="eq"><span data-k="p1">p1(</span><span data-k="p2">p2(</span><span data-k="p3">p3(</span><span data-k="S">S(</span><span data-k="r3">r3(</span><span data-k="r2">r2(</span><span data-k="r1">r1(</span><span data-k="req">req</span>)))))))</div>
+          <span class="muted" style="font-size:12.5px">r = way out (r1 runs first) · S = server · p = way back (p3 runs first)</span>
+        </div>
+        <div class="log"><ol id="log" aria-label="Event log"></ol></div>
+        <div class="consoleout muted">console: <span id="console">(empty)</span></div>
+      </div>
+    </div>
+  </section>
+
+  <section aria-labelledby="h-marble">
+    <div class="intro">
+      <h2 id="h-marble">Operators work over time: the search box</h2>
+      <p class="muted">Each lane is the stream after one operator. Press Play and watch the values move down the pipe. In the second scenario the user types a new term while the first request is still running, and <code>switchMap</code> cancels it.</p>
+    </div>
+    <div class="controls">
+      <div class="seg" role="group" aria-label="Typing scenario">
+        <button id="mb-a" aria-pressed="true">Types "nolan", waits</button>
+        <button id="mb-b" aria-pressed="false">Changes mind to "coco"</button>
+      </div>
+      <button id="mb-play" class="primary">Play</button>
+    </div>
+    <div class="lanes-wrap"><div class="lanes" id="lanes"></div></div>
+  </section>
+
+  <section aria-labelledby="h-rules">
+    <h2 id="h-rules">Four rules that prevent most interceptor bugs</h2>
+    <div class="rules">
+      <div class="rule"><h3>Return <code>next(req)</code></h3><p>Forget the <code>return</code> and the chain is broken: the request never leaves.</p></div>
+      <div class="rule"><h3>Clone, don't mutate</h3><p>Requests are immutable. <code>req.headers.set()</code> returns a new object you then ignore, so it fails silently. Use <code>req.clone({ setHeaders })</code>.</p></div>
+      <div class="rule"><h3><code>finalize</code> for cleanup</h3><p>It runs after success, error <i>and</i> cancel. <code>tap</code> never sees a cancel.</p></div>
+      <div class="rule"><h3>Catch, react, rethrow</h3><p><code>return throwError(() =&gt; err)</code> after handling. Returning <code>of(null)</code> tells the component the request succeeded.</p></div>
+    </div>
+  </section>
+
+  <footer>Companion to aegis-console M11 (RxJS) and M12 (HTTP &amp; interceptors). Times are illustrative: the server takes about 120 ms.</footer>
+</div>
+
+<script>
+(function () {
+  // ── Onion simulator ───────────────────────────────────────────────
+  // dir: out | back | err | warn | idle · eq: formula term being evaluated
+  const common = [
+    { t: 0, node: 'component', dir: 'idle', title: "console.log('A')", text: 'Plain synchronous code runs first.', console: 'A' },
+    { t: 0, node: 'component', dir: 'idle', title: 'http.post(...) returns an Observable', text: 'This is the receipt. No interceptor has run and nothing has been sent. It is a function waiting to be called.' },
+    { t: 1, node: 'component', dir: 'out', title: '.subscribe(...) is called', text: 'Subscribing calls the Observable. The whole chain now runs synchronously, top to bottom.', eq: 'req' },
+    { t: 1, node: 'loading', dir: 'out', title: 'loading: code before next(req)', text: 'inFlight.update(n => n + 1). The spinner appears. Then it calls next(req), which is "everyone after me".', eq: 'r1', inflight: 1 },
+    { t: 1, node: 'auth', dir: 'out', title: 'auth: clone and stamp the token', text: "req.clone({ setHeaders: { Authorization: 'Bearer tok-1' } }), then next(stampedReq).", eq: 'r2' },
+    { t: 1, node: 'unauth', dir: 'out', title: 'unauthorized: nothing on the way out', text: 'It calls next(req) and attaches catchError, which waits for whatever comes back.', eq: 'r3' },
+    { t: 2, node: 'server', dir: 'out', title: 'The request leaves the browser', text: 'next() of the last interceptor is the real HTTP backend. The XHR/fetch is now on the network.', eq: 'S' },
+    { t: 2, node: 'component', dir: 'idle', title: "subscribe() has returned, so console.log('B')", text: 'The line after subscribe runs NOW, before any data exists. This is why B prints before C.', console: 'B' },
+  ];
+  const scenarios = {
+    ok: common.concat([
+      { t: 60, node: 'server', dir: 'out', title: 'Waiting…', text: 'JavaScript is free: you can click, scroll and type. Only the network is busy.', eq: 'S' },
+      { t: 122, node: 'server', dir: 'back', title: 'Server answers 201 Created', text: 'The response starts travelling back up through the same layers, innermost first.', eq: 'S' },
+      { t: 122, node: 'unauth', dir: 'back', title: 'unauthorized: catchError sees no error', text: 'A success value just passes through catchError untouched.', eq: 'p3' },
+      { t: 122, node: 'auth', dir: 'back', title: 'auth: nothing on the way back', text: 'It returned next(stampedReq) as-is, so the value passes straight through.', eq: 'p2' },
+      { t: 122, node: 'component', dir: 'back', title: "Your next() callback runs: console.log('C')", text: 'The value reaches the subscriber. HttpClient emits once, then completes.', console: 'C', eq: 'p1' },
+      { t: 122, node: 'loading', dir: 'back', title: 'loading: finalize runs', text: 'The stream completed, so finalize fires: inFlight 1 → 0 and the spinner disappears.', eq: 'p1', inflight: 0, final: true },
+    ]),
+    e401: common.concat([
+      { t: 60, node: 'server', dir: 'out', title: 'Waiting…', text: 'JavaScript is free while the request is in flight.', eq: 'S' },
+      { t: 122, node: 'server', dir: 'err', title: 'Server answers 401 Unauthorized', text: 'The token expired. An ERROR travels back instead of a value.', eq: 'S' },
+      { t: 122, node: 'unauth', dir: 'err', title: 'unauthorized: catchError catches it', text: "status 401 → auth.logout('Please sign in again'), then return throwError(() => err) so the caller still sees it.", eq: 'p3' },
+      { t: 122, node: 'auth', dir: 'err', title: 'auth: the error passes through', text: 'No catchError here, so the error keeps travelling up.', eq: 'p2' },
+      { t: 122, node: 'component', dir: 'err', title: "Your error callback runs: console.log('E')", text: 'next() is never called. error() gets the HttpErrorResponse (status 401).', console: 'E', eq: 'p1' },
+      { t: 122, node: 'loading', dir: 'back', title: 'loading: finalize STILL runs', text: 'Errors end the stream too: inFlight 1 → 0. The spinner cannot get stuck.', eq: 'p1', inflight: 0, final: true },
+    ]),
+    cancel: common.concat([
+      { t: 30, node: 'server', dir: 'out', title: 'Waiting…', text: 'The request is in flight. The user clicks to another page.', eq: 'S' },
+      { t: 50, node: 'component', dir: 'warn', title: 'Component destroyed → unsubscribe()', text: 'toSignal / takeUntilDestroyed / the async pipe unsubscribe for you. The browser aborts the request.', eq: 'p1' },
+      { t: 50, node: 'loading', dir: 'warn', title: 'loading: finalize runs on cancel too', text: 'inFlight 1 → 0. No C and no E: your callbacks are never called after unsubscribe. tap() would have missed this.', eq: 'p1', inflight: 0, final: true },
+      { t: 122, node: 'server', dir: 'warn', title: 'A late answer (if any) is ignored', text: 'Nobody is listening anymore. This is exactly how switchMap cancels old searches.', eq: 'S' },
+    ]),
+  };
+  const order = ['p1', 'p2', 'p3', 'S', 'r3', 'r2', 'r1', 'req'];
+  let scenario = 'ok', i = -1, timer = null, consoleText = [], inflight = 0;
+  const $ = id => document.getElementById(id);
+  const nodes = { component: $('n-component'), loading: $('n-loading'), auth: $('n-auth'), unauth: $('n-unauth'), server: $('n-server') };
+  const dirLabel = { out: '↓ way out', back: '↑ way back', err: '↑ way back · error', warn: '✕ cancelled', idle: 'component code' };
+
+  function render() {
+    const steps = scenarios[scenario];
+    const s = steps[i];
+    Object.values(nodes).forEach(n => n.classList.remove('on-out', 'on-back', 'on-err', 'on-warn'));
+    $('btn-step').textContent = i < 0 ? 'Subscribe' : i >= steps.length - 1 ? 'Done' : 'Next step';
+    $('btn-step').disabled = i >= steps.length - 1;
+    const log = $('log');
+    if (!s) {
+      $('clock').textContent = '—'; $('now-dir').textContent = 'ready';
+      $('now-title').textContent = 'Nothing has happened yet';
+      $('now-text').textContent = 'Building the request costs nothing. Press Subscribe to place the order.';
+      log.innerHTML = ''; $('console').textContent = '(empty)'; setInflight(0);
+      document.querySelectorAll('#eq span').forEach(e => (e.className = ''));
+      return;
+    }
+    const cls = s.dir === 'idle' ? null : 'on-' + s.dir;
+    if (cls) nodes[s.node].classList.add(cls);
+    $('clock').textContent = 't = ' + s.t + ' ms';
+    $('now-dir').textContent = dirLabel[s.dir];
+    $('now-dir').style.color = s.dir === 'idle' ? 'var(--muted)' : `var(--${s.dir === 'warn' ? 'warn' : s.dir === 'err' ? 'err' : s.dir})`;
+    $('now-title').textContent = s.title;
+    $('now-text').textContent = s.text;
+    // inflight + console are cumulative up to i
+    let f = 0, out = [];
+    for (let k = 0; k <= i; k++) { if (steps[k].inflight !== undefined) f = steps[k].inflight; if (steps[k].console) out.push(steps[k].console); }
+    setInflight(f);
+    $('console').textContent = out.length ? out.join('  ') : '(empty)';
+    // equation
+    const kDone = new Set();
+    for (let k = 0; k < i; k++) if (steps[k].eq) kDone.add(steps[k].eq);
+    document.querySelectorAll('#eq span').forEach(e => {
+      const key = e.dataset.k;
+      e.className = key === s.eq ? 'cur ' + (s.dir === 'idle' ? '' : s.dir) : kDone.has(key) ? 'done' : '';
+    });
+    // log
+    log.innerHTML = '';
+    for (let k = 0; k <= i; k++) {
+      const st = steps[k];
+      const li = document.createElement('li');
+      li.className = (st.dir === 'idle' ? '' : st.dir) + (st.console ? ' console' : '') + (k === i ? ' latest' : '');
+      li.innerHTML = `<span class="t">${st.t}ms</span><span class="m"></span>`;
+      li.querySelector('.m').textContent = (st.console ? `console: ${st.console} · ` : '') + st.title;
+      log.appendChild(li);
+    }
+    log.parentElement.scrollTop = log.parentElement.scrollHeight;
+  }
+  function setInflight(n) { inflight = n; $('inflight').textContent = n; $('spinbar').classList.toggle('busy', n > 0); }
+  function step() { if (i < scenarios[scenario].length - 1) { i++; render(); } else stop(); }
+  function stop() { clearInterval(timer); timer = null; $('btn-play').textContent = 'Play'; }
+  function reset() { stop(); i = -1; render(); }
+  $('btn-step').addEventListener('click', () => { stop(); step(); });
+  $('btn-reset').addEventListener('click', reset);
+  $('btn-play').addEventListener('click', () => {
+    if (timer) return stop();
+    if (i >= scenarios[scenario].length - 1) i = -1;
+    $('btn-play').textContent = 'Pause';
+    step();
+    timer = setInterval(() => { step(); if (i >= scenarios[scenario].length - 1) stop(); }, 1500);
+  });
+  const scBtns = { ok: $('sc-ok'), e401: $('sc-401'), cancel: $('sc-cancel') };
+  Object.entries(scBtns).forEach(([k, b]) => b.addEventListener('click', () => {
+    scenario = k; Object.values(scBtns).forEach(x => x.setAttribute('aria-pressed', String(x === b))); reset();
+  }));
+  // open in a meaningful state: the first half of the 201 run is already visible
+  i = 7; render();
+
+  // ── Inside the box ────────────────────────────────────────────────
+  // cls: down (subscribe travelling in) · up (value travelling out) · drop (filtered out)
+  const inSteps = [
+    { doll: 'map', cls: 'down', t: 1, dir: '↓ subscribing, outside → in', title: 'map gets your subscribe', text: 'It can\'t do anything yet, so it subscribes to its source: the filter doll.' },
+    { doll: 'filter', cls: 'down', t: 1, dir: '↓ subscribing, outside → in', title: 'filter subscribes to its source', text: 'Same thing: it asks the doll inside it to start.' },
+    { doll: 'concat', cls: 'down', t: 1, dir: '↓ subscribing, outside → in', title: 'concatMap subscribes to its source', text: 'It waits for a request to arrive from the of(req) doll.' },
+    { doll: 'of', cls: 'down', t: 1, dir: '↓ the smallest doll', title: 'of(req) hands out the request letter', text: 'It emits the HttpRequest object, the same one that was sitting there all along.', val: 'HttpRequest { method: \'POST\', url: \'/api/watchlist\', body: { movieId: 3 } }', st: {} },
+    { doll: 'concat', cls: 'down', t: 1, dir: '→ into the onion', title: 'concatMap runs handler.handle(req)', text: 'This is the interceptor chain: loading +1, auth stamps the token (on a clone), unauthorized attaches catchError. Then the request leaves the browser.', val: 'HttpRequest { …, headers: { Authorization: \'Bearer tok-1\' } }   ← a clone', st: { int: ['busy', 'running (way out)'], net: ['busy', 'sent, waiting'] } },
+    { doll: 'filter', cls: 'drop', t: 2, dir: '↑ first event comes back', title: 'filter throws away the "Sent" event', text: 'HttpClient first emits a "request sent" notice. It is not an HttpResponse, so filter drops it. Your callback never sees it.', val: '{ type: 0 }   // HttpEventType.Sent', dropped: true },
+    { doll: 'concat', cls: 'up', t: 122, dir: '↑ the answer comes back', title: 'The server answered: concatMap emits the response', text: 'The response has passed back through the interceptors (unauthorized → auth → loading). Now the response object exists for the first time.', val: 'HttpResponse { status: 201, body: { id: 7, movieId: 3 } }', st: { int: ['yes', 'ran (both ways)'], net: ['yes', 'done in 120 ms'], res: ['yes', 'HttpResponse 201'] } },
+    { doll: 'filter', cls: 'up', t: 122, dir: '↑ inside → out', title: 'filter lets the HttpResponse through', text: 'It is an HttpResponse, so it passes.', val: 'HttpResponse { status: 201, body: { id: 7, movieId: 3 } }' },
+    { doll: 'map', cls: 'up', t: 122, dir: '↑ inside → out', title: 'map takes out res.body', text: 'You asked for the body (the default), so the wrapper is removed.', val: '{ id: 7, movieId: 3 }' },
+    { doll: null, cls: 'up', t: 122, dir: '✓ delivered', title: 'Your next callback is called with the body', text: 'Then the stream completes (HttpClient emits once), and every doll cleans up. loading\'s finalize sets inFlight back to 0.', val: '{ id: 7, movieId: 3 }', st: { cb: ['yes', 'called once, then complete'] } },
+  ];
+  const dolls = { map: $('d-map'), filter: $('d-filter'), concat: $('d-concat'), of: $('d-of') };
+  const stIds = { net: 'st-net', int: 'st-int', res: 'st-res', cb: 'st-cb' };
+  const stDefault = { net: ['no', 'not sent'], int: ['no', 'not run'], res: ['no', 'does not exist yet'], cb: ['no', 'not called'] };
+  let ii = -1, inTimer = null;
+  function renderInside() {
+    Object.values(dolls).forEach(d => d.classList.remove('down', 'up', 'drop'));
+    document.querySelectorAll('#code-a .cl').forEach(l => l.classList.remove('down', 'up', 'drop'));
+    const st = { ...stDefault };
+    for (let k = 0; k <= ii; k++) Object.assign(st, inSteps[k].st || {});
+    Object.entries(st).forEach(([k, [cls, text]]) => { const el = $(stIds[k]); el.className = cls; el.textContent = text; });
+    const s = inSteps[ii];
+    $('in-step').textContent = ii < 0 ? 'obs.subscribe(…)' : ii >= inSteps.length - 1 ? 'Done' : 'Next step';
+    $('in-step').disabled = ii >= inSteps.length - 1;
+    const val = $('in-val');
+    if (!s) {
+      $('in-dir').textContent = 'before subscribe · t = 0 ms';
+      $('in-title').textContent = 'Just a description';
+      $('in-text').textContent = 'All four dolls exist, and that is all. Building them took microseconds and touched no network.';
+      val.hidden = true;
+      return;
+    }
+    if (s.doll) { dolls[s.doll].classList.add(s.cls); codeLines(s.doll).forEach(l => l.classList.add(s.cls)); }
+    $('in-dir').textContent = `${s.dir} · t = ${s.t} ms`;
+    $('in-dir').style.color = s.cls === 'down' ? 'var(--out)' : s.cls === 'drop' ? 'var(--warn)' : 'var(--back)';
+    $('in-title').textContent = s.title;
+    $('in-text').textContent = s.text;
+    val.hidden = !s.val;
+    val.textContent = s.val || '';
+    val.classList.toggle('dropped', !!s.dropped);
+  }
+  function inStop() { clearInterval(inTimer); inTimer = null; $('in-play').textContent = 'Play'; }
+  function inNext() { if (ii < inSteps.length - 1) { ii++; renderInside(); } if (ii >= inSteps.length - 1) inStop(); }
+  $('in-step').addEventListener('click', () => { inStop(); inNext(); });
+  $('in-reset').addEventListener('click', () => { inStop(); ii = -1; renderInside(); });
+  $('in-play').addEventListener('click', () => {
+    if (inTimer) return inStop();
+    if (ii >= inSteps.length - 1) ii = -1;
+    $('in-play').textContent = 'Pause';
+    inNext();
+    inTimer = setInterval(inNext, 1600);
+  });
+  // code lines ↔ dolls
+  function codeLines(doll) { return [...document.querySelectorAll(`#code-a .cl[data-doll="${doll}"]`)]; }
+  document.querySelectorAll('#code-a .cl[data-doll]').forEach(line => {
+    const doll = line.dataset.doll;
+    const on = v => { dolls[doll].classList.toggle('hover', v); codeLines(doll).forEach(l => l.classList.toggle('hover', v)); };
+    line.addEventListener('mouseenter', () => on(true));
+    line.addEventListener('mouseleave', () => on(false));
+    line.addEventListener('click', () => dolls[doll].scrollIntoView({ behavior: 'smooth', block: 'nearest' }));
+  });
+  // hovering a box lights up only the innermost doll under the pointer, and its code lines
+  const dollOf = el => Object.keys(dolls).find(k => dolls[k] === el);
+  const clearHover = () => document.querySelectorAll('#code-a .cl.hover, .doll.hover').forEach(x => x.classList.remove('hover'));
+  document.querySelector('.inside').addEventListener('mouseover', e => {
+    const d = e.target.closest('.doll'); clearHover();
+    if (d) codeLines(dollOf(d)).forEach(l => l.classList.add('hover'));
+  });
+  document.querySelector('.inside').addEventListener('mouseleave', clearHover);
+  const tabs = ['a', 'b', 'c'];
+  tabs.forEach(t => $('tb-' + t).addEventListener('click', () => tabs.forEach(u => {
+    $('tb-' + u).setAttribute('aria-selected', String(u === t));
+    $('tab-' + u).hidden = u !== t;
+  })));
+  renderInside();
+
+  // ── Marble lanes ──────────────────────────────────────────────────
+  const marbleScenarios = {
+    a: { max: 800, ticks: [0, 100, 200, 300, 400, 500, 600, 700, 800], lanes: [
+      ['keystrokes', [[0, 'n'], [80, 'no'], [150, 'nolan']]],
+      ['debounceTime(300)', [[450, 'nolan']]],
+      ['distinctUntilChanged()', [[450, 'nolan']]],
+      ['switchMap(search)', [], [[450, 600, 'GET ?q=nolan', false]]],
+      ['results (toSignal)', [[0, '[]', true], [600, '3 movies', true]]],
+    ]},
+    b: { max: 1200, ticks: [0, 200, 400, 600, 800, 1000, 1200], lanes: [
+      ['keystrokes', [[0, 'n'], [150, 'nolan'], [520, 'coco']]],
+      ['debounceTime(300)', [[450, 'nolan'], [820, 'coco']]],
+      ['distinctUntilChanged()', [[450, 'nolan'], [820, 'coco']]],
+      ['switchMap(search)', [], [[450, 820, 'nolan ✕ cancelled', true], [820, 1000, 'GET ?q=coco', false]]],
+      ['results (toSignal)', [[0, '[]', true], [1000, '1 movie', true]]],
+    ]},
+  };
+  let mb = 'a', raf = null;
+  const lanesEl = $('lanes');
+  function drawMarbles() {
+    const sc = marbleScenarios[mb];
+    const pct = t => (t / sc.max) * 100;
+    let html = '';
+    sc.lanes.forEach(([label, marbles, bars]) => {
+      html += `<div class="lane"><span class="lbl">${label}</span><div class="track">`;
+      (bars || []).forEach(([a, b, text, cancelled]) => {
+        html += `<div class="bar${cancelled ? ' cancelled' : ''}" data-t="${a}" style="left:${pct(a)}%;width:${pct(b) - pct(a)}%"></div>`;
+        html += `<span class="barlabel" data-t="${a}" style="left:${pct(a)}%">${text}</span>`;
+      });
+      marbles.forEach(([t, text, res]) => {
+        html += `<span class="marble${res ? ' res' : ''}" data-t="${t}" style="left:calc(${pct(t)}% + ${t === 0 ? 14 : 0}px)">${text}</span>`;
+      });
+      html += `</div></div>`;
+    });
+    html += `<div class="axis"><span></span><div class="ticks">${sc.ticks.map(t => `<span style="left:${pct(t)}%">${t}ms</span>`).join('')}</div></div>`;
+    html += `<div class="cursor" id="mb-cursor" hidden></div>`;
+    lanesEl.innerHTML = html;
+  }
+  function playMarbles() {
+    cancelAnimationFrame(raf);
+    const sc = marbleScenarios[mb];
+    const items = [...lanesEl.querySelectorAll('[data-t]')];
+    const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (reduce) { items.forEach(e => e.classList.remove('hidden-yet')); return; }
+    items.forEach(e => e.classList.add('hidden-yet'));
+    const cursor = $('mb-cursor');
+    cursor.hidden = false;
+    const track = lanesEl.querySelector('.track');
+    const offset = track.getBoundingClientRect().left - lanesEl.getBoundingClientRect().left;
+    const width = track.getBoundingClientRect().width;
+    const duration = 4500, start = performance.now();
+    const frame = now => {
+      const t = Math.min(sc.max, ((now - start) / duration) * sc.max);
+      cursor.style.left = offset + (t / sc.max) * width + 'px';
+      items.forEach(e => { if (+e.dataset.t <= t) e.classList.remove('hidden-yet'); });
+      if (t < sc.max) raf = requestAnimationFrame(frame);
+      else cursor.hidden = true;
+    };
+    raf = requestAnimationFrame(frame);
+  }
+  const mbBtns = { a: $('mb-a'), b: $('mb-b') };
+  Object.entries(mbBtns).forEach(([k, b]) => b.addEventListener('click', () => {
+    mb = k; Object.values(mbBtns).forEach(x => x.setAttribute('aria-pressed', String(x === b))); cancelAnimationFrame(raf); drawMarbles();
+  }));
+  $('mb-play').addEventListener('click', playMarbles);
+  drawMarbles();
+})();
+</script>

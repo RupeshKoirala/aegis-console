@@ -18,7 +18,7 @@ git checkout -q main
 node $GEN stub $SRC src/app/modules
 git push -q origin main solutions
 cd /home/user/aegis-authoring
-rm -rf modules; cp -r $SRC modules; cp $GEN /home/user/aegis-src/run.sh /home/user/aegis-src/publish.sh tools/
+rm -rf modules; cp -r $SRC modules; cp $GEN /home/user/aegis-src/run.sh /home/user/aegis-src/publish.sh /home/user/aegis-src/make-bugs.py tools/
 git add -A; $G commit -qm "Authoring: $MSG$TRAILER" || true
 git push -q origin authoring
 echo "published: $MSG"

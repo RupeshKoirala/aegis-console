@@ -1,0 +1,443 @@
+<title>Packet to Postgres</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;800&family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=IBM+Plex+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: a network operations notebook. One column of lessons; the two instruments (anycast map, system map) run full width. Teal = the path a packet takes; orange = a failure or reroute. */
+:root {
+  --bg: #f2f5f7; --surface: #ffffff; --sunk: #e6ecf0; --ink: #102027; --muted: #51636d; --line: #cfd9df;
+  --path: #0b7a80; --path-soft: #d9f0f0; --alert: #c4560f; --alert-soft: #fbe6d6; --ok: #2f7d32; --ok-soft: #e0f1e0; --bad: #b3261e; --bad-soft: #f8dedb;
+  --display: "Archivo", "Segoe UI", system-ui, sans-serif;
+  --body: "Atkinson Hyperlegible", "Segoe UI", system-ui, sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #0c1317; --surface: #121c22; --sunk: #19262e; --ink: #e2ebef; --muted: #91a4ae; --line: #26363f;
+  --path: #4fd1d6; --path-soft: #10302f; --alert: #ff9a55; --alert-soft: #3a2413; --ok: #7bd67f; --ok-soft: #142d16; --bad: #ff8a80; --bad-soft: #3a1714; color-scheme: dark } }
+:root[data-theme="dark"] {
+  --bg: #0c1317; --surface: #121c22; --sunk: #19262e; --ink: #e2ebef; --muted: #91a4ae; --line: #26363f;
+  --path: #4fd1d6; --path-soft: #10302f; --alert: #ff9a55; --alert-soft: #3a2413; --ok: #7bd67f; --ok-soft: #142d16; --bad: #ff8a80; --bad-soft: #3a1714; color-scheme: dark }
+
+* { box-sizing: border-box; }
+body { background: var(--bg); color: var(--ink); font: 17px/1.6 var(--body); }
+.wrap { max-width: 1100px; margin: 0 auto; padding-block: 28px 80px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); display: grid; gap: 52px; }
+h1, h2, h3 { font-family: var(--display); text-wrap: balance; margin: 0; line-height: 1.15; }
+h1 { font-size: clamp(32px, 5.5vw, 52px); font-weight: 800; letter-spacing: -.015em; }
+h2 { font-size: clamp(23px, 3vw, 30px); font-weight: 800; }
+h3 { font-size: 18px; font-weight: 600; }
+p { margin: 0; max-width: 70ch; }
+code, .mono { font-family: var(--mono); font-size: .86em; }
+:not(pre) > code { background: var(--sunk); padding: 1px 5px; border-radius: 4px; }
+.muted { color: var(--muted); }
+.eyebrow { font: 600 12px/1 var(--mono); letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
+section { display: grid; gap: 18px; scroll-margin-top: 16px; }
+.head { display: grid; gap: 8px; border-top: 2px solid var(--ink); padding-top: 14px; }
+.cols { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 14px; }
+.box { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 14px 16px; display: grid; gap: 8px; align-content: start; min-width: 0; }
+.box p, .box li { font-size: 15.5px; }
+ul.tight, ol.tight { margin: 0; padding-left: 20px; display: grid; gap: 4px; }
+pre { margin: 0; background: var(--sunk); border-radius: 8px; padding: 12px 14px; font: 13.5px/1.55 var(--mono); overflow-x: auto; }
+.tablewrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 10px; background: var(--surface); }
+table { border-collapse: collapse; width: 100%; font-size: 15px; min-width: 600px; }
+th, td { text-align: left; padding: 9px 12px; border-bottom: 1px solid var(--line); vertical-align: top; }
+th { font: 600 12px var(--mono); letter-spacing: .06em; text-transform: uppercase; color: var(--muted); background: var(--sunk); }
+td.num { font-family: var(--mono); font-variant-numeric: tabular-nums; white-space: nowrap; }
+tr:last-child td { border-bottom: 0; }
+button { font: 700 14.5px var(--body); padding: 8px 14px; border-radius: 8px; border: 1px solid var(--line); background: var(--surface); color: var(--ink); cursor: pointer; }
+button:hover { border-color: var(--path); }
+button.primary { background: var(--path); border-color: var(--path); color: var(--surface); }
+button[aria-pressed="true"] { background: var(--path-soft); border-color: var(--path); }
+button:focus-visible, a:focus-visible { outline: 2px solid var(--path); outline-offset: 2px; }
+.callout { border-left: 3px solid var(--path); background: var(--path-soft); padding: 12px 16px; border-radius: 0 8px 8px 0; max-width: 78ch; display: grid; gap: 6px; }
+.callout b.k { font: 600 12px var(--mono); letter-spacing: .08em; text-transform: uppercase; color: var(--path); }
+
+/* path overview */
+.layers { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 8px; }
+@media (max-width: 760px) { .layers { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.layer { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 12px; display: grid; gap: 4px; align-content: start; }
+.layer .n { font: 600 12px var(--mono); color: var(--muted); }
+.layer b { font-family: var(--display); font-size: 15.5px; }
+.layer small { color: var(--muted); font-size: 13.5px; }
+.layer.today { border-color: var(--path); background: var(--path-soft); }
+
+/* anycast lab */
+.lab { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 14px; display: grid; gap: 12px; }
+.lab .bar { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.mapwrap { overflow-x: auto; border-radius: 8px; background: var(--sunk); }
+svg.world { display: block; width: 100%; min-width: 640px; height: auto; }
+svg .grat { stroke: var(--line); stroke-width: 1; fill: none; }
+svg .land { fill: var(--surface); stroke: var(--line); stroke-width: 1; }
+svg .pop circle { fill: var(--path); stroke: var(--surface); stroke-width: 2; cursor: pointer; }
+svg .pop.down circle { fill: var(--bad); }
+svg .pop text, svg .user text { font: 600 12px var(--mono); fill: var(--ink); }
+svg .user rect { fill: var(--alert); cursor: pointer; }
+svg .user.sel rect { fill: var(--ink); }
+svg .route { stroke: var(--path); stroke-width: 2.5; fill: none; }
+svg .route.uni { stroke: var(--alert); stroke-dasharray: 6 4; }
+svg .rtt { font: 600 12px var(--mono); fill: var(--ink); paint-order: stroke; stroke: var(--sunk); stroke-width: 4px; }
+.readout { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 10px; }
+.stat { background: var(--sunk); border-radius: 8px; padding: 10px 12px; display: grid; gap: 2px; }
+.stat b { font: 600 22px var(--mono); font-variant-numeric: tabular-nums; }
+.stat span { font-size: 13px; color: var(--muted); }
+
+/* system map */
+.sys { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr); gap: 14px; align-items: start; }
+@media (max-width: 860px) { .sys { grid-template-columns: minmax(0, 1fr); } }
+.sysmap { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; overflow-x: auto; }
+svg.system { display: block; width: 100%; min-width: 620px; height: auto; }
+svg.system .node rect { fill: var(--surface); stroke: var(--line); stroke-width: 1.5; rx: 8; cursor: pointer; transition: fill .2s, stroke .2s; }
+svg.system .node text { font: 600 12.5px var(--body); fill: var(--ink); pointer-events: none; }
+svg.system .node text.aws { font: 11px var(--mono); fill: var(--muted); }
+svg.system .node.on rect { fill: var(--path-soft); stroke: var(--path); stroke-width: 2.5; }
+svg.system .node.sel rect { stroke: var(--ink); stroke-width: 2.5; }
+svg.system .edge { stroke: var(--line); stroke-width: 2; fill: none; marker-end: url(#arr); }
+svg.system .edge.on { stroke: var(--path); stroke-width: 3; }
+svg.system .zone { fill: none; stroke: var(--line); stroke-dasharray: 5 5; }
+svg.system .zl { font: 600 11px var(--mono); fill: var(--muted); letter-spacing: .06em; }
+svg.system #arr path { fill: var(--muted); }
+.detail { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 14px 16px; display: grid; gap: 8px; min-height: 220px; }
+.detail .tag { font: 600 12px var(--mono); color: var(--path); }
+.trace { display: flex; flex-wrap: wrap; gap: 8px; }
+
+/* quiz */
+.q { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 14px 16px; display: grid; gap: 10px; }
+.q p.ask { font-weight: 700; }
+.q .opts { display: grid; gap: 6px; }
+.q .opts button { text-align: left; font-weight: 400; font-size: 15.5px; }
+.q .opts button.right { background: var(--ok-soft); border-color: var(--ok); }
+.q .opts button.wrong { background: var(--bad-soft); border-color: var(--bad); }
+.q .why { font-size: 15px; color: var(--muted); }
+footer { font-size: 14px; color: var(--muted); }
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+
+<div class="wrap">
+  <header style="display:grid; gap:14px">
+    <span class="eyebrow">Backend path · Layer 1 (network) + Layer 6 (the whole system) · ~70 minutes</span>
+    <h1>Packet to Postgres</h1>
+    <p class="muted">You know what happens inside the browser. This page follows the request <i>after</i> it leaves: across the internet, into a load balancer, through a server, down to the database, and back. It starts with the question your manager asked, and ends with a map of a whole protective-DNS system where every AWS service has a place.</p>
+  </header>
+
+  <section aria-labelledby="h-path">
+    <div class="head"><span class="eyebrow">Your route for the next ~8 study days</span><h2 id="h-path">Six layers, each built on the one before</h2></div>
+    <div class="layers">
+      <div class="layer today"><span class="n">1 · today</span><b>Network</b><small>IP, DNS, TCP/UDP, TLS, load balancers, anycast</small></div>
+      <div class="layer"><span class="n">2 · 1 day</span><b>Backend basics</b><small>what a server does with one request</small></div>
+      <div class="layer"><span class="n">3 · 2 days</span><b>Postgres</b><small>tables, indexes, transactions, migrations</small></div>
+      <div class="layer"><span class="n">4 · 1.5 days</span><b>Spring Boot</b><small>read and review level, not syntax</small></div>
+      <div class="layer"><span class="n">5 · 2 days</span><b>AWS (12 services)</b><small>where each piece runs</small></div>
+      <div class="layer today"><span class="n">6 · today (preview)</span><b>The whole system</b><small>follow a query, follow a click</small></div>
+    </div>
+    <p class="muted" style="font-size:15px">Why this order: AWS only makes sense once you know what's being hosted (layers 2–4), and the backend only makes sense once you know how bytes travel (layer 1). Seeing layer 6 today gives every later layer a place to land.</p>
+  </section>
+
+  <!-- NETWORK -->
+  <section id="net" aria-labelledby="h-net">
+    <div class="head"><span class="eyebrow">Layer 1 · 20 minutes</span><h2 id="h-net">How bytes travel</h2></div>
+    <div class="cols">
+      <div class="box"><h3>Address + port</h3><p>An <b>IP address</b> finds the machine; a <b>port</b> finds the program on it. <code>203.0.113.10:443</code> = "the HTTPS server on that machine". Postgres listens on <b>5432</b>, DNS on <b>53</b>, HTTPS on <b>443</b>, SSH on <b>22</b>.</p><p><b>Private</b> ranges (<code>10.x</code>, <code>172.16–31.x</code>, <code>192.168.x</code>) only work inside a network. <b>NAT</b> lets many private machines share one public IP on the way out.</p></div>
+      <div class="box"><h3>TCP vs UDP</h3><p><b>TCP</b>: a phone call. Handshake first (1 round trip), delivery guaranteed and in order. HTTP, Postgres and SSH use it.</p><p><b>UDP</b>: a postcard. No handshake, no guarantee, very fast. Classic DNS uses UDP: one small question, one small answer. If it's lost, ask again.</p></div>
+      <div class="box"><h3>One HTTPS request, in round trips</h3><ol class="tight"><li><b>DNS</b>: name → IP (often cached: 0 trips)</li><li><b>TCP handshake</b>: 1 round trip</li><li><b>TLS handshake</b>: 1 more (TLS 1.3)</li><li><b>HTTP request → response</b>: 1 more</li></ol><p>So a fresh connection to a server 100 ms away costs ~300 ms before the first byte. That's why latency matters more than bandwidth, and why reusing connections (keep-alive, connection pools) matters so much.</p></div>
+    </div>
+    <div class="tablewrap"><table>
+      <thead><tr><th>Latency numbers worth knowing</th><th>≈ time</th><th>So what?</th></tr></thead>
+      <tbody>
+        <tr><td>Read from memory (cache hit in your service)</td><td class="num">0.0001 ms</td><td>Caching policy in memory makes a DNS decision almost free</td></tr>
+        <tr><td>Query to Postgres in the same data centre</td><td class="num">0.5–2 ms</td><td>Fine once; deadly if you do it 500 times in a loop (N+1, layer 3)</td></tr>
+        <tr><td>Round trip within one city / one AWS region</td><td class="num">1–5 ms</td><td>Keep the API and its database in the same region</td></tr>
+        <tr><td>Round trip across the US</td><td class="num">60–80 ms</td><td>A DNS answer from the other coast feels slow on every page load</td></tr>
+        <tr><td>Round trip Europe ↔ Australia</td><td class="num">250–300 ms</td><td>The reason anycast exists</td></tr>
+      </tbody>
+    </table></div>
+    <div class="cols">
+      <div class="box"><h3>Load balancers: L4 vs L7</h3><p><b>Layer 4</b> (AWS <b>NLB</b>) forwards TCP/UDP connections without reading them: very fast, keeps the client IP, works for DNS. <b>Layer 7</b> (AWS <b>ALB</b>) reads HTTP: routes <code>/api/billing</code> to one service and <code>/api/lists</code> to another, ends TLS, adds <code>X-Forwarded-For</code>. Both run <b>health checks</b> and stop sending traffic to sick servers.</p></div>
+      <div class="box"><h3>CDN</h3><p>Copies of static files (the Angular bundle, images) kept in hundreds of locations close to users (AWS <b>CloudFront</b>). The browser downloads <code>main.js</code> from 10 ms away instead of from your origin server. CDNs use anycast too.</p></div>
+    </div>
+  </section>
+
+  <!-- ANYCAST -->
+  <section id="anycast" aria-labelledby="h-any">
+    <div class="head"><span class="eyebrow">Layer 1 · 15 minutes · the question from your manager</span><h2 id="h-any">Anycast: one address, many places</h2></div>
+    <div class="cols">
+      <div class="box"><h3>Unicast (normal)</h3><p>One IP address belongs to <b>one</b> server in one place. Everyone in the world travels to that place.</p></div>
+      <div class="box"><h3>Anycast</h3><p>The <b>same IP</b> is announced from <b>many</b> data centres at once, using <b>BGP</b>, the protocol internet routers use to tell each other "I can reach this address". Each router picks the <i>shortest network path</i>, so every user lands on the nearest copy.</p></div>
+      <div class="box"><h3>Failover for free</h3><p>If a site goes down, it <b>withdraws</b> its BGP announcement. Within seconds routers forget that path and send traffic to the next nearest site. Customers change nothing: the IP they configured still works.</p></div>
+    </div>
+    <div class="lab" aria-label="Anycast simulator">
+      <div class="bar">
+        <span class="eyebrow">Mode</span>
+        <div class="bar" role="group" aria-label="Routing mode"><button id="m-any" aria-pressed="true">Anycast: 1 IP, 8 sites</button><button id="m-uni" aria-pressed="false">Unicast: 1 IP, 1 server</button></div>
+        <span class="muted" style="font-size:14px">Click an orange office to select it. Click a teal site to take it offline.</span>
+      </div>
+      <div class="mapwrap"><svg class="world" id="world" viewBox="0 0 1000 470" role="img" aria-label="World map with resolver sites and offices"></svg></div>
+      <div class="readout">
+        <div class="stat"><span>Selected office</span><b id="o-user">—</b></div>
+        <div class="stat"><span>Answered by</span><b id="o-pop">—</b></div>
+        <div class="stat"><span>Round trip (est.)</span><b id="o-rtt">—</b></div>
+        <div class="stat"><span>Average, all 8 offices</span><b id="o-avg">—</b></div>
+      </div>
+      <p class="muted" style="font-size:14.5px" id="o-note">Same resolver IP for everyone: <code>198.51.100.53</code>. Round trips are estimated from distance (light in fibre ≈ 200 km per ms, plus 4 ms of equipment); real paths are longer.</p>
+    </div>
+    <div class="cols">
+      <div class="box"><h3>Why protective DNS uses it</h3><ul class="tight"><li>Every DNS lookup waits for the answer: 10 ms vs 250 ms is felt on every page load.</li><li>Customers configure <b>one or two IPs</b> on routers worldwide. Anycast is the only way one IP can be close to everyone.</li><li>A site outage or DDoS is absorbed: traffic spreads over the remaining sites.</li><li>DNS over UDP is a single packet each way, so it never cares which site answered the previous query.</li></ul></div>
+      <div class="box"><h3>The fine print (sounds senior in meetings)</h3><ul class="tight"><li>"Nearest" means the shortest <b>BGP path</b>, not the shortest distance. A user in one country can land on a far site because of how their ISP peers.</li><li>Long-lived <b>TCP</b> connections can break if routes change mid-connection. Fine for DNS and HTTP, which are short.</li><li>Every site must hold the <b>same policy data</b>, so policy changes in the portal must be pushed to all sites quickly (see the system map below).</li><li>In AWS: <b>Route 53</b>, <b>CloudFront</b> and <b>Global Accelerator</b> are anycast services. You can also bring your own IP range and announce it.</li></ul></div>
+    </div>
+    <div class="callout"><b class="k">What to say to your manager</b><p>"Anycast means the same IP is announced over BGP from many locations, so routers send each client to the nearest one. That's why our customers can point at one resolver IP and still get low latency everywhere, and why a site can drop out without anyone reconfiguring: its route is withdrawn and traffic shifts to the next site. The catch is that every site needs the same policy data, and 'nearest' is by BGP path, not by distance."</p></div>
+  </section>
+
+  <!-- SYSTEM -->
+  <section id="system" aria-labelledby="h-sys">
+    <div class="head"><span class="eyebrow">Layer 6 preview · 20 minutes</span><h2 id="h-sys">The whole system on one page</h2><p class="muted">A typical protective-DNS SaaS, simplified. Click any box to read what it does and which layer of your path teaches it, or press a trace button to follow a real flow step by step.</p></div>
+    <div class="trace">
+      <button class="primary" id="t-dns">▶ Follow a DNS query</button>
+      <button id="t-click">▶ Follow a portal click ("block this domain")</button>
+      <button id="t-next" disabled>Next step</button>
+      <button id="t-reset">Reset</button>
+    </div>
+    <div class="sys">
+      <div class="sysmap"><svg class="system" id="sys" viewBox="0 0 760 560" role="img" aria-label="System map"></svg></div>
+      <div class="detail" aria-live="polite">
+        <span class="tag" id="d-tag">Start here</span>
+        <h3 id="d-title">Two halves</h3>
+        <p id="d-text">The <b>data plane</b> (top) answers DNS queries fast, millions per minute, at many anycast sites. The <b>control plane</b> (bottom) is where customers change things: the Angular portal, the Spring Boot APIs and Postgres. Your team mostly works on the control plane, but every change it makes has to reach the data plane.</p>
+        <p class="muted" id="d-layer" style="font-size:14.5px"></p>
+      </div>
+    </div>
+  </section>
+
+  <!-- AWS WATCH LIST -->
+  <section id="aws" aria-labelledby="h-aws">
+    <div class="head"><span class="eyebrow">Layer 5 preview · your AWS course, trimmed</span><h2 id="h-aws">Watch these lectures, skip the rest (for now)</h2><p class="muted">From your 448-lecture Developer Associate course, ~45 lectures matter for understanding this system. Watch at 1.5× and stop each one when it turns into console clicking; you'll do hands-on work in the labs.</p></div>
+    <div class="tablewrap"><table>
+      <thead><tr><th>Service</th><th>Its job in the system above</th><th>Lectures (section → lecture)</th></tr></thead>
+      <tbody>
+        <tr><td><b>Regions &amp; AZs</b></td><td>Where everything physically lives; why you run in 2+ zones</td><td>03 Getting started → 01 Regions &amp; AZ</td></tr>
+        <tr><td><b>IAM</b></td><td>Who/what may call which AWS API (services get <i>roles</i>, not keys)</td><td>04 IAM → 01 Users, Groups, Policies · 12 → Roles &amp; Policies lectures</td></tr>
+        <tr><td><b>VPC</b></td><td>Private network: public subnets (load balancers), private subnets (servers, database)</td><td>10 VPC Fundamentals → 01–06 (all short; 06 Three-Tier Architecture is the key one)</td></tr>
+        <tr><td><b>EC2 + Security Groups</b></td><td>Virtual machines; SGs are per-server firewalls</td><td>05 EC2 → 02 Basics, 05 Security Groups &amp; Ports</td></tr>
+        <tr><td><b>ELB (ALB / NLB)</b></td><td>ALB in front of the APIs; NLB for UDP/TCP like DNS</td><td>07 ELB &amp; ASG → 01, 02, 04, 07, 11, 12, 15</td></tr>
+        <tr><td><b>RDS Postgres</b></td><td>The control-plane database</td><td>08 RDS → 01 Overview, 02 Read Replicas vs Multi-AZ, 06 Security, 07 RDS Proxy</td></tr>
+        <tr><td><b>Route 53</b></td><td>DNS for your own domains; health-check failover; latency routing</td><td>09 Route 53 → 01, 02, 06 TTL, 07 CNAME vs Alias, 10 Latency, 11 Health Checks, 13 Failover</td></tr>
+        <tr><td><b>S3</b></td><td>Exports, reports, feed files; shared by presigned URL</td><td>11 S3 → 01, 03 · 14 S3 Security → 01 Encryption, 11 Pre-signed URLs</td></tr>
+        <tr><td><b>CloudFront</b></td><td>Serves the Angular portal from the edge (anycast)</td><td>15 CloudFront → 01 Overview, 03 Caching, 07 ALB/EC2 as origin</td></tr>
+        <tr><td><b>ECS / Fargate (+ ECR)</b></td><td>Run Spring Boot containers without managing servers</td><td>16 ECS → 01 Docker Intro, 02 Amazon ECS, 07 Solutions Architectures, 12 ECR</td></tr>
+        <tr><td><b>SQS / SNS</b></td><td>Queues and fan-out: policy-change events, log batches</td><td>19 Messaging → 02, 03, 06 Visibility Timeout, 07 Dead Letter Queues, 13 SNS, 14 Fan-Out</td></tr>
+        <tr><td><b>Lambda · CloudWatch · Secrets Manager / SSM</b></td><td>Small jobs; logs, metrics and alarms; DB passwords and API keys</td><td>Lambda section intro + overview · Monitoring section: CloudWatch Metrics, Logs, Alarms · Secrets Manager and SSM Parameter Store lectures</td></tr>
+      </tbody>
+    </table></div>
+    <p class="muted" style="font-size:15px"><b>Skip for now</b> (exam material, not needed to understand this system): Elastic Beanstalk, CodeCommit/CodeBuild/CodePipeline details, SAM, CDK and CloudFormation deep dives, Kinesis, Step Functions, Cognito, DynamoDB deep dive, X-Ray, ElastiCache strategies. Come back if your work touches them.</p>
+  </section>
+
+  <!-- QUIZ -->
+  <section id="check" aria-labelledby="h-check">
+    <div class="head"><span class="eyebrow">5 minutes</span><h2 id="h-check">Explain it back</h2></div>
+    <div class="q" data-answer="1"><p class="ask">A customer in Singapore and one in London both use resolver IP 198.51.100.53. What happens?</p><div class="opts"><button>Both go to the same server; one of them is slow</button><button>Each reaches the nearest site announcing that IP (by BGP path)</button><button>DNS picks the closest server by geolocation</button></div><p class="why" hidden>That's anycast: same IP, many announcements, routers choose the shortest path. No DNS trick is involved; it happens at the IP routing level.</p></div>
+    <div class="q" data-answer="2"><p class="ask">The Frankfurt site goes down. What do Frankfurt-area customers need to change?</p><div class="opts"><button>Their resolver IP, to a backup address</button><button>Nothing, but only after their DNS cache expires</button><button>Nothing: the site's BGP route is withdrawn and traffic moves to the next nearest site</button></div><p class="why" hidden>Failover happens in the routing layer within seconds. That's a big part of why anycast is used for DNS.</p></div>
+    <div class="q" data-answer="0"><p class="ask">An admin blocks a domain in the portal. Why might a query 2 seconds later still be allowed?</p><div class="opts"><button>The change hasn't propagated from the database to every resolver site's in-memory policy yet</button><button>Anycast routing is random</button><button>Postgres is eventually consistent</button></div><p class="why" hidden>The control plane (portal → API → Postgres) and the data plane (resolvers with cached policy) are separate. Propagation time is a real product metric.</p></div>
+    <div class="q" data-answer="1"><p class="ask">Which load balancer would sit in front of a UDP DNS service?</p><div class="opts"><button>ALB, because it understands HTTP</button><button>NLB (layer 4): it forwards UDP/TCP without parsing it</button><button>CloudFront</button></div><p class="why" hidden>ALB only speaks HTTP(S). DNS is UDP (and TCP for big answers), so you need a layer-4 balancer.</p></div>
+    <div class="q" data-answer="2"><p class="ask">Your Spring Boot API runs 500 small Postgres queries for one page. Each takes 1 ms in the same region. What's the problem?</p><div class="opts"><button>None, 500 ms is fine</button><button>Postgres can't handle 500 queries</button><button>It's an N+1 pattern: half a second of waiting that one JOIN would turn into ~2 ms</button></div><p class="why" hidden>Round trips add up. Layer 3 teaches how to see this in logs and fix it with joins or batch queries.</p></div>
+  </section>
+
+  <section aria-labelledby="h-next">
+    <div class="head"><span class="eyebrow">What's next</span><h2 id="h-next">Your next three study sessions</h2></div>
+    <div class="cols">
+      <div class="box"><h3>Today: 30-minute terminal lab</h3><pre>dig example.com            # the answer + TTL
+dig +trace example.com     # watch root → TLD → authoritative
+dig @1.1.1.1 example.com   # ask a specific (anycast) resolver
+curl -v https://example.com -o /dev/null   # DNS, TCP, TLS, HTTP in order
+traceroute 1.1.1.1         # path to the nearest anycast site</pre><p>Ask Claude Code to explain any line you can't. Then explain the whole output to yourself out loud.</p></div>
+      <div class="box"><h3>Next: Layer 2, backend basics</h3><p>One request through a small Spring Boot service with breakpoints: filter → controller → service → repository → database → JSON. You draw the sequence diagram; Claude Code checks it.</p></div>
+      <div class="box"><h3>Then: Layer 3, Postgres</h3><p>Model tenants → lists → indicators, make a query slow on purpose, fix it with an index, then prevent a race condition with a constraint.</p></div>
+    </div>
+  </section>
+
+  <footer>Simplified, generic architecture for learning. Distances and round trips are estimates. Addresses use documentation ranges (198.51.100.0/24, 203.0.113.0/24).</footer>
+</div>
+
+<script>
+(function () {
+  const $ = id => document.getElementById(id);
+  const NS = 'http://www.w3.org/2000/svg';
+  const el = (tag, attrs = {}, parent) => { const e = document.createElementNS(NS, tag); for (const k in attrs) e.setAttribute(k, attrs[k]); if (parent) parent.appendChild(e); return e; };
+
+  // ── Anycast simulator ──────────────────────────────────────────
+  const W = 1000, H = 470;
+  const proj = (lat, lon) => [((lon + 180) / 360) * W, ((80 - lat) / 140) * H];
+  const POPS = [
+    { id: 'iad', name: 'Ashburn', lat: 39.0, lon: -77.5 }, { id: 'dfw', name: 'Dallas', lat: 32.9, lon: -97.0 },
+    { id: 'sjc', name: 'San Jose', lat: 37.3, lon: -121.9, L: [-12, 18, 'end'] }, { id: 'gru', name: 'São Paulo', lat: -23.5, lon: -46.6 },
+    { id: 'lhr', name: 'London', lat: 51.5, lon: -0.1, L: [-12, -10, 'end'] }, { id: 'fra', name: 'Frankfurt', lat: 50.1, lon: 8.7, L: [12, -6, 'start'] },
+    { id: 'sin', name: 'Singapore', lat: 1.35, lon: 103.8 }, { id: 'syd', name: 'Sydney', lat: -33.9, lon: 151.2, L: [-12, 4, 'end'] },
+  ];
+  const USERS = [
+    { id: 'ny', name: 'New York', lat: 40.7, lon: -74.0 }, { id: 'aus', name: 'Austin', lat: 30.3, lon: -97.7, L: [0, 24, 'middle'] },
+    { id: 'van', name: 'Vancouver', lat: 49.3, lon: -123.1 }, { id: 'bog', name: 'Bogotá', lat: 4.7, lon: -74.1 },
+    { id: 'par', name: 'Paris', lat: 48.9, lon: 2.35, L: [0, 24, 'middle'] }, { id: 'ktm', name: 'Kathmandu', lat: 27.7, lon: 85.3 },
+    { id: 'tyo', name: 'Tokyo', lat: 35.7, lon: 139.7 }, { id: 'akl', name: 'Auckland', lat: -36.8, lon: 174.8, L: [-4, 24, 'end'] },
+  ];
+  const km = (a, b) => { const R = 6371, r = Math.PI / 180; const dLat = (b.lat - a.lat) * r, dLon = (b.lon - a.lon) * r;
+    const h = Math.sin(dLat / 2) ** 2 + Math.cos(a.lat * r) * Math.cos(b.lat * r) * Math.sin(dLon / 2) ** 2; return 2 * R * Math.asin(Math.sqrt(h)); };
+  const rtt = (u, p) => Math.round((km(u, p) / 200) * 2 * 1.3 + 4); // ×1.3: real fibre paths aren't straight lines
+  let mode = 'any', down = new Set(), sel = 'ktm';
+  const svg = $('world');
+
+  // backdrop: graticule + very rough continents (just for orientation)
+  const LAND = [
+    [[70,-165],[72,-100],[60,-60],[47,-53],[25,-80],[15,-92],[8,-78],[20,-105],[32,-117],[50,-128],[60,-145]],
+    [[12,-72],[5,-50],[-8,-35],[-23,-41],[-40,-62],[-55,-68],[-40,-73],[-18,-71],[-5,-81]],
+    [[71,25],[60,30],[45,40],[40,28],[36,-6],[43,-9],[48,-5],[54,8],[58,5],[65,14]],
+    [[37,-10],[35,10],[31,32],[12,43],[-2,41],[-34,26],[-34,18],[-17,12],[5,-8],[15,-17],[28,-12]],
+    [[72,40],[75,100],[70,140],[64,178],[52,158],[40,140],[35,128],[22,120],[10,106],[1,104],[8,98],[21,92],[8,77],[25,66],[25,57],[13,45],[30,48],[42,45],[45,40],[60,30]],
+    [[-11,132],[-12,142],[-25,153],[-38,149],[-35,138],[-35,117],[-22,114],[-14,127]],
+    [[-35,173],[-41,175],[-46,168],[-40,172]],
+  ];
+  function drawBase() {
+    const g = el('g', {}, svg);
+    for (let lon = -150; lon <= 180; lon += 30) { const [x] = proj(0, lon); el('line', { x1: x, y1: 0, x2: x, y2: H, class: 'grat' }, g); }
+    for (let lat = -60; lat <= 60; lat += 30) { const [, y] = proj(lat, 0); el('line', { x1: 0, y1: y, x2: W, y2: y, class: 'grat' }, g); }
+    LAND.forEach(poly => el('polygon', { points: poly.map(([la, lo]) => proj(la, lo).join(',')).join(' '), class: 'land' }, g));
+  }
+  drawBase();
+  const routesG = el('g', {}, svg), popsG = el('g', {}, svg), usersG = el('g', {}, svg);
+  function bestFor(u) {
+    if (mode === 'uni') return POPS[0];
+    const live = POPS.filter(p => !down.has(p.id));
+    return live.length ? live.reduce((b, p) => (rtt(u, p) < rtt(u, b) ? p : b)) : null;
+  }
+  function render() {
+    routesG.innerHTML = ''; popsG.innerHTML = ''; usersG.innerHTML = '';
+    let sum = 0, n = 0;
+    USERS.forEach(u => {
+      const p = bestFor(u); if (!p) return;
+      const [x1, y1] = proj(u.lat, u.lon), [x2, y2] = proj(p.lat, p.lon);
+      const mx = (x1 + x2) / 2, my = Math.min(y1, y2) - 30 - Math.abs(x1 - x2) * 0.08;
+      el('path', { d: `M${x1},${y1} Q${mx},${my} ${x2},${y2}`, class: 'route' + (mode === 'uni' ? ' uni' : ''), opacity: u.id === sel ? 1 : 0.35 }, routesG);
+      const t = rtt(u, p); sum += t; n++;
+      if (u.id === sel) { const tx = el('text', { x: mx, y: (my + (y1 + y2) / 2) / 2, class: 'rtt', 'text-anchor': 'middle' }, routesG); tx.textContent = t + ' ms'; }
+    });
+    POPS.forEach(p => {
+      if (mode === 'uni' && p.id !== 'iad') return;
+      const [x, y] = proj(p.lat, p.lon);
+      const g = el('g', { class: 'pop' + (down.has(p.id) ? ' down' : ''), tabindex: 0, role: 'button', 'aria-label': `${p.name} site, ${down.has(p.id) ? 'offline' : 'online'}` }, popsG);
+      el('circle', { cx: x, cy: y, r: 9 }, g);
+      const [ldx, ldy, la] = p.L || [12, 4, 'start']; const t = el('text', { x: x + ldx, y: y + ldy, 'text-anchor': la }, g); t.textContent = p.name + (down.has(p.id) ? ' ✕' : '');
+      const toggle = () => { if (mode === 'uni') return; down.has(p.id) ? down.delete(p.id) : down.add(p.id); render(); };
+      g.addEventListener('click', toggle); g.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggle(); } });
+    });
+    USERS.forEach(u => {
+      const [x, y] = proj(u.lat, u.lon);
+      const g = el('g', { class: 'user' + (u.id === sel ? ' sel' : ''), tabindex: 0, role: 'button', 'aria-label': `Office ${u.name}` }, usersG);
+      el('rect', { x: x - 6, y: y - 6, width: 12, height: 12, rx: 2 }, g);
+      const [udx, udy, ua] = u.L || [-10, -10, 'end']; const t = el('text', { x: x + udx, y: y + udy, 'text-anchor': ua }, g); t.textContent = u.name;
+      const pick = () => { sel = u.id; render(); };
+      g.addEventListener('click', pick); g.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); pick(); } });
+    });
+    const u = USERS.find(x => x.id === sel), p = bestFor(u);
+    $('o-user').textContent = u.name;
+    $('o-pop').textContent = p ? p.name : 'no site up';
+    $('o-rtt').textContent = p ? rtt(u, p) + ' ms' : '—';
+    $('o-avg').textContent = n ? Math.round(sum / n) + ' ms' : '—';
+    $('o-note').innerHTML = mode === 'uni'
+      ? 'Unicast: one server in Ashburn answers the whole world. Look at Kathmandu, Tokyo and Auckland. If Ashburn goes down, <b>everyone</b> is down.'
+      : down.size
+        ? `Offline: ${[...down].map(id => POPS.find(p => p.id === id).name).join(', ')}. Their routes were withdrawn, so their users moved to the next nearest site. Same IP, no customer change.`
+        : 'Same resolver IP for everyone: <code>198.51.100.53</code>. Round trips are estimated from distance (light in fibre ≈ 200 km per ms, ×1.3 for indirect paths, plus 4 ms of equipment).';
+  }
+  const setMode = m => { mode = m; $('m-any').setAttribute('aria-pressed', String(m === 'any')); $('m-uni').setAttribute('aria-pressed', String(m === 'uni')); render(); };
+  $('m-any').addEventListener('click', () => setMode('any'));
+  $('m-uni').addEventListener('click', () => setMode('uni'));
+  render();
+
+  // ── System map ──────────────────────────────────────────────────
+  const NODES = {
+    users:   { x: 20,  y: 40,  w: 150, t: 'Offices & laptops', a: 'networks + agent', layer: 'Layer 1', d: 'Customer devices. Their routers (or an endpoint agent on roaming laptops) send every DNS question to the resolver IP. Laptops off the office network need the agent, or their queries skip protection.' },
+    anycast: { x: 200, y: 40,  w: 170, t: 'Anycast resolver IP', a: 'BGP · Global Accel.', layer: 'Layer 1', d: 'One or two IPs announced from every site. Routers deliver each query to the nearest site. This is the part your manager asked about.' },
+    pop:     { x: 400, y: 40,  w: 170, t: 'Resolver site (×N)', a: 'EC2 / metal · NLB', layer: 'Layers 1 + 5', d: 'Receives the UDP query, asks the decision engine, then answers: real IP (allow), NXDOMAIN (block) or block-page IP (redirect). Upstream resolution for allowed names happens here too.' },
+    engine:  { x: 400, y: 140, w: 170, t: 'Decision engine', a: 'in-memory policy', layer: 'Layer 2', d: 'Evaluates allow list → block list → threat intel → policy rules for this tenant, in microseconds, from an in-memory copy of policy. It never calls Postgres per query; that would be far too slow (see the latency table).' },
+    intel:   { x: 600, y: 140, w: 140, t: 'Threat feeds', a: 'S3 files · APIs', layer: 'Layer 5', d: 'Indicator lists pulled from feeds, often as large gzipped files in S3 handed out through presigned URLs. Loaded into the engine on a schedule.' },
+    logs:    { x: 600, y: 40,  w: 140, t: 'Query logs', a: 'queue → column DB', layer: 'Layers 3 + 5', d: 'Every decision is logged: tenant, name, verdict, reason, source. Billions of rows, so they go into a column store built for analytics (not Postgres), via a queue or stream.' },
+    browser: { x: 20,  y: 330, w: 150, t: 'Admin in browser', a: 'Angular portal', layer: 'Your strength', d: 'The Angular app you already know. Downloaded from a CDN, then talks to the API with a JWT in the Authorization header.' },
+    cdn:     { x: 20,  y: 440, w: 150, t: 'Static files', a: 'CloudFront + S3 / nginx', layer: 'Layer 5', d: 'Serves index.html and the JS bundles from the edge. The base-href decides which path the app lives under.' },
+    alb:     { x: 200, y: 330, w: 170, t: 'Load balancer', a: 'ALB (layer 7) · TLS', layer: 'Layers 1 + 5', d: 'Ends HTTPS, checks /actuator/health on each server, routes /api/... paths to the right service, adds X-Forwarded-For.' },
+    api:     { x: 400, y: 330, w: 170, t: 'API services', a: 'Spring Boot · ECS/EC2', layer: 'Layers 2 + 4', d: 'Accounts, policies, lists, billing. Each request: security filter (JWT → user, tenant, role) → controller → service (rules, @Transactional) → repository → Postgres → JSON.' },
+    db:      { x: 400, y: 450, w: 170, t: 'Postgres', a: 'RDS · Multi-AZ', layer: 'Layer 3', d: 'Source of truth for tenants, users, policies, lists, subscriptions and invoices. Constraints enforce business rules. Lives in a private subnet; only the API can reach it.' },
+    bus:     { x: 600, y: 330, w: 140, t: 'Change events', a: 'SNS → SQS', layer: 'Layer 5', d: 'When policy changes, the API publishes an event. Every resolver site picks it up and refreshes its in-memory copy. This is the propagation delay from quiz question 3.' },
+    ops:     { x: 600, y: 450, w: 140, t: 'Ops', a: 'IAM · Secrets · Logs', layer: 'Layer 5', d: 'IAM roles let services call AWS without keys. Secrets Manager holds the DB password. CloudWatch collects logs, metrics and alarms from everything.' },
+  };
+  const EDGES = [['users','anycast'],['anycast','pop'],['pop','engine'],['engine','intel'],['pop','logs'],['browser','alb'],['cdn','browser'],['alb','api'],['api','db'],['api','bus'],['bus','engine'],['api','ops']];
+  const sys = $('sys');
+  const defs = el('defs', {}, sys); const mk = el('marker', { id: 'arr', viewBox: '0 0 10 10', refX: 9, refY: 5, markerWidth: 7, markerHeight: 7, orient: 'auto-start-reverse' }, defs); el('path', { d: 'M0,0 L10,5 L0,10 z' }, mk);
+  const zone = (x, y, w, h, label) => { el('rect', { x, y, width: w, height: h, rx: 12, class: 'zone' }, sys); const t = el('text', { x: x + 10, y: y + 16, class: 'zl' }, sys); t.textContent = label; };
+  zone(8, 12, 744, 210, 'DATA PLANE · answers queries · many anycast sites');
+  zone(8, 300, 744, 252, 'CONTROL PLANE · where customers change things · one AWS region');
+  const H_N = 56;
+  const centre = (n, side) => { const b = NODES[n]; return side === 'r' ? [b.x + b.w, b.y + H_N / 2] : side === 'l' ? [b.x, b.y + H_N / 2] : side === 'b' ? [b.x + b.w / 2, b.y + H_N] : [b.x + b.w / 2, b.y]; };
+  const edgeEls = {};
+  EDGES.forEach(([a, b]) => {
+    const A = NODES[a], B = NODES[b]; let p1, p2;
+    if (Math.abs(A.y - B.y) < 20) { p1 = centre(a, A.x < B.x ? 'r' : 'l'); p2 = centre(b, A.x < B.x ? 'l' : 'r'); }
+    else { p1 = centre(a, A.y < B.y ? 'b' : 't'); p2 = centre(b, A.y < B.y ? 't' : 'b'); }
+    const midY = (p1[1] + p2[1]) / 2;
+    const d = Math.abs(A.y - B.y) < 20 ? `M${p1[0]},${p1[1]} L${p2[0]},${p2[1]}` : `M${p1[0]},${p1[1]} C${p1[0]},${midY} ${p2[0]},${midY} ${p2[0]},${p2[1]}`;
+    edgeEls[a + '>' + b] = el('path', { d, class: 'edge' }, sys);
+  });
+  const nodeEls = {};
+  Object.entries(NODES).forEach(([id, n]) => {
+    const g = el('g', { class: 'node', tabindex: 0, role: 'button', 'aria-label': n.t }, sys);
+    el('rect', { x: n.x, y: n.y, width: n.w, height: H_N }, g);
+    const t1 = el('text', { x: n.x + 10, y: n.y + 23 }, g); t1.textContent = n.t;
+    const t2 = el('text', { x: n.x + 10, y: n.y + 42, class: 'aws' }, g); t2.textContent = n.a;
+    nodeEls[id] = g;
+    const show = () => { stopTrace(); Object.values(nodeEls).forEach(x => x.classList.remove('sel')); g.classList.add('sel'); detail(n.layer, n.t, n.d, n.a); };
+    g.addEventListener('click', show); g.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); show(); } });
+  });
+  function detail(tag, title, text, aws) { $('d-tag').textContent = tag; $('d-title').textContent = title; $('d-text').textContent = text; $('d-layer').textContent = aws ? 'Runs on: ' + aws : ''; }
+
+  const TRACES = {
+    dns: [
+      ['users', null, 't = 0 ms', 'A laptop asks for login-micros0ft.top', 'The browser needs an IP before it can connect. The OS sends a UDP packet to the configured resolver IP on port 53.'],
+      ['anycast', 'users>anycast', 't ≈ 1 ms', 'Routed to the nearest site', 'Internet routers see the resolver IP announced from many sites and forward the packet along the shortest BGP path.'],
+      ['pop', 'anycast>pop', 't ≈ 6 ms', 'The resolver site receives it', 'A layer-4 load balancer (or the network itself) hands the packet to one resolver process at that site.'],
+      ['engine', 'pop>engine', 't ≈ 6.05 ms', 'Decision from memory', 'Tenant identified from the source IP or agent token. Allow list: no. Block list: no. Threat intel: newly registered look-alike domain, phishing. Verdict: REDIRECT to the block page.'],
+      ['logs', 'pop>logs', 't ≈ 6.1 ms (async)', 'Logged without waiting', 'The decision is queued for the log pipeline. The answer is not delayed by logging; that is why it is asynchronous.'],
+      ['users', 'users>anycast', 't ≈ 12 ms', 'Answer reaches the laptop', 'The block-page IP comes back. The browser connects to it and the user reads "Blocked: phishing". The attack chain broke at stage 1.'],
+    ],
+    click: [
+      ['browser', null, 't = 0 ms', 'Admin clicks "Block domain"', 'Angular sends POST /api/v1/lists/42/entries with the JWT in the Authorization header (your interceptor adds it).'],
+      ['alb', 'browser>alb', 't ≈ 20 ms', 'Load balancer', 'TLS ends here. The path /api/... is routed to a healthy API instance. X-Forwarded-For carries the admin\'s IP.'],
+      ['api', 'alb>api', 't ≈ 21 ms', 'Spring Boot handles it', 'Security filter verifies the JWT → user, tenant, role. @PreAuthorize: may this role edit lists for this tenant? Validation: is it a real domain? The service method runs in a transaction.'],
+      ['db', 'api>db', 't ≈ 23 ms', 'Postgres write', 'INSERT into list_entries. A unique constraint stops duplicates even if two admins click at the same time. COMMIT.'],
+      ['bus', 'api>bus', 't ≈ 25 ms', 'Publish "list changed"', 'After the commit, an event goes to SNS/SQS so the data plane learns about it. The API returns 201 to the browser now; it does not wait for every site.'],
+      ['engine', 'bus>engine', 't ≈ 1–5 s', 'Every resolver site refreshes', 'Each site consumes the event and updates its in-memory policy. From now on, queries for that domain are blocked everywhere. This gap is the propagation delay.'],
+    ],
+  };
+  let trace = null, step = -1;
+  function stopTrace() { trace = null; step = -1; $('t-next').disabled = true; clearHi(); }
+  function clearHi() { Object.values(nodeEls).forEach(x => x.classList.remove('on', 'sel')); Object.values(edgeEls).forEach(x => x.classList.remove('on')); }
+  function showStep() {
+    const s = TRACES[trace][step]; clearHi();
+    for (let k = 0; k <= step; k++) { const e = TRACES[trace][k][1]; if (e && edgeEls[e]) edgeEls[e].classList.add('on'); }
+    nodeEls[s[0]].classList.add('on');
+    detail(`${trace === 'dns' ? 'DNS query' : 'Portal click'} · step ${step + 1} of ${TRACES[trace].length} · ${s[2]}`, s[3], s[4], NODES[s[0]].a);
+    $('t-next').disabled = step >= TRACES[trace].length - 1;
+    $('t-next').textContent = step >= TRACES[trace].length - 1 ? 'Done' : 'Next step';
+  }
+  const start = name => { trace = name; step = 0; showStep(); };
+  $('t-dns').addEventListener('click', () => start('dns'));
+  $('t-click').addEventListener('click', () => start('click'));
+  $('t-next').addEventListener('click', () => { if (trace && step < TRACES[trace].length - 1) { step++; showStep(); } });
+  $('t-reset').addEventListener('click', () => { stopTrace(); detail('Start here', 'Two halves', 'The data plane (top) answers DNS queries fast, millions per minute, at many anycast sites. The control plane (bottom) is where customers change things: the Angular portal, the Spring Boot APIs and Postgres. Your team mostly works on the control plane, but every change it makes has to reach the data plane.', ''); });
+
+  // ── Quiz ────────────────────────────────────────────────────────
+  document.querySelectorAll('.q').forEach(q => {
+    const right = +q.dataset.answer, btns = q.querySelectorAll('.opts button');
+    btns.forEach((b, i) => b.addEventListener('click', () => {
+      btns.forEach((x, j) => { x.classList.remove('right', 'wrong'); if (j === right) x.classList.add('right'); });
+      if (i !== right) b.classList.add('wrong');
+      q.querySelector('.why').hidden = false;
+    }));
+  });
+})();
+</script>

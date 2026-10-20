@@ -1,0 +1,438 @@
+<title>Security in One Hour</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Sora:wght@500;700&family=Source+Sans+3:ital,wght@0,400;0,600;1,400&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: a SOC runbook. Sticky time-boxed index on the left (minutes = the plan), lessons on the right, each ending in a 30-second check. Verdict colours (allow/block/redirect) are the only loud colours. */
+:root {
+  --bg: #f4f6f8; --surface: #ffffff; --sunk: #e8edf2; --ink: #0f1b2b; --muted: #546273; --line: #d3dbe4;
+  --accent: #1f5fbf; --accent-soft: #e2ecfa;
+  --allow: #0e7a4f; --allow-soft: #dcf2e8; --block: #b8322a; --block-soft: #f9e1df; --warn: #9a6200; --warn-soft: #fbeed4;
+  --display: "Sora", "Segoe UI", system-ui, sans-serif;
+  --body: "Source Sans 3", "Segoe UI", system-ui, sans-serif;
+  --mono: "JetBrains Mono", ui-monospace, Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #0b121c; --surface: #111a26; --sunk: #182333; --ink: #e3e9f1; --muted: #93a1b3; --line: #253245;
+  --accent: #7fb0ff; --accent-soft: #16263f;
+  --allow: #4fd39a; --allow-soft: #10301f; --block: #ff8a80; --block-soft: #3a1714; --warn: #f2b84b; --warn-soft: #36290f; color-scheme: dark } }
+:root[data-theme="dark"] {
+  --bg: #0b121c; --surface: #111a26; --sunk: #182333; --ink: #e3e9f1; --muted: #93a1b3; --line: #253245;
+  --accent: #7fb0ff; --accent-soft: #16263f;
+  --allow: #4fd39a; --allow-soft: #10301f; --block: #ff8a80; --block-soft: #3a1714; --warn: #f2b84b; --warn-soft: #36290f; color-scheme: dark }
+
+* { box-sizing: border-box; }
+body { background: var(--bg); color: var(--ink); font: 17px/1.62 var(--body); }
+.wrap { max-width: 1180px; margin: 0 auto; padding-block: 28px 80px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
+  display: grid; grid-template-columns: 250px minmax(0, 1fr); gap: 40px; align-items: start; }
+@media (max-width: 880px) { .wrap { grid-template-columns: minmax(0, 1fr); gap: 20px; } }
+h1, h2, h3 { font-family: var(--display); text-wrap: balance; margin: 0; line-height: 1.18; letter-spacing: -.01em; }
+h1 { font-size: clamp(30px, 5vw, 44px); }
+h2 { font-size: clamp(23px, 3vw, 29px); }
+h3 { font-size: 18px; }
+p { margin: 0; max-width: 68ch; }
+code, .mono { font-family: var(--mono); font-size: .86em; }
+:not(pre) > code { background: var(--sunk); padding: 1px 5px; border-radius: 4px; }
+a { color: var(--accent); }
+.muted { color: var(--muted); }
+.eyebrow { font: 600 12px/1 var(--mono); letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
+
+/* index */
+nav.index { position: sticky; top: calc(env(safe-area-inset-top, 0px) + 16px); display: grid; gap: 14px; }
+@media (max-width: 880px) { nav.index { position: static; } }
+.progress { height: 6px; background: var(--sunk); border-radius: 3px; overflow: hidden; }
+.progress span { display: block; height: 100%; width: 0; background: var(--allow); transition: width .3s; }
+nav.index ol { list-style: none; margin: 0; padding: 0; display: grid; gap: 2px; }
+nav.index li a { display: grid; grid-template-columns: 20px 1fr auto; gap: 8px; align-items: baseline; padding: 7px 8px; border-radius: 6px; color: var(--ink); text-decoration: none; font-size: 15px; }
+nav.index li a:hover { background: var(--sunk); }
+nav.index li a .min { font: 12px var(--mono); color: var(--muted); font-variant-numeric: tabular-nums; }
+nav.index li a .tick { width: 14px; height: 14px; border: 1.5px solid var(--line); border-radius: 50%; align-self: center; }
+nav.index li.done a .tick { background: var(--allow); border-color: var(--allow); }
+@media (max-width: 880px) { nav.index ol { grid-auto-flow: column; grid-auto-columns: max-content; overflow-x: auto; padding-bottom: 4px; } }
+
+main { display: grid; gap: 56px; min-width: 0; }
+header.hero { display: grid; gap: 14px; }
+.plan { display: flex; flex-wrap: wrap; gap: 8px; }
+.plan span { font: 13px var(--mono); padding: 4px 9px; border: 1px solid var(--line); border-radius: 999px; color: var(--muted); }
+
+section.lesson { display: grid; gap: 18px; scroll-margin-top: 20px; }
+.lesson-head { display: grid; gap: 6px; border-top: 2px solid var(--ink); padding-top: 14px; }
+.lesson-head .eyebrow b { color: var(--ink); }
+.cols { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 14px; }
+.box { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 14px 16px; display: grid; gap: 8px; align-content: start; min-width: 0; }
+.box h3 { font-size: 16px; }
+.box p, .box li { font-size: 15.5px; }
+ul.tight { margin: 0; padding-left: 18px; display: grid; gap: 4px; }
+.atwork { border-left: 3px solid var(--accent); background: var(--accent-soft); padding: 10px 14px; border-radius: 0 8px 8px 0; font-size: 15.5px; max-width: 76ch; }
+.atwork b { font-family: var(--display); font-size: 13px; letter-spacing: .04em; text-transform: uppercase; color: var(--accent); margin-right: 6px; }
+pre { margin: 0; background: var(--sunk); border-radius: 8px; padding: 12px 14px; font: 13.5px/1.55 var(--mono); overflow-x: auto; }
+.tablewrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 10px; background: var(--surface); }
+table { border-collapse: collapse; width: 100%; font-size: 15px; min-width: 560px; }
+th, td { text-align: left; padding: 9px 12px; border-bottom: 1px solid var(--line); vertical-align: top; }
+th { font: 600 12px var(--mono); letter-spacing: .06em; text-transform: uppercase; color: var(--muted); background: var(--sunk); }
+tr:last-child td { border-bottom: 0; }
+.pill { display: inline-block; font: 600 11.5px/1 var(--mono); padding: 4px 7px; border-radius: 999px; white-space: nowrap; }
+.pill.allow { background: var(--allow-soft); color: var(--allow); }
+.pill.block { background: var(--block-soft); color: var(--block); }
+.pill.redir { background: var(--accent-soft); color: var(--accent); }
+.pill.warn { background: var(--warn-soft); color: var(--warn); }
+
+/* DNS path diagram */
+.path { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 0; align-items: stretch; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 14px; overflow-x: auto; }
+.hop { display: grid; gap: 4px; text-align: center; padding: 10px 6px; border-radius: 8px; position: relative; min-width: 110px; }
+.hop b { font-family: var(--display); font-size: 14px; }
+.hop small { font-size: 12.5px; color: var(--muted); }
+.hop.us { background: var(--accent-soft); outline: 1.5px solid var(--accent); }
+.hop + .hop::before { content: "→"; position: absolute; left: -9px; top: 50%; transform: translateY(-50%); color: var(--muted); font-family: var(--mono); }
+
+/* verdict lab */
+.lab { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 16px; display: grid; gap: 12px; }
+.lab .row { display: flex; flex-wrap: wrap; gap: 8px; }
+.lab input { flex: 1 1 260px; min-width: 0; font: 15px var(--mono); padding: 9px 12px; border: 1px solid var(--line); border-radius: 8px; background: var(--bg); color: var(--ink); }
+button { font: 600 14.5px var(--body); padding: 8px 14px; border-radius: 8px; border: 1px solid var(--line); background: var(--surface); color: var(--ink); cursor: pointer; }
+button:hover { border-color: var(--accent); }
+button.primary { background: var(--accent); border-color: var(--accent); color: var(--surface); }
+button:focus-visible, input:focus-visible, a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.samples { display: flex; flex-wrap: wrap; gap: 6px; }
+.samples button { font: 12.5px var(--mono); padding: 4px 8px; }
+.verdict { display: grid; gap: 8px; }
+.verdict .big { font: 700 22px var(--display); }
+.signals { display: grid; gap: 6px; }
+.sig { display: grid; grid-template-columns: 64px 1fr; gap: 10px; align-items: baseline; font-size: 15px; }
+.sig .w { font: 600 12.5px var(--mono); text-align: right; font-variant-numeric: tabular-nums; }
+.sig .w.pos { color: var(--block); } .sig .w.neg { color: var(--allow); }
+
+/* quiz */
+.quiz { display: grid; gap: 12px; }
+.q { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 14px 16px; display: grid; gap: 10px; }
+.q p.ask { font-weight: 600; }
+.q .opts { display: grid; gap: 6px; }
+.q .opts button { text-align: left; font-weight: 400; font-size: 15.5px; }
+.q .opts button.right { background: var(--allow-soft); border-color: var(--allow); color: var(--ink); }
+.q .opts button.wrong { background: var(--block-soft); border-color: var(--block); color: var(--ink); }
+.q .why { font-size: 15px; color: var(--muted); }
+
+/* spot the bug */
+details.spot { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 12px 16px; }
+details.spot summary { cursor: pointer; font-weight: 600; }
+details.spot[open] summary { margin-bottom: 10px; }
+details.spot .fix { margin-top: 10px; display: grid; gap: 8px; }
+.done-row { display: flex; align-items: center; gap: 10px; }
+.done-row button.on { background: var(--allow-soft); border-color: var(--allow); color: var(--allow); }
+footer { font-size: 14px; color: var(--muted); }
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+
+<div class="wrap">
+  <nav class="index" aria-label="Lessons">
+    <span class="eyebrow">60-minute plan</span>
+    <div class="progress" aria-hidden="true"><span id="bar"></span></div>
+    <span class="muted mono" id="progress-text" style="font-size:12.5px">0 of 7 done</span>
+    <ol id="toc">
+      <li data-id="l0"><a href="#l0"><span class="tick"></span><span>Mindset</span><span class="min">4m</span></a></li>
+      <li data-id="l1"><a href="#l1"><span class="tick"></span><span>How attacks run</span><span class="min">8m</span></a></li>
+      <li data-id="l2"><a href="#l2"><span class="tick"></span><span>DNS &amp; protective DNS</span><span class="min">14m</span></a></li>
+      <li data-id="l3"><a href="#l3"><span class="tick"></span><span>Threat intel &amp; IOCs</span><span class="min">8m</span></a></li>
+      <li data-id="l4"><a href="#l4"><span class="tick"></span><span>App security (your stack)</span><span class="min">14m</span></a></li>
+      <li data-id="l5"><a href="#l5"><span class="tick"></span><span>Cloud &amp; incidents</span><span class="min">7m</span></a></li>
+      <li data-id="l6"><a href="#l6"><span class="tick"></span><span>Final check</span><span class="min">5m</span></a></li>
+    </ol>
+  </nav>
+
+  <main>
+    <header class="hero">
+      <span class="eyebrow">For engineers joining a protective-DNS / threat-intel company</span>
+      <h1>Security in one hour</h1>
+      <p class="muted">Enough to follow every conversation in your first week: how attacks actually unfold, why DNS is where you catch them, what "an IOC" really is, and the eight mistakes in web code that cause most breaches. Each lesson ends with a 30-second check. Tick it off and the bar on the left fills up.</p>
+      <div class="plan"><span>7 lessons</span><span>15 quick checks</span><span>1 hands-on verdict lab</span><span>3 spot-the-bug snippets</span></div>
+    </header>
+
+    <!-- L0 -->
+    <section class="lesson" id="l0">
+      <div class="lesson-head"><span class="eyebrow"><b>Lesson 1</b> · 4 minutes</span><h2>Think like a defender (and an attacker)</h2></div>
+      <div class="cols">
+        <div class="box"><h3>CIA: what we protect</h3><ul class="tight"><li><b>Confidentiality</b>: only the right people read it (a tenant never sees another tenant's logs).</li><li><b>Integrity</b>: nobody tampers with it (a block list can't be silently edited).</li><li><b>Availability</b>: it works when needed (if the DNS resolver is down, the whole customer is offline).</li></ul></div>
+        <div class="box"><h3>Risk = threat × vulnerability × impact</h3><p><b>Threat</b>: someone or something that wants to hurt you (a phishing gang). <b>Vulnerability</b>: a weakness (an endpoint that skips the tenant check). <b>Impact</b>: what it costs if it happens. Fix the vulnerability with the highest product first, not the one that looks scariest.</p></div>
+        <div class="box"><h3>Three habits</h3><ul class="tight"><li><b>Least privilege</b>: give each user, service and key the minimum access.</li><li><b>Defense in depth</b>: assume one layer fails (UI hides the button <i>and</i> the API checks the role).</li><li><b>Fail closed</b>: when unsure (unknown role, missing claim), deny.</li></ul></div>
+      </div>
+      <div class="quiz" data-lesson="l0">
+        <div class="q" data-answer="2"><p class="ask">The Delete button is hidden for READ_ONLY users in Angular. Is that access control?</p><div class="opts"><button>Yes, they can't click what they can't see</button><button>Yes, if the route guard also blocks it</button><button>No. The API must check the role too; anyone can call the API directly</button></div><p class="why" hidden>UI gating is a convenience. The browser is the attacker's computer: they can call your API with curl. Real enforcement lives on the server.</p></div>
+        <div class="q" data-answer="1"><p class="ask">A role string arrives that your code doesn't recognise. What should the permission check return?</p><div class="opts"><button>Allow, so we don't lock out a new customer</button><button>Deny (fail closed) and log it</button></div><p class="why" hidden>Fail closed. A bug that denies too much gets reported in an hour; a bug that allows too much gets discovered in a breach report.</p></div>
+      </div>
+      <div class="done-row"><button data-done="l0">Mark lesson 1 done</button></div>
+    </section>
+
+    <!-- L1 -->
+    <section class="lesson" id="l1">
+      <div class="lesson-head"><span class="eyebrow"><b>Lesson 2</b> · 8 minutes</span><h2>How an attack actually runs</h2><p class="muted">Almost every breach follows the same arc. Learn the stages: every security product (including yours) is built to break one or more of them.</p></div>
+      <div class="tablewrap"><table>
+        <thead><tr><th>Stage</th><th>What happens</th><th>Where DNS sees it</th></tr></thead>
+        <tbody>
+          <tr><td><b>1 · Delivery</b></td><td>Phishing email with a link or attachment.</td><td>User clicks <code>micros0ft-login[.]com</code>: a lookup for a 2-day-old look-alike domain.</td></tr>
+          <tr><td><b>2 · Execution</b></td><td>Malware runs on the laptop.</td><td>The dropper downloads its second stage: another lookup.</td></tr>
+          <tr><td><b>3 · Command &amp; control (C2)</b></td><td>Malware "phones home" for instructions, often every N seconds (a <i>beacon</i>).</td><td>Regular lookups to a C2 domain, or hundreds of random-looking names (a <i>DGA</i>, domain generation algorithm).</td></tr>
+          <tr><td><b>4 · Lateral movement</b></td><td>Attacker spreads to other machines with stolen credentials.</td><td>Mostly internal; less DNS signal.</td></tr>
+          <tr><td><b>5 · Exfiltration / impact</b></td><td>Data stolen, or ransomware encrypts everything.</td><td>Data smuggled out inside DNS queries (<i>DNS tunnelling</i>): long, high-entropy subdomains.</td></tr>
+        </tbody>
+      </table></div>
+      <div class="cols">
+        <div class="box"><h3>Why DNS is the choke point</h3><p>Nearly every stage needs a name lookup <i>before</i> any connection is made. Block the lookup and the connection never happens, on every device, without installing anything on the device. That's the whole pitch of protective DNS.</p></div>
+        <div class="box"><h3>MITRE ATT&amp;CK</h3><p>The industry's shared catalogue of attacker techniques (IDs like <code>T1071.004</code> "Application Layer Protocol: DNS"). Threat reports and detections reference these IDs, so you'll see them in tickets.</p></div>
+      </div>
+      <div class="atwork"><b>At work</b>Dashboards that split blocks into "threat intel" vs "your policies" map directly to this table: intel catches stages 1–3 and 5, while customer policies (block categories, new domains) shrink the surface for stage 1.</div>
+      <div class="quiz" data-lesson="l1">
+        <div class="q" data-answer="0"><p class="ask">A laptop looks up <code>xk2v9q.biz</code>, <code>p8f3mz.biz</code>, <code>ty7wq1.biz</code>… 300 times an hour. Most likely?</p><div class="opts"><button>Malware using a DGA to find its C2 server</button><button>A CDN load-balancing</button><button>A user typing badly</button></div><p class="why" hidden>Random-looking, short-lived names in bulk are the signature of a domain generation algorithm: the malware tries many names until it finds the one the attacker registered today.</p></div>
+        <div class="q" data-answer="1"><p class="ask">Which stage does blocking a phishing link's domain break?</p><div class="opts"><button>Exfiltration</button><button>Delivery (the click goes nowhere)</button><button>Lateral movement</button></div><p class="why" hidden>Stage 1. The earlier you break the chain, the cheaper the incident.</p></div>
+      </div>
+      <div class="done-row"><button data-done="l1">Mark lesson 2 done</button></div>
+    </section>
+
+    <!-- L2 -->
+    <section class="lesson" id="l2">
+      <div class="lesson-head"><span class="eyebrow"><b>Lesson 3</b> · 14 minutes</span><h2>DNS, and what a protective resolver adds</h2></div>
+      <div class="path" role="img" aria-label="DNS resolution path">
+        <div class="hop"><b>Device</b><small>"where is example.com?"</small></div>
+        <div class="hop us"><b>Recursive resolver</b><small>protective DNS lives here</small></div>
+        <div class="hop"><b>Root</b><small>"ask .com"</small></div>
+        <div class="hop"><b>TLD (.com)</b><small>"ask its nameserver"</small></div>
+        <div class="hop"><b>Authoritative</b><small>"93.184.215.14"</small></div>
+      </div>
+      <div class="cols">
+        <div class="box"><h3>Records you'll see in logs</h3><ul class="tight"><li><code>A</code> / <code>AAAA</code>: name → IPv4 / IPv6</li><li><code>CNAME</code>: alias to another name (chains can hide the real target)</li><li><code>MX</code> mail, <code>TXT</code> text (verification, sometimes tunnelling), <code>NS</code> nameservers</li><li>Response codes: <code>NOERROR</code>, <code>NXDOMAIN</code> (doesn't exist: lots of these = DGA), <code>SERVFAIL</code></li><li><b>TTL</b>: how long the answer is cached. Very low TTLs + rotating IPs = "fast flux", a common malicious pattern.</li></ul></div>
+        <div class="box"><h3>Three verdicts</h3><p><span class="pill allow">ALLOW</span> answer normally. <span class="pill block">BLOCK</span> refuse (NXDOMAIN or 0.0.0.0). <span class="pill redir">REDIRECT</span> answer with the IP of a <i>block page</i> that explains why, so users don't file "the internet is broken" tickets. A <i>sinkhole</i> is a redirect to a server that logs which infected machines still call home.</p><p><b>Passthrough / monitor mode</b>: decide, log the decision, but allow anyway. That's how new customers trial safely.</p></div>
+        <div class="box"><h3>Order of evaluation</h3><p>Typically: customer <b>allow list</b> (always wins, to fix false positives) → customer <b>block list</b> → <b>threat intel</b> (malware, phishing, C2) → <b>policy rules</b> (categories like gambling, domain age, country, response IP) → default allow. Policies may be inherited down the tenant tree (partner → MSP → company).</p></div>
+      </div>
+      <h3>Verdict lab: what signals would a resolver weigh?</h3>
+      <div class="lab">
+        <p class="muted" style="font-size:15px">A toy scorer (made-up weights, for intuition only). Type a domain or try a sample. Real engines combine intel feeds with signals like these.</p>
+        <div class="row"><label class="eyebrow" for="dom" style="align-self:center">Domain</label><input id="dom" value="secure-paypa1-verify.top" autocomplete="off" spellcheck="false"><button class="primary" id="score-btn">Score it</button></div>
+        <div class="samples" aria-label="Samples"><button>login.microsoftonline.com</button><button>secure-paypa1-verify.top</button><button>xk29vq7zt1p.biz</button><button>dGhpcyBpcyBleGZpbA.n3t.example</button><button>news.bbc.co.uk</button></div>
+        <div class="verdict" id="verdict" aria-live="polite"></div>
+      </div>
+      <div class="cols">
+        <div class="box"><h3>Ways around protective DNS (know them)</h3><ul class="tight"><li><b>DoH / DoT</b>: browsers or malware send DNS over HTTPS to a public resolver, skipping yours. Defences: block known DoH endpoints, use the canary domain, enforce via agent.</li><li><b>Hard-coded IPs</b>: no lookup at all. That's why IP-based enforcement (inline appliances) complements DNS.</li><li><b>Roaming laptops</b> off the office network: hence an <b>endpoint agent</b>.</li></ul></div>
+        <div class="box"><h3>False positives are a product problem</h3><p>Every wrong block is a support ticket and erodes trust. That's why allow lists win, why the block page shows a reason, why "review" requests exist, and why passthrough mode exists. Expect to build UI for all of these.</p></div>
+      </div>
+      <div class="quiz" data-lesson="l2">
+        <div class="q" data-answer="2"><p class="ask">A domain is on a threat feed but the customer put it on their allow list. Usual result?</p><div class="opts"><button>Blocked: intel beats customers</button><button>Redirected to the block page</button><button>Allowed: the customer's allow list wins (and it's logged)</button></div><p class="why" hidden>Allow lists exist to override false positives. The decision is still logged so the customer (and you) can audit it.</p></div>
+        <div class="q" data-answer="1"><p class="ask">Why redirect to a block page instead of just returning NXDOMAIN?</p><div class="opts"><button>It's faster</button><button>The user learns why and can request a review; fewer support tickets</button><button>NXDOMAIN is not allowed by the RFC</button></div><p class="why" hidden>UX and support: a page that says "blocked: phishing, request review" beats a browser error.</p></div>
+        <div class="q" data-answer="0"><p class="ask">Which pattern suggests DNS tunnelling (data exfiltration)?</p><div class="opts"><button>Many long, random-looking subdomains under one domain, often TXT queries</button><button>One lookup per hour to a bank</button><button>Lots of NOERROR answers for a CDN</button></div><p class="why" hidden>Data gets encoded into labels like <code>dGhpcyBp…</code>.attacker.tld. Length + entropy + volume to one parent domain is the tell.</p></div>
+      </div>
+      <div class="done-row"><button data-done="l2">Mark lesson 3 done</button></div>
+    </section>
+
+    <!-- L3 -->
+    <section class="lesson" id="l3">
+      <div class="lesson-head"><span class="eyebrow"><b>Lesson 4</b> · 8 minutes</span><h2>Threat intelligence and IOCs</h2></div>
+      <div class="cols">
+        <div class="box"><h3>IOC: indicator of compromise</h3><p>A concrete, matchable artefact: an <b>IP</b>, <b>CIDR</b> range, <b>domain</b>, <b>URL</b>, file <b>hash</b> (MD5/SHA-1/SHA-256), email address. Lists of these are what "lists", "feeds" and "indicators" mean in the product.</p></div>
+        <div class="box"><h3>Pyramid of Pain</h3><p>From easy for attackers to change to hard: hashes → IPs → domains → network artefacts → tools → <b>TTPs</b> (behaviour). Blocking hashes annoys attackers for minutes; detecting behaviour (like DGA patterns) costs them weeks.</p></div>
+        <div class="box"><h3>Quality fields</h3><ul class="tight"><li><b>Confidence / score</b>: how sure (blocks often need score ≥ threshold)</li><li><b>First / last seen</b>, <b>expiry</b>: IOCs go stale; an IP from last year may belong to a hospital now</li><li><b>Source</b>: which feed said so (needed to debug false positives)</li><li><b>Category</b>: phishing, malware, C2, spam…</li></ul></div>
+      </div>
+      <div class="cols">
+        <div class="box"><h3>Feeds and formats</h3><p><b>STIX</b> is the JSON format for describing threats; <b>TAXII</b> is the API to fetch STIX. Also: CSV/text lists, vendor APIs (OTX, ISAC sharing groups, EDR platforms). A "source" configurator in the UI usually means: URL + credentials + polling schedule + mapping into your indicator model.</p></div>
+        <div class="box"><h3>Defang before you paste</h3><p>Never paste a live malicious URL into chat or tickets: it becomes clickable and link scanners will fetch it. Write <code>hxxps://evil[.]com/login</code> and <code>203.0.113[.]7</code>. Your UI should display IOCs defanged and copy them raw only on purpose.</p></div>
+      </div>
+      <div class="quiz" data-lesson="l3">
+        <div class="q" data-answer="1"><p class="ask">Which IOC is cheapest for an attacker to change?</p><div class="opts"><button>Their C2 behaviour pattern</button><button>A file hash (recompile → new hash)</button><button>Their favourite tooling</button></div><p class="why" hidden>Bottom of the Pyramid of Pain: changing one byte gives a new hash.</p></div>
+        <div class="q" data-answer="0"><p class="ask">Why do indicators need an expiry?</p><div class="opts"><button>Infrastructure gets abandoned and reused; old IOCs cause false positives</button><button>To save disk space</button><button>Because STIX requires it</button></div><p class="why" hidden>Cloud IPs and expired domains are recycled constantly. Stale intel blocks innocent services.</p></div>
+      </div>
+      <div class="done-row"><button data-done="l3">Mark lesson 4 done</button></div>
+    </section>
+
+    <!-- L4 -->
+    <section class="lesson" id="l4">
+      <div class="lesson-head"><span class="eyebrow"><b>Lesson 5</b> · 14 minutes</span><h2>Application security for an Angular + Spring stack</h2><p class="muted">A security company's own portal is a prime target: it holds every customer's policies and logs. These are the mistakes that matter most, in the order you're likely to meet them.</p></div>
+      <div class="tablewrap"><table>
+        <thead><tr><th>Mistake</th><th>What it looks like</th><th>The fix</th></tr></thead>
+        <tbody>
+          <tr><td><b>Broken access control</b> (#1 on OWASP Top 10)</td><td><code>GET /tenants/42/logs</code> works for a user of tenant 7 (IDOR). Role checked in Angular only.</td><td>Every endpoint checks <i>who</i> and <i>which tenant</i> on the server (<code>@PreAuthorize</code> + a scope resolver that fails closed). Test it.</td></tr>
+          <tr><td><b>Injection</b></td><td>SQL built with <code>"… WHERE name = '" + name + "'"</code>; JSON built by string concatenation.</td><td>Parameterised queries / JPA parameters; build objects, let the library serialise.</td></tr>
+          <tr><td><b>XSS</b></td><td><code>bypassSecurityTrustHtml(userText)</code>, <code>[innerHTML]</code> with untrusted data.</td><td>Let Angular escape. Sanitise if you must render HTML; add a CSP.</td></tr>
+          <tr><td><b>Secrets in code</b></td><td>Passwords/API keys in <code>application.yml</code>, compose files, or the Angular bundle (a browser bundle is public).</td><td>Env vars / AWS Secrets Manager; rotate anything ever committed; secret scanning in CI.</td></tr>
+          <tr><td><b>Token handling</b></td><td>JWT in the URL (<code>?token=</code>) leaks via history, logs and Referer. Long-lived tokens in localStorage are readable by any XSS.</td><td>Short lifetimes + refresh; one-time codes for hand-offs; strip tokens from URLs at once; prefer HttpOnly cookies where possible.</td></tr>
+          <tr><td><b>SSRF</b></td><td>An endpoint fetches any URL/host the user supplies ("test this resolver").</td><td>Allowlist destinations by key; block private/metadata IPs (169.254.169.254 on AWS).</td></tr>
+          <tr><td><b>Trusting client headers</b></td><td>Rate limit per IP using <code>X-Forwarded-For</code> straight from the request.</td><td>Only trust it from your load balancer; limit per account too.</td></tr>
+          <tr><td><b>Logging sensitive data</b></td><td>Login request body (with password) logged at DEBUG; MFA codes in <code>console.log</code>.</td><td>Never log credentials, tokens or codes; mask PII; INFO in production.</td></tr>
+        </tbody>
+      </table></div>
+      <h3>Spot the bug (open each after you've guessed)</h3>
+      <details class="spot"><summary>1 · An Angular guard</summary>
+<pre>canActivate: [() =&gt; {
+  const role = localStorage.getItem('role');   // set at login
+  return role === 'ADMIN';
+}]</pre>
+        <div class="fix"><p><b>Bug:</b> the role comes from <code>localStorage</code>, which the user can edit in DevTools (<code>localStorage.setItem('role','ADMIN')</code>). Fine for <i>hiding</i> UI, never for security. <b>Fix:</b> derive roles from the signed token's claims, and make sure the API enforces the same rule.</p></div>
+      </details>
+      <details class="spot"><summary>2 · A Spring repository</summary>
+<pre>@Query("SELECT i FROM Indicator i WHERE i.tenantId = :tenant AND i.value LIKE %:q%")
+List&lt;Indicator&gt; search(@Param("tenant") long tenant, @Param("q") String q);
+
+// controller
+@GetMapping("/indicators/search")
+List&lt;Indicator&gt; search(@RequestParam long tenant, @RequestParam String q) {
+  return repo.search(tenant, q);
+}</pre>
+        <div class="fix"><p><b>The query is actually parameterised</b> (it uses <code>:q</code>), so that part is fine. <b>The bug is the tenant:</b> it comes from a request parameter, so any user can read any tenant's indicators (IDOR). <b>Fix:</b> take the tenant from the authenticated principal, never from the request.</p></div>
+      </details>
+      <details class="spot"><summary>3 · A "test resolver" endpoint</summary>
+<pre>@GetMapping("/tools/dns-test")
+String test(@RequestParam String server, @RequestParam String name) {
+  return rest.getForObject("http://" + server + "/resolve?name=" + name, String.class);
+}</pre>
+        <div class="fix"><p><b>Bug:</b> SSRF. <code>server=169.254.169.254/latest/meta-data/iam</code> makes your server fetch its own cloud credentials. <b>Fix:</b> accept a server <i>key</i> mapped to an allowlisted URL in config, require an admin role, and set timeouts.</p></div>
+      </details>
+      <div class="atwork"><b>At work</b>Code reviews in security companies get asked "which tenant can see this?" on every endpoint. Ask it of your own PRs first, and add one test per role: allowed, denied, other tenant.</div>
+      <div class="quiz" data-lesson="l4">
+        <div class="q" data-answer="2"><p class="ask">You find a database password in <code>application.yml</code> on main. First step?</p><div class="opts"><button>Delete the line and push</button><button>Rewrite git history to remove it</button><button>Tell the owner privately so it gets rotated; then move it to a secret store</button></div><p class="why" hidden>Deleting doesn't remove it from history or from anyone's clone. Rotation is the only real fix; cleanup comes after.</p></div>
+        <div class="q" data-answer="0"><p class="ask">Which is the strongest tenant check?</p><div class="opts"><button>Server derives tenant from the verified JWT and filters every query by it</button><button>Angular sends the tenant ID in a header</button><button>The route guard checks the tenant</button></div><p class="why" hidden>Anything the client sends can be changed. The verified token is the source of truth on the server.</p></div>
+        <div class="q" data-answer="1"><p class="ask">Why is a token in a URL query string dangerous?</p><div class="opts"><button>URLs are case-insensitive</button><button>URLs end up in browser history, server/proxy logs and Referer headers</button><button>It makes the URL too long</button></div><p class="why" hidden>Any of those places can leak a live session. Hand-offs should use one-time codes exchanged server-side.</p></div>
+      </div>
+      <div class="done-row"><button data-done="l4">Mark lesson 5 done</button></div>
+    </section>
+
+    <!-- L5 -->
+    <section class="lesson" id="l5">
+      <div class="lesson-head"><span class="eyebrow"><b>Lesson 6</b> · 7 minutes</span><h2>Cloud basics and what to do in an incident</h2></div>
+      <div class="cols">
+        <div class="box"><h3>AWS shared responsibility</h3><p>AWS secures the data centres and hypervisors. <b>You</b> secure everything you configure: IAM, security groups, S3 bucket policies, patching your EC2 images, database access, secrets.</p></div>
+        <div class="box"><h3>The checklist that prevents most cloud incidents</h3><ul class="tight"><li>IAM roles with least privilege; no long-lived access keys on laptops</li><li>RDS (Postgres) in private subnets, never public; TLS on</li><li>S3 private by default; share with <b>presigned URLs</b> that expire</li><li>Secrets in Secrets Manager / SSM, rotated</li><li>CloudTrail + CloudWatch logs on; alerts on root login</li><li>Security groups: no <code>0.0.0.0/0</code> on admin ports</li></ul></div>
+        <div class="box"><h3>If you think something is wrong</h3><ol class="tight" style="padding-left:20px"><li><b>Don't destroy evidence</b>: don't wipe, reboot or "clean up".</li><li><b>Report early</b> to your lead / security channel, even if unsure.</li><li><b>Contain</b> when told to: rotate the key, disable the user, block the domain.</li><li><b>Write the timeline</b> as you go (UTC times).</li><li><b>Blameless post-mortem</b>: fix the system, not the person.</li></ol></div>
+      </div>
+      <div class="quiz" data-lesson="l5">
+        <div class="q" data-answer="1"><p class="ask">You need to give a customer a download of their export file in S3. Best way?</p><div class="opts"><button>Make the bucket public for an hour</button><button>Generate a presigned URL that expires in minutes</button><button>Email the AWS access key</button></div><p class="why" hidden>Presigned URLs grant access to one object, for a short time, without sharing credentials.</p></div>
+        <div class="q" data-answer="0"><p class="ask">You accidentally pushed an AWS key to a public repo and deleted it 2 minutes later. Safe?</p><div class="opts"><button>No: bots scrape public pushes within seconds. Report it and rotate the key now</button><button>Yes, 2 minutes is too short</button></div><p class="why" hidden>Automated scanners watch public GitHub in real time. Assume it's compromised.</p></div>
+      </div>
+      <div class="done-row"><button data-done="l5">Mark lesson 6 done</button></div>
+    </section>
+
+    <!-- L6 -->
+    <section class="lesson" id="l6">
+      <div class="lesson-head"><span class="eyebrow"><b>Lesson 7</b> · 5 minutes</span><h2>Final check and your first-week vocabulary</h2></div>
+      <div class="quiz" data-lesson="l6">
+        <div class="q" data-answer="2"><p class="ask">An MSP admin asks why a site was blocked for one of their companies. What do you look up first?</p><div class="opts"><button>The browser cache</button><button>The DNS RFC</button><button>The DNS log entry: verdict, reason (intel vs policy), matching list/rule, and the policy inherited at that tenant level</button></div><p class="why" hidden>Logs carry the reason and the matching rule. With inheritance, check which level (partner, MSP, company) the rule came from.</p></div>
+        <div class="q" data-answer="0"><p class="ask">Which statement is true?</p><div class="opts"><button>Protective DNS can't see traffic to hard-coded IPs, which is why IP enforcement and endpoint agents exist alongside it</button><button>DNS filtering sees all network traffic</button><button>DoH makes DNS filtering more effective</button></div><p class="why" hidden>DNS only sees lookups. Layers cover each other's gaps: defense in depth again.</p></div>
+      </div>
+      <div class="tablewrap"><table>
+        <thead><tr><th>Term</th><th>Plain meaning</th></tr></thead>
+        <tbody>
+          <tr><td>IOC</td><td>Something you can match: IP, domain, URL, hash</td></tr>
+          <tr><td>TTP</td><td>Tactics, techniques, procedures: how an attacker behaves</td></tr>
+          <tr><td>C2</td><td>Command and control: the attacker's server malware talks to</td></tr>
+          <tr><td>DGA</td><td>Algorithm that generates many random domains for C2</td></tr>
+          <tr><td>RPZ</td><td>Response Policy Zone: a standard way to feed block rules into a resolver</td></tr>
+          <tr><td>NOD / NRD</td><td>Newly observed / newly registered domain: young domains are riskier</td></tr>
+          <tr><td>Sinkhole</td><td>Redirect bad domains to a server you control, to see who's infected</td></tr>
+          <tr><td>EDR</td><td>Endpoint detection &amp; response (e.g. Microsoft Defender for Endpoint, SentinelOne, CrowdStrike)</td></tr>
+          <tr><td>SIEM / syslog export</td><td>Central log analysis; customers export your logs to theirs</td></tr>
+          <tr><td>MSP / MSSP</td><td>(Security) service provider managing many customer companies; hence multi-tenant UIs</td></tr>
+          <tr><td>SSO / SAML / OIDC</td><td>Sign in with the customer's identity provider</td></tr>
+          <tr><td>MFA / TOTP</td><td>Second factor; TOTP = the 6-digit app codes</td></tr>
+        </tbody>
+      </table></div>
+      <div class="atwork"><b>First week</b>Ask for: an architecture diagram, how a DNS query flows through production, where logs land, how releases ship, and who owns security questions. Keep a glossary of internal names and map each to a term on this page.</div>
+      <div class="done-row"><button data-done="l6">Mark lesson 7 done</button></div>
+    </section>
+
+    <footer>Toy scorer weights are illustrative, not a real detection model. Example domains use reserved or fictional names. Your progress is saved in this browser only.</footer>
+  </main>
+</div>
+
+<script>
+(function () {
+  const KEY = 'sec-hour-done';
+  let done = [];
+  try { done = JSON.parse(localStorage.getItem(KEY) || '[]'); } catch { done = []; }
+  const save = () => { try { localStorage.setItem(KEY, JSON.stringify(done)); } catch {} };
+  const ids = ['l0','l1','l2','l3','l4','l5','l6'];
+  function render() {
+    document.querySelectorAll('#toc li').forEach(li => li.classList.toggle('done', done.includes(li.dataset.id)));
+    document.querySelectorAll('[data-done]').forEach(b => {
+      const on = done.includes(b.dataset.done);
+      b.classList.toggle('on', on);
+      b.textContent = on ? '✓ Done' : b.dataset.label;
+      b.setAttribute('aria-pressed', String(on));
+    });
+    const n = ids.filter(i => done.includes(i)).length;
+    document.getElementById('bar').style.width = (n / ids.length * 100) + '%';
+    document.getElementById('progress-text').textContent = `${n} of ${ids.length} done`;
+  }
+  document.querySelectorAll('[data-done]').forEach(b => {
+    b.dataset.label = b.textContent;
+    b.addEventListener('click', () => {
+      const id = b.dataset.done;
+      done = done.includes(id) ? done.filter(x => x !== id) : [...done, id];
+      save(); render();
+    });
+  });
+  render();
+
+  // quizzes
+  document.querySelectorAll('.q').forEach(q => {
+    const right = +q.dataset.answer;
+    const btns = q.querySelectorAll('.opts button');
+    btns.forEach((b, i) => b.addEventListener('click', () => {
+      btns.forEach((x, j) => { x.classList.remove('right', 'wrong'); if (j === right) x.classList.add('right'); });
+      if (i !== right) b.classList.add('wrong');
+      q.querySelector('.why').hidden = false;
+    }));
+  });
+
+  // toy verdict scorer
+  const brands = ['paypal', 'microsoft', 'apple', 'google', 'amazon', 'netflix', 'bank', 'office365', 'outlook'];
+  const riskyTlds = ['top', 'xyz', 'click', 'biz', 'zip', 'mov', 'icu', 'cam', 'rest'];
+  const known = ['microsoftonline.com', 'bbc.co.uk', 'google.com', 'paypal.com', 'apple.com', 'amazon.com'];
+  const entropy = s => { const f = {}; for (const c of s) f[c] = (f[c] || 0) + 1; return -Object.values(f).reduce((a, n) => { const p = n / s.length; return a + p * Math.log2(p); }, 0); };
+  function score(raw) {
+    const d = raw.trim().toLowerCase().replace(/^hxxps?:\/\//, '').replace(/^https?:\/\//, '').replace(/\[\.\]/g, '.').split('/')[0];
+    const labels = d.split('.').filter(Boolean);
+    if (labels.length < 2) return null;
+    const tld = labels.at(-1);
+    const reg = labels.slice(-2).join('.');
+    const sigs = [];
+    const isKnown = known.some(k => d === k || d.endsWith('.' + k));
+    if (isKnown) sigs.push([-60, `On a well-known allow list (${known.find(k => d === k || d.endsWith('.' + k))})`]);
+    if (riskyTlds.includes(tld)) sigs.push([20, `.${tld} is a cheap TLD heavily used for abuse`]);
+    const brand = brands.find(b => d.replace(/1/g, 'l').replace(/0/g, 'o').includes(b));
+    if (brand && !isKnown) sigs.push([35, `Mentions "${brand}" but isn't the brand's real domain (look-alike / typosquat)`]);
+    if (/[0-9]/.test(labels.at(-2)) && /[a-z]/.test(labels.at(-2)) && brand) sigs.push([10, 'Digits swapped for letters (paypa1, micros0ft)']);
+    if (/(secure|verify|login|account|update)/.test(d) && !isKnown) sigs.push([15, 'Urgency/credential words in the name']);
+    const sld = labels.at(-2);
+    const e = entropy(sld);
+    if (sld.length >= 9 && e > 3.2 && !brand) sigs.push([30, `Random-looking name (entropy ${e.toFixed(2)} bits/char): DGA-like`]);
+    const longest = labels.slice(0, -2).reduce((m, l) => Math.max(m, l.length), 0);
+    if (longest >= 16) sigs.push([30, `A ${longest}-char subdomain label: possible DNS tunnelling`]);
+    if (labels.length >= 5) sigs.push([8, `${labels.length} labels deep`]);
+    if (!sigs.length) sigs.push([0, 'No risk signals in this toy model']);
+    const total = Math.max(0, Math.min(100, 10 + sigs.reduce((a, [w]) => a + w, 0)));
+    const verdict = total >= 60 ? ['block', 'BLOCK (redirect to block page)'] : total >= 35 ? ['warn', 'REVIEW (log it, maybe allow)'] : ['allow', 'ALLOW'];
+    return { d, reg, total, verdict, sigs };
+  }
+  const out = document.getElementById('verdict');
+  function run() {
+    const r = score(document.getElementById('dom').value);
+    if (!r) { out.innerHTML = '<p class="muted">Enter a domain like <code>example.com</code>.</p>'; return; }
+    out.innerHTML = '';
+    const head = document.createElement('div');
+    head.innerHTML = `<span class="pill ${r.verdict[0]}"></span> <span class="big mono"></span>`;
+    head.querySelector('.pill').textContent = r.verdict[1];
+    head.querySelector('.big').textContent = ` risk ${r.total}/100`;
+    out.appendChild(head);
+    const list = document.createElement('div'); list.className = 'signals';
+    r.sigs.forEach(([w, text]) => {
+      const row = document.createElement('div'); row.className = 'sig';
+      row.innerHTML = `<span class="w ${w > 0 ? 'pos' : w < 0 ? 'neg' : ''}"></span><span></span>`;
+      row.children[0].textContent = (w > 0 ? '+' : '') + w;
+      row.children[1].textContent = text;
+      list.appendChild(row);
+    });
+    out.appendChild(list);
+  }
+  document.getElementById('score-btn').addEventListener('click', run);
+  document.getElementById('dom').addEventListener('keydown', e => { if (e.key === 'Enter') run(); });
+  document.querySelectorAll('.samples button').forEach(b => b.addEventListener('click', () => { document.getElementById('dom').value = b.textContent; run(); }));
+  run();
+})();
+</script>
